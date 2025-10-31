@@ -22,9 +22,6 @@ import com.example.accountservice.repository.AccountRepository;
 import com.example.accountservice.specification.AccountSpecification;
 import com.example.accountservice.util.ValidateUtil;
 import com.example.accountservice.util.UsernameGenerator;
-import com.example.accountservice.util.listener.event.UserDeletedEvent;
-import com.example.accountservice.util.listener.event.UserRegisteredEvent;
-import com.example.accountservice.util.listener.event.UserUpdatedEvent;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
@@ -115,7 +112,7 @@ public class AccountService {
         account.setVisible(0);
         Account deletedAccount = accountRepository.save(account);
         log.info("Soft deleted account id: {}", id);
-        applicationEventPublisher.publishEvent(new UserDeletedEvent(deletedAccount));
+        // applicationEventPublisher.publishEvent(new UserDeletedEvent(deletedAccount));
         return true;
     }
 
@@ -152,7 +149,8 @@ public class AccountService {
         Account savedAccount = saveAccount(account);
 
         // Bắn sự kiện sau khi commit
-        applicationEventPublisher.publishEvent(new UserRegisteredEvent(savedAccount));
+        // applicationEventPublisher.publishEvent(new
+        // UserRegisteredEvent(savedAccount));
         return savedAccount;
     }
 
@@ -195,7 +193,7 @@ public class AccountService {
         account.setVisible(existingAccount.get().getVisible());
 
         Account savedAccount = saveAccount(account);
-        applicationEventPublisher.publishEvent(new UserUpdatedEvent(savedAccount));
+        // applicationEventPublisher.publishEvent(new UserUpdatedEvent(savedAccount));
         return savedAccount;
     }
 

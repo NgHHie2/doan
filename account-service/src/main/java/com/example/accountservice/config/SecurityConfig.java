@@ -1,5 +1,6 @@
 package com.example.accountservice.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,11 +13,19 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.example.accountservice.service.OAuth2UserService;
+
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private OAuth2UserService oauth2UserService;
+
+    @Autowired
+    private OAuth2AuthenticationSuccessHandler oauth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,7 +38,12 @@ public class SecurityConfig {
                 .logout(logout -> logout.disable()) // Tắt logout endpoint mặc định
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // Cho phép tất cả request
-                );
+
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oauth2UserService))
+                        .successHandler(oauth2SuccessHandler));
 
         return http.build();
     }

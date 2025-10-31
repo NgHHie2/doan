@@ -28,4 +28,9 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     Optional<Account> findByCccdAndVisibleAndRole(String cccd, int visible, Role role);
 
+    // OAuth2 methods
+    Optional<Account> findByGoogleIdAndVisible(String googleId, int visible);
+
+    boolean existsByGoogleIdAndVisible(String googleId, int visible);
+
 }

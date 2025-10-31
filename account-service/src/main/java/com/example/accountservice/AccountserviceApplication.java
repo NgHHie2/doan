@@ -24,8 +24,8 @@ public class AccountserviceApplication implements CommandLineRunner {
 	@Autowired
 	private AccountService accountService;
 
-	@Autowired
-	private KafkaTemplate<String, AccountDTO> kafkaTemplate;
+	// @Autowired
+	// private KafkaTemplate<String, AccountDTO> kafkaTemplate;
 
 	public static void main(String[] args) {
 		SpringApplication.run(AccountserviceApplication.class, args);
@@ -34,14 +34,14 @@ public class AccountserviceApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		System.out.println("first");
-		// ✅ Warmup Kafka producer
-		try {
-			// Buộc producer connect tới broker mà không gửi message thật
-			kafkaTemplate.partitionsFor("warmup-topic");
-			log.info("Kafka producer warmup done ✅");
-		} catch (Exception e) {
-			log.warn("Kafka warmup failed: {}", e.getMessage());
-		}
+		// // ✅ Warmup Kafka producer
+		// try {
+		// // Buộc producer connect tới broker mà không gửi message thật
+		// kafkaTemplate.partitionsFor("warmup-topic");
+		// log.info("Kafka producer warmup done ✅");
+		// } catch (Exception e) {
+		// log.warn("Kafka warmup failed: {}", e.getMessage());
+		// }
 
 		// ✅ Tạo account admin mặc định
 		if (!accountService.existsByCccd("123456789012")) {
