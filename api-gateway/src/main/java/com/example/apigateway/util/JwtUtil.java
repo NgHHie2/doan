@@ -27,13 +27,6 @@ public class JwtUtil {
     }
 
     /**
-     * Lấy userId từ token
-     */
-    public Long getUserIdFromToken(String token) {
-        return jwtTokenProvider.getUserIdFromToken(token);
-    }
-
-    /**
      * Lấy JWT ID từ token
      */
     public String getJwtIdFromToken(String token) {

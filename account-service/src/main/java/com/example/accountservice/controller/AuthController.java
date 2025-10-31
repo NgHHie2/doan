@@ -34,25 +34,21 @@ public class AuthController {
      * Đăng xuất khỏi hệ thống
      * Xóa thông tin account khỏi redis
      * 
-     * Input: X-User-Id header từ JWT
-     * 
      * Output:
      * - Trả về thông báo thành công hoặc thất bại
      * - Nếu đăng xuất thành công thì response set jwt về null
      */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response,
-            @RequestHeader(value = "X-User-Id", required = false) String userIdHeader) {
+            @RequestHeader(value = "X-Username", required = false) String username) {
 
-        if (userIdHeader == null || userIdHeader.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Missing X-User-Id header"));
+        if (username == null || username.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing X-Username header"));
         }
 
         try {
-            Long accountId = Long.valueOf(userIdHeader);
-
             // Clear token in redis
-            redisTokenService.revokeToken(accountId);
+            redisTokenService.revokeToken(username);
 
             // Clear JWT cookie
             Cookie jwtCookie = new Cookie("jwt", null);
@@ -62,7 +58,7 @@ public class AuthController {
             jwtCookie.setMaxAge(0);
             response.addCookie(jwtCookie);
 
-            log.info("User logged out successfully: {}", accountId);
+            log.info("User logged out successfully: {}", username);
             return ResponseEntity.ok(Map.of("message", "Logout successful. Cookie cleared."));
 
         } catch (Exception e) {

@@ -16,9 +16,9 @@ import java.util.List;
 public class RedisTokenInfo {
 
     @Id
-    private Long accountId;
+    private String username;
 
     private String jti;
     private String role; // String instead of enum in Gateway
-    private List<Long> positions;
+
 }

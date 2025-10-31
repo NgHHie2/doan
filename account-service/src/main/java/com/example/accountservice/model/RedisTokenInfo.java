@@ -19,20 +19,18 @@ import java.util.List;
 public class RedisTokenInfo {
 
     @Id
-    private Long accountId;
+    private String username;
 
     private String jti;
     private Role role;
-    private List<Long> positions;
 
     @TimeToLive
     private Long ttl;
 
-    public RedisTokenInfo(String jti, Long accountId, Role role, List<Long> positions) {
+    public RedisTokenInfo(String jti, String username, Role role) {
         this.jti = jti;
-        this.accountId = accountId;
+        this.username = username;
         this.role = role;
-        this.positions = positions;
         this.ttl = 86400L;
     }
 }

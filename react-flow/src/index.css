@@ -30,23 +30,20 @@
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Nút trong minimap (nếu có) */
 .react-flow__minimap-mask {
   fill: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Màu node trong minimap */
 .react-flow__minimap-node {
   fill: #999 !important;
   stroke: #666 !important;
 }
 
-/* Màu node được chọn trong minimap */
 .react-flow__minimap-node.selected {
   fill: #fff !important;
   stroke: #fff !important;
 }
 
 .react-flow__background path {
-  stroke-width: 0.5 !important; /* 👈 độ dày line */
+  stroke-width: 0.5 !important;
 }

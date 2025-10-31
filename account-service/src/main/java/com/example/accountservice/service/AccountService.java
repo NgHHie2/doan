@@ -46,10 +46,10 @@ public class AccountService {
 
     // Lấy tài khoản theo ID, chỉ lấy tài khoản chưa xóa (visible = 1)
     // Trả về exception nếu không tìm thấy (do sai id hoặc tài khoản đã bị xóa)
-    public Optional<Account> getAccountById(Long id) {
-        Optional<Account> accountOpt = accountRepository.findByIdAndVisible(id, 1);
+    public Optional<Account> getAccountByUsername(String un) {
+        Optional<Account> accountOpt = accountRepository.findByUsernameAndVisible(un, 1);
         if (accountOpt.isEmpty()) {
-            throw new EntityNotFoundException("Account not found with id: " + id);
+            throw new EntityNotFoundException("Account not found with username: " + un);
         }
         return accountOpt;
     }
@@ -167,7 +167,7 @@ public class AccountService {
      */
     @Transactional
     public Account updateAccount(Account account) {
-        Optional<Account> existingAccount = getAccountById(account.getId());
+        Optional<Account> existingAccount = getAccountByUsername(account.getUsername());
         if (existingAccount.isEmpty()) {
             throw new EntityNotFoundException("Account not found with id: " + account.getId());
         }
@@ -195,34 +195,6 @@ public class AccountService {
         Account savedAccount = saveAccount(account);
         // applicationEventPublisher.publishEvent(new UserUpdatedEvent(savedAccount));
         return savedAccount;
-    }
-
-    /*
-     * UPDATE PASSWORD BY ADMIN
-     * Chức năng: ADMIN cập nhật password của user (Admin không cần oldPassword)
-     * Conditions:
-     * - Tài khoản tồn tại và chưa bị xóa (visible = 1)
-     * - newPassword và confirmPassword phải giống nhau
-     * Exception:
-     * - Tài khoản không tồn tại (sai id hoặc đã xóa): trả về
-     * EntityNotFoundException
-     * - Mật khẩu mới và phần xác nhận không giống nhau: trả về
-     * IllegalArgumentException
-     */
-    @Transactional
-    public Boolean updatePasswordByAdmin(Long accountId, PasswordChangeDTO passwordChangeDTO) {
-        Account account = getAccountById(accountId)
-                .orElseThrow(() -> new EntityNotFoundException("Account not found with id: " + accountId));
-
-        if (!passwordChangeDTO.getNewPassword().equals(passwordChangeDTO.getConfirmPassword())) {
-            throw new IllegalArgumentException("New password and confirm password do not match");
-        }
-
-        String encodedPassword = passwordEncoder.encode(passwordChangeDTO.getNewPassword());
-        account.setPassword(encodedPassword);
-        accountRepository.save(account);
-
-        return true;
     }
 
     /*

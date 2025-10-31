@@ -1,25 +1,33 @@
 // src/App.tsx
 import React from "react";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
 import { SchemaVisualizer } from "./SchemaVisualizer/SchemaVisualizer";
-import ReactFlow, { ReactFlowProvider } from "reactflow";
-import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
+import { ReactFlowProvider } from "reactflow";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { LoginPage } from "./pages/LoginPage";
+import { HomePage } from "./pages/HomePage";
+import theme from "./theme";
 
 function App() {
   return (
-    <ChakraProvider>
-      <WebSocketProvider>
-        <ReactFlowProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* <Route path="/" element={<Home />} /> */}
-              <Route path="/:diagramId" element={<SchemaVisualizer />} />
-            </Routes>
-          </BrowserRouter>
-        </ReactFlowProvider>
-      </WebSocketProvider>
-    </ChakraProvider>
+    <>
+      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      <ChakraProvider theme={theme}>
+        <WebSocketProvider>
+          <ReactFlowProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/:diagramId" element={<SchemaVisualizer />} />
+                <Route path="/" element={<Navigate to="/home" replace />} />
+              </Routes>
+            </BrowserRouter>
+          </ReactFlowProvider>
+        </WebSocketProvider>
+      </ChakraProvider>
+    </>
   );
 }
 

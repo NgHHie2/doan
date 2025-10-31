@@ -33,15 +33,15 @@ public class JwtUtil {
     }
 
     public String generateToken(Account account) {
-        Long userId = account.getId();
+        String username = account.getUsername();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
         String jwtId = UUID.randomUUID().toString(); // Tạo unique JWT ID
 
         return Jwts.builder()
-                .subject(userId.toString()) // Dùng userId làm subject thay vì username
-                .claim("userId", userId)
-                .claim("cccd", account.getCccd())
+                .subject(username) // Dùng userId làm subject thay vì username
+                // .claim("userId", userId)
+                .claim("username", account.getUsername())
                 .claim("role", account.getRole())
                 .id(jwtId) // Thêm JWT ID
                 .issuedAt(now)

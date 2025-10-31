@@ -20,20 +20,20 @@ public class RedisTokenService {
     /**
      * Kiểm tra token có tồn tại trong Redis và lấy thông tin
      */
-    public Optional<RedisTokenInfo> getTokenInfo(Long accountId) {
+    public Optional<RedisTokenInfo> getTokenInfo(String username) {
         try {
-            Optional<RedisTokenInfo> tokenInfo = redisTokenRepository.findById(accountId);
+            Optional<RedisTokenInfo> tokenInfo = redisTokenRepository.findById(username);
 
             if (tokenInfo.isPresent()) {
-                log.debug("Found token info in Redis - accId: {}, jti: {}, Role: {}",
-                        accountId, tokenInfo.get().getJti(), tokenInfo.get().getRole());
+                log.debug("Found token info in Redis - username: {}, jti: {}, Role: {}",
+                        username, tokenInfo.get().getJti(), tokenInfo.get().getRole());
                 return tokenInfo;
             } else {
-                log.debug("Token not found in Redis - accId: {}", accountId);
+                log.debug("Token not found in Redis - username: {}", username);
                 return Optional.empty();
             }
         } catch (Exception e) {
-            log.error("Failed to get token info from Redis - accId: {}, Error: {}", accountId, e.getMessage());
+            log.error("Failed to get token info from Redis - username: {}, Error: {}", username, e.getMessage());
             return Optional.empty();
         }
     }
@@ -41,13 +41,13 @@ public class RedisTokenService {
     /**
      * Kiểm tra token có hợp lệ không (tồn tại trong Redis)
      */
-    public boolean isTokenValid(Long accountId) {
+    public boolean isTokenValid(String username) {
         try {
-            boolean exists = redisTokenRepository.existsById(accountId);
-            log.debug("Token validation - accId: {}, Valid: {}", accountId, exists);
+            boolean exists = redisTokenRepository.existsById(username);
+            log.debug("Token validation - username: {}, Valid: {}", username, exists);
             return exists;
         } catch (Exception e) {
-            log.error("Failed to validate token - accId: {}, Error: {}", accountId, e.getMessage());
+            log.error("Failed to validate token - username: {}, Error: {}", username, e.getMessage());
             return false;
         }
     }

@@ -23,6 +23,7 @@ public class Account {
     private Long id;
 
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Column(unique = true, nullable = false)
     private String username;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -57,9 +58,6 @@ public class Account {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<AccountPosition> accountPositions;
 
     @JsonIgnore
     @CreationTimestamp

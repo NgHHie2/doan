@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.example.apigateway.model.RedisTokenInfo;
 
 @Repository
-public interface RedisTokenRepository extends CrudRepository<RedisTokenInfo, Long> {
+public interface RedisTokenRepository extends CrudRepository<RedisTokenInfo, String> {
 
 }

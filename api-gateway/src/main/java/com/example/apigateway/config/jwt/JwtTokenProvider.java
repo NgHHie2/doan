@@ -30,25 +30,7 @@ public class JwtTokenProvider {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return claims.getSubject(); // Sẽ trả về userId dưới dạng string
-    }
-
-    public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.get("userId", Long.class);
-    }
-
-    public String getCccdFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.get("cccd", String.class);
+        return claims.getSubject();
     }
 
     // Method để lấy JWT ID
@@ -75,10 +57,9 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        String userIdStr = getUsernameFromToken(token); // Subject là userId
-        Long userId = getUserIdFromToken(token);
+        String username = getUsernameFromToken(token); // Subject là userId
 
-        CustomUserDetail userDetail = new CustomUserDetail(userId, userIdStr);
+        CustomUserDetail userDetail = new CustomUserDetail(username);
 
         return new UsernamePasswordAuthenticationToken(
                 userDetail,
@@ -99,7 +80,7 @@ public class JwtTokenProvider {
     public void logTokenInfo(String token) {
         try {
             Claims claims = getAllClaimsFromToken(token);
-            log.info("Token Info - JTI: {}, Subject: {}, UserId: {}, Issued: {}, Expires: {}",
+            log.info("Token Info - JTI: {}, Subject: {}, Username: {}, Issued: {}, Expires: {}",
                     claims.getId(),
                     claims.getSubject(),
                     claims.getIssuedAt(),

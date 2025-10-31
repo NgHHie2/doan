@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.example.accountservice.dto.AccountSearchDTO;
 import com.example.accountservice.enums.Role;
 import com.example.accountservice.model.Account;
-import com.example.accountservice.model.AccountPosition;
 
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
@@ -25,16 +24,6 @@ public class AccountSpecification {
 
     public static Specification<Account> hasRole(Role role) {
         return (root, query, cb) -> role == null ? cb.conjunction() : cb.equal(root.get("role"), role);
-    }
-
-    public static Specification<Account> hasPositions(List<Long> positionIds) {
-        return (root, query, cb) -> {
-            if (positionIds == null || positionIds.isEmpty()) {
-                return cb.conjunction();
-            }
-            Join<Account, AccountPosition> positionJoin = root.join("accountPositions", JoinType.LEFT);
-            return positionJoin.get("position").get("id").in(positionIds);
-        };
     }
 
     public static Specification<Account> keywordInFields(String keyword, List<String> searchFields) {
@@ -95,7 +84,6 @@ public class AccountSpecification {
     public static Specification<Account> build(AccountSearchDTO searchDTO) {
         return Specification.where(isVisible())
                 .and(hasRole(searchDTO.getRole()))
-                .and(hasPositions(searchDTO.getPositionIds()))
                 .and(keywordInFields(searchDTO.getKeyword(), searchDTO.getSearchFields()));
     }
 }

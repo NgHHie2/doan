@@ -5,15 +5,12 @@ import org.springframework.stereotype.Service;
 
 import com.example.accountservice.enums.Role;
 import com.example.accountservice.model.Account;
-import com.example.accountservice.model.AccountPosition;
 import com.example.accountservice.model.RedisTokenInfo;
 import com.example.accountservice.repository.RedisTokenRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,22 +19,18 @@ public class RedisTokenService {
     @Autowired
     private RedisTokenRepository redisTokenRepository;
 
-    @Autowired
-    private AccountPositionService accountPositionService;
-
     /**
      * Lưu thông tin token vào Redis
      */
     public void saveTokenInfo(String jti, Account account) {
-        Long accountId = account.getId();
+        String username = account.getUsername();
         Role role = account.getRole();
-        List<Long> positions = getPositionsByAccount(account.getId());
         try {
-            redisTokenRepository.deleteById(accountId);
-            RedisTokenInfo tokenInfo = new RedisTokenInfo(jti, accountId, role, positions);
+            redisTokenRepository.deleteById(username);
+            RedisTokenInfo tokenInfo = new RedisTokenInfo(jti, username, role);
             redisTokenRepository.save(tokenInfo);
-            log.info("Saved token info to Redis - JTI: {}, AccountId: {}, Role: {}, Positions: {}",
-                    jti, accountId, role, positions);
+            log.info("Saved token info to Redis - JTI: {}, username: {}, Role: {}",
+                    jti, username, role);
         } catch (Exception e) {
             log.error("Failed to save token info to Redis - JTI: {}, Error: {}", jti, e.getMessage());
         }
@@ -46,11 +39,11 @@ public class RedisTokenService {
     /**
      * Lấy thông tin token từ Redis
      */
-    public Optional<RedisTokenInfo> getTokenInfo(Long accountId) {
+    public Optional<RedisTokenInfo> getTokenInfo(String username) {
         try {
-            return redisTokenRepository.findById(accountId);
+            return redisTokenRepository.findById(username);
         } catch (Exception e) {
-            log.error("Failed to get token info from Redis - accId: {}, Error: {}", accountId, e.getMessage());
+            log.error("Failed to get token info from Redis - username: {}, Error: {}", username, e.getMessage());
             return Optional.empty();
         }
     }
@@ -58,13 +51,13 @@ public class RedisTokenService {
     /**
      * Kiểm tra token có tồn tại trong Redis không
      */
-    public boolean isTokenValid(Long accountId) {
+    public boolean isTokenValid(String username) {
         try {
-            boolean exists = redisTokenRepository.existsById(accountId);
-            log.debug("Token validation - accId: {}, Valid: {}", accountId, exists);
+            boolean exists = redisTokenRepository.existsById(username);
+            log.debug("Token validation - username: {}, Valid: {}", username, exists);
             return exists;
         } catch (Exception e) {
-            log.error("Failed to validate token - accId: {}, Error: {}", accountId, e.getMessage());
+            log.error("Failed to validate token - username: {}, Error: {}", username, e.getMessage());
             return false;
         }
     }
@@ -72,27 +65,12 @@ public class RedisTokenService {
     /**
      * Xóa token khỏi Redis (logout)
      */
-    public void revokeToken(Long accountId) {
+    public void revokeToken(String username) {
         try {
-            redisTokenRepository.deleteById(accountId);
-            log.info("Revoked token - accId: {}", accountId);
+            redisTokenRepository.deleteById(username);
+            log.info("Revoked token - username: {}", username);
         } catch (Exception e) {
-            log.error("Failed to revoke token - accId: {}, Error: {}", accountId, e.getMessage());
-        }
-    }
-
-    /*
-     * Lấy danh sách các id position của một account (để lưu vào redis)
-     */
-    private List<Long> getPositionsByAccount(Long accountId) {
-        try {
-            List<AccountPosition> accountPositions = accountPositionService.getPositionsByAccount(accountId);
-            return accountPositions.stream()
-                    .map(ap -> ap.getPosition().getId())
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            log.warn("Cannot get positions for account {}: {}", accountId, e.getMessage());
-            return List.of();
+            log.error("Failed to revoke token - username: {}, Error: {}", username, e.getMessage());
         }
     }
 

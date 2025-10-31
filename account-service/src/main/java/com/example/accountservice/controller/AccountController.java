@@ -41,7 +41,8 @@ public class AccountController {
     private AccountService accountService;
 
     /**
-     * Tìm kiếm tài khoản theo từ khóa, theo filter role hoặc position với phân trang
+     * Tìm kiếm tài khoản theo từ khóa, theo filter role hoặc position với phân
+     * trang
      * Quyền: Chỉ ADMIN mới được sử dụng
      * 
      * Input:
@@ -102,27 +103,27 @@ public class AccountController {
      * Output:
      * - Optional<Account>: Thông tin tài khoản hoặc empty nếu không tìm thấy
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{username}")
     @RequireRole({ Role.ADMIN, Role.TEACHER })
-    public Optional<Account> getAccountById(@PathVariable Long id) {
-        log.info("get user by id: " + id);
-        return accountService.getAccountById(id);
+    public Optional<Account> getAccountById(@PathVariable String username) {
+        log.info("get user by username: " + username);
+        return accountService.getAccountByUsername(username);
     }
 
     /**
      * User xem thông tin của chính mình
      * 
      * Input:
-     * - X-User-Id (header): ID của user hiện tại từ JWT token
+     * - X-Username (header): ID của user hiện tại từ JWT token
      * 
      * Output:
      * - Optional<Account>: Thông tin tài khoản của user hiện tại
      */
     @GetMapping("/me")
-    public Optional<Account> getAccountByMe(@RequestHeader(value = "X-User-Id", required = false) String userIdString) {
-        Long accountId = Long.valueOf(userIdString);
-        log.info("get user by id: " + accountId);
-        return accountService.getAccountById(accountId);
+    public Optional<Account> getAccountByMe(@RequestHeader(value = "X-Username", required = false) String username) {
+
+        log.info("get user by username: " + username);
+        return accountService.getAccountByUsername(username);
     }
 
     /**
@@ -131,8 +132,10 @@ public class AccountController {
      * Quyền: Chỉ ADMIN mới được sử dụng
      * 
      * Input:
-     * - account (request body): Thông tin tài khoản mới (firstName, lastName, cccd, role, email,...)
-     * - KHÔNG TRUYỀN VÀO ID, USERNAME, PASSWORD, VISIBLE (Không hiển  thị các trường này ở FE)
+     * - account (request body): Thông tin tài khoản mới (firstName, lastName, cccd,
+     * role, email,...)
+     * - KHÔNG TRUYỀN VÀO ID, USERNAME, PASSWORD, VISIBLE (Không hiển thị các trường
+     * này ở FE)
      * - firstName, lastName, cccd bắt buộc phải điền
      * - Username sẽ được tự động sinh từ họ tên
      * - Password mặc định là "123456Aa@"
@@ -171,37 +174,16 @@ public class AccountController {
     }
 
     /**
-     * Admin đổi password cho user bất kỳ
-     *  --- Đổi password của Admin và User khác nhau ở Input: Admin không cần oldPassword ---
-     * Chức năng: Cho phép admin thay đổi password của bất kỳ user nào
-     * Quyền: Chỉ ADMIN mới được sử dụng
-     * 
-     * Input:
-     * - id (path variable): ID của tài khoản cần đổi password
-     * - passwordChangeDTO (request body):
-     * - newPassword: Mật khẩu mới (tối thiểu 6 ký tự)
-     * - confirmPassword: Xác nhận mật khẩu mới
-     * 
-     * Output:
-     * - Boolean: true nếu đổi password thành công, false nếu thất bại
-     */
-    @PutMapping("/change-password/{id}")
-    @RequireRole({ Role.ADMIN })
-    public Boolean updatePasswordByAdmin(@PathVariable Long id,
-            @Valid @RequestBody PasswordChangeDTO passwordChangeDTO) {
-        return accountService.updatePasswordByAdmin(id, passwordChangeDTO);
-    }
-
-    /**
      * USER HIỆN KHÔNG THỂ ĐỔI PASSWORD (có thể cập nhật lại sau)
-     * --- Đổi password của Admin và User khác nhau ở Input: Admin không cần oldPassword ---
+     * --- Đổi password của Admin và User khác nhau ở Input: Admin không cần
+     * oldPassword ---
      * 
      * User đổi password của chính mình
      * Chức năng: Cho phép user thay đổi password của chính mình
      * Quyền: Tất cả user đã đăng nhập
      * 
      * Input:
-     * - X-User-Id (header): ID của user hiện tại từ JWT token
+     * - X-Username (header): ID của user hiện tại từ JWT token
      * - passwordChangeDTO (request body):
      * - oldPassword: Mật khẩu cũ (bắt buộc)
      * - newPassword: Mật khẩu mới (tối thiểu 6 ký tự)
@@ -212,14 +194,15 @@ public class AccountController {
      */
     // @PutMapping("/change-password")
     // public Boolean updatePasswordByUser(
-    //         @RequestHeader(value = "X-User-Id", required = false) String userIdString,
-    //         @Valid @RequestBody PasswordChangeDTO passwordChangeDTO) {
+    // @RequestHeader(value = "X-Username", required = false) String username,
+    // @Valid @RequestBody PasswordChangeDTO passwordChangeDTO) {
 
-    //     if (passwordChangeDTO.getOldPassword() == null || passwordChangeDTO.getOldPassword().isEmpty()) {
-    //         throw new IllegalArgumentException("Old password must not be empty");
-    //     }
-    //     Long accountId = Long.valueOf(userIdString);
-    //     return accountService.updatePasswordByUser(accountId, passwordChangeDTO);
+    // if (passwordChangeDTO.getOldPassword() == null ||
+    // passwordChangeDTO.getOldPassword().isEmpty()) {
+    // throw new IllegalArgumentException("Old password must not be empty");
+    // }
+    //
+    // return accountService.updatePasswordByUser(accountId, passwordChangeDTO);
     // }
 
     /**

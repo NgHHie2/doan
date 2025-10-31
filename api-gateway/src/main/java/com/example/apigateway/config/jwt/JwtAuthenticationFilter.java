@@ -49,8 +49,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         // THÊM: Chặn request nếu header chứa các trường không hợp lệ
         HttpHeaders headers = exchange.getRequest().getHeaders();
-        if (headers.containsKey("X-User-Id") || headers.containsKey("X-User-Role")
-                || headers.containsKey("X-Positions") || headers.containsKey("X-CCCD")) {
+        if (headers.containsKey("X-Username") || headers.containsKey("X-User-Role")) {
             return handleUnauthorized(exchange);
         }
 
@@ -66,9 +65,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         // Truy vấn redis lấy thông tin jwt và account theo accountId trong jwt
-        Long accountId = jwtTokenProvider.getUserIdFromToken(token);
-        String cccd = jwtTokenProvider.getCccdFromToken(token);
-        Optional<RedisTokenInfo> redisTokenInfo = redisTokenService.getTokenInfo(accountId);
+        String username = jwtTokenProvider.getUsernameFromToken(token);
+        Optional<RedisTokenInfo> redisTokenInfo = redisTokenService.getTokenInfo(username);
 
         if (redisTokenInfo.isEmpty()
                 || !redisTokenInfo.get().getJti().equals(jwtTokenProvider.getJwtIdFromToken(token))) {
@@ -76,16 +74,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         RedisTokenInfo tokenInfo = redisTokenInfo.get();
-        String positionsHeader = tokenInfo.getPositions() != null
-                ? tokenInfo.getPositions().stream().map(String::valueOf).collect(Collectors.joining(","))
-                : "";
 
         // Set account info vào header của request trước khi forward xuống các services
         ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-                .header("X-User-Id", tokenInfo.getAccountId().toString())
+                .header("X-Username", tokenInfo.getUsername().toString())
                 .header("X-User-Role", tokenInfo.getRole())
-                .header("X-Positions", positionsHeader)
-                .header("X-CCCD", cccd)
                 .build();
 
         return chain.filter(exchange.mutate().request(modifiedRequest).build());

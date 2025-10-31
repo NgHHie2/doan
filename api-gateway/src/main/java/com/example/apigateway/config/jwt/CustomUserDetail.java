@@ -14,16 +14,14 @@ import java.util.Collection;
 @AllArgsConstructor
 public class CustomUserDetail implements UserDetails {
 
-    private Long userId;
-    private String userIdStr; // Subject của JWT (userId dưới dạng string)
+    private String username;
 
     @JsonIgnore
     private String password;
 
     // Constructor không cần password (vì API Gateway chỉ decode JWT)
-    public CustomUserDetail(Long userId, String userIdStr) {
-        this.userId = userId;
-        this.userIdStr = userIdStr;
+    public CustomUserDetail(String username) {
+        this.username = username;
         this.password = null; // API Gateway không cần password
     }
 
@@ -39,7 +37,7 @@ public class CustomUserDetail implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userIdStr; // Trả về userId dưới dạng string
+        return username; // Trả về userId dưới dạng string
     }
 
     @Override

@@ -14,7 +14,7 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     Optional<Account> findByUsernameAndVisible(String username, int visible);
 
-    Optional<Account> findByIdAndVisible(Long id, int visible);
+    // Optional<Account> findByUsernameAndVisible(String username, int visible);
 
     boolean existsByCccdAndVisible(String cccd, int visible);
 
