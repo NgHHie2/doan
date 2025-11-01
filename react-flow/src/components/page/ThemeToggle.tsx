@@ -9,8 +9,10 @@ export function ThemeToggle() {
       aria-label="Toggle theme"
       icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
       onClick={toggleColorMode}
-      variant="ghost"
+      // variant="ghost"
+      mx={2}
       size="md"
+      borderRadius={"50%"}
     />
   );
 }

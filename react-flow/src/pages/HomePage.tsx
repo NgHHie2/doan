@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
   Box,
   Button,
@@ -9,48 +9,104 @@ import {
   VStack,
   HStack,
   Icon,
-  Card,
-  CardHeader,
-  CardBody,
-  Grid,
   Flex,
   Avatar,
   useColorModeValue,
-  SimpleGrid,
+  IconButton,
+  Drawer,
+  DrawerContent,
+  DrawerOverlay,
+  useDisclosure,
+  Divider,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Spinner,
 } from "@chakra-ui/react";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { ThemeToggle } from "../components/page/ThemeToggle";
 import {
-  PenTool,
   Plus,
-  FileText,
   LogOut,
   Folder,
-  Clock,
   User,
+  Share2,
+  Trash2,
+  Menu as MenuIcon,
+  ChevronRight,
+  Settings,
 } from "lucide-react";
+import { DiDatabase } from "react-icons/di";
+import {
+  FaFolder,
+  FaFolderOpen,
+  FaTrash,
+  FaUserFriends,
+  FaUsers,
+} from "react-icons/fa";
+import { FaUserGroup } from "react-icons/fa6";
+import { IoMdTrash, IoMdFolderOpen, IoMdFolder } from "react-icons/io";
+import { HiUsers, HiOutlineUsers } from "react-icons/hi2";
+import { PiTrashSimpleFill, PiTrashSimple } from "react-icons/pi";
+import { HeaderWithSearch } from "../components/page/HeaderWithSearch";
+import { FloatingUnitButton } from "../components/page/FloatingUnitButton";
+import FloatingChat from "../components/page/FloatingChat";
 
-interface Diagram {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
+interface UserData {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  picture?: string;
 }
 
 export function HomePage() {
   const navigate = useNavigate();
-  const [diagrams, setDiagrams] = useState<Diagram[]>([]);
-  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const location = useLocation();
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const headerBg = useColorModeValue("white", "gray.800");
-  const cardBg = useColorModeValue("white", "gray.800");
-  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const chatWidth = "360px";
+
+  const bgColor = useColorModeValue("#faf9f9ff", "#0d1117");
+  const cardBg = useColorModeValue("white", "#161b22");
+  const borderColor = useColorModeValue("#d0d7de", "#30363d");
+  const textColor = useColorModeValue("#24292f", "#e6edf3");
+  const hoverBg = useColorModeValue("#f6f8fa", "#1c2128");
+  const activeNavBg = useColorModeValue("#cbe0f8ff", "#353c47ff");
+  const mutedText = useColorModeValue("#57606a", "#8b949e");
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/account/me", {
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+      } else {
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+      navigate("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
-      // Gọi API logout trên server
       await fetch("http://localhost:8080/account/logout", {
-        method: "POST", // hoặc 'GET' tùy server
-        credentials: "include", // gửi cookie với request
+        method: "POST",
+        credentials: "include",
       });
       navigate("/login");
     } catch (err) {
@@ -59,228 +115,260 @@ export function HomePage() {
   };
 
   const handleCreateDiagram = () => {
-    // TODO: Create new diagram via API
     const newId = Date.now().toString();
     navigate(`/${newId}`);
   };
 
-  const handleOpenDiagram = (diagramId: string) => {
-    navigate(`/${diagramId}`);
+  const isActive = (path: string) => location.pathname === path;
+
+  const NavItem = ({
+    icon,
+    activeIcon,
+    label,
+    path,
+    onClick,
+  }: {
+    icon: any;
+    activeIcon?: any;
+    label: string;
+    path?: string;
+    onClick?: () => void;
+  }) => {
+    const active = path && isActive(path);
+
+    return (
+      <Button
+        w="full"
+        justifyContent="flex-start"
+        variant="ghost"
+        leftIcon={
+          <Icon
+            as={active && activeIcon ? activeIcon : icon}
+            boxSize={6}
+            mr="4px"
+          />
+        }
+        bg={active ? activeNavBg : "transparent"}
+        color={textColor}
+        fontWeight="400"
+        fontSize="15px"
+        h="45px"
+        _hover={{ bg: activeNavBg }}
+        onClick={() => {
+          if (onClick) onClick();
+          else if (path) navigate(path);
+          onClose();
+        }}
+      >
+        {label}
+      </Button>
+    );
   };
 
-  return (
-    <Box minH="100vh">
-      {/* Header */}
-      <Box
-        bg={headerBg}
-        borderBottom="1px"
-        borderColor="gray.200"
-        _dark={{ borderColor: "gray.700" }}
-      >
-        <Container maxW="container.xl" py={4}>
-          <Flex justify="space-between" align="center">
-            <HStack spacing={3}>
-              <Box
-                bg="blue.100"
-                _dark={{ bg: "blue.900" }}
-                p={2}
-                borderRadius="full"
-              >
-                <Icon as={PenTool} boxSize={6} color="blue.500" />
-              </Box>
-              <Box>
-                <Heading size="md">Diagram Builder</Heading>
-                <Text
-                  fontSize="sm"
-                  color="gray.600"
-                  _dark={{ color: "gray.400" }}
-                >
-                  Create and manage your diagrams
-                </Text>
-              </Box>
-            </HStack>
-
-            <HStack spacing={2}>
-              {user && (
-                <HStack
-                  spacing={2}
-                  px={3}
-                  py={1.5}
-                  bg="gray.100"
-                  _dark={{ bg: "gray.700" }}
-                  borderRadius="lg"
-                >
-                  <Icon as={User} boxSize={4} />
-                  <Text fontSize="sm" display={{ base: "none", sm: "block" }}>
-                    {user.email}
-                  </Text>
-                </HStack>
-              )}
-              <ThemeToggle />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                leftIcon={<Icon as={LogOut} boxSize={4} />}
-              >
-                Logout
-              </Button>
-            </HStack>
-          </Flex>
-        </Container>
-      </Box>
-
-      {/* Main Content */}
-      <Container maxW="container.xl" py={8}>
-        <Flex justify="space-between" align="center" mb={8}>
+  const SidebarContent = () => (
+    <VStack h="full" spacing={0} align="stretch">
+      {/* Logo & Title */}
+      <Box p={2} pt={4} pb={6}>
+        <HStack spacing={1}>
+          <Icon as={DiDatabase} p={0} boxSize={12} color={textColor} />
           <Box>
-            <Heading size="xl" mb={2}>
-              My Diagrams
+            <Heading size="md" color={textColor} fontWeight="600">
+              Database Diagram
             </Heading>
-            <Text color="gray.600" _dark={{ color: "gray.400" }}>
-              Manage and organize your diagram projects
+            <Text fontSize="sm" color={mutedText}>
+              Design & Visualize
             </Text>
           </Box>
-          <Button
-            colorScheme="blue"
-            size="lg"
-            leftIcon={<Icon as={Plus} boxSize={5} />}
-            onClick={handleCreateDiagram}
-          >
-            New Diagram
-          </Button>
-        </Flex>
+        </HStack>
+      </Box>
 
-        {/* Diagrams Grid */}
-        {diagrams.length === 0 ? (
-          <Card bg={cardBg} textAlign="center" py={12}>
-            <CardBody>
-              <VStack spacing={4}>
-                <Box
-                  bg="gray.100"
-                  _dark={{ bg: "gray.700" }}
-                  p={6}
-                  borderRadius="full"
-                >
-                  <Icon as={FileText} boxSize={12} color="gray.400" />
-                </Box>
-                <Heading size="md">No diagrams yet</Heading>
-                <Text color="gray.600" _dark={{ color: "gray.400" }}>
-                  Get started by creating your first diagram
-                </Text>
-                <Button
-                  colorScheme="blue"
-                  leftIcon={<Icon as={Plus} boxSize={4} />}
-                  onClick={handleCreateDiagram}
-                  mt={4}
-                >
-                  Create Your First Diagram
-                </Button>
-              </VStack>
-            </CardBody>
-          </Card>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-            {diagrams.map((diagram) => (
-              <Card
-                key={diagram.id}
-                bg={cardBg}
-                cursor="pointer"
-                onClick={() => handleOpenDiagram(diagram.id)}
-                _hover={{
-                  bg: hoverBg,
-                  transform: "translateY(-4px)",
-                  shadow: "lg",
-                }}
-                transition="all 0.2s"
-              >
-                <CardHeader>
-                  <VStack align="start" spacing={3}>
-                    <Box
-                      bg="blue.100"
-                      _dark={{ bg: "blue.900" }}
-                      p={2}
-                      borderRadius="lg"
-                    >
-                      <Icon as={Folder} boxSize={6} color="blue.500" />
-                    </Box>
-                    <Heading size="md">{diagram.name}</Heading>
-                    <HStack
-                      spacing={1}
-                      fontSize="sm"
-                      color="gray.600"
-                      _dark={{ color: "gray.400" }}
-                    >
-                      <Icon as={Clock} boxSize={3} />
-                      <Text>
-                        Updated:{" "}
-                        {new Date(diagram.updatedAt).toLocaleDateString()}
-                      </Text>
-                    </HStack>
-                  </VStack>
-                </CardHeader>
-                <CardBody pt={0}>
-                  <Text
-                    fontSize="sm"
-                    color="gray.600"
-                    _dark={{ color: "gray.400" }}
-                  >
-                    Created: {new Date(diagram.createdAt).toLocaleDateString()}
+      <Box p={4} pt={0}>
+        <Button
+          w="full"
+          colorScheme="blue"
+          leftIcon={<Icon as={Plus} boxSize={6} />}
+          onClick={handleCreateDiagram}
+          size="lg"
+          fontSize={"md"}
+          boxShadow="0 5px 10px rgba(0,0,0,0.4)"
+        >
+          New Diagram
+        </Button>
+      </Box>
+
+      {/* Navigation */}
+      <VStack flex={1} spacing={1} px={4} align="stretch" overflowY="auto">
+        <NavItem
+          icon={IoMdFolderOpen}
+          activeIcon={IoMdFolder}
+          label="My Diagrams"
+          path="/home"
+        />
+        <NavItem
+          icon={HiOutlineUsers}
+          activeIcon={HiUsers}
+          label="Shared with Me"
+          path="/home/shared"
+        />
+        <NavItem
+          icon={PiTrashSimple}
+          activeIcon={PiTrashSimpleFill}
+          label="Trash"
+          path="/home/trash"
+        />
+      </VStack>
+
+      {/* User Profile */}
+      {loading ? (
+        <Box p={4}>
+          <Spinner size="sm" />
+        </Box>
+      ) : user ? (
+        <Box p={3} borderBottom="1px" borderColor={borderColor}>
+          <Menu>
+            <MenuButton
+              as={Button}
+              w="full"
+              h="auto"
+              p={2}
+              variant="ghost"
+              _hover={{ bg: hoverBg }}
+            >
+              <HStack spacing={3}>
+                <Avatar
+                  size="sm"
+                  name={`${user.firstName} ${user.lastName}`}
+                  src={user.picture}
+                />
+                <VStack align="start" spacing={0} flex={1}>
+                  <Text fontSize="sm" fontWeight="600" color={textColor}>
+                    {user.firstName} {user.lastName}
                   </Text>
-                </CardBody>
-              </Card>
-            ))}
-          </SimpleGrid>
-        )}
-
-        {/* Quick Actions */}
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mt={12}>
-          <Card bg={cardBg}>
-            <CardHeader>
-              <Heading size="sm">Recent Activity</Heading>
-            </CardHeader>
-            <CardBody pt={0}>
-              <Text
-                fontSize="sm"
-                color="gray.600"
-                _dark={{ color: "gray.400" }}
+                  <Text fontSize="xs" color={mutedText}>
+                    @{user.username}
+                  </Text>
+                </VStack>
+                <Text
+                  fontSize={"sm"}
+                  border={"1px"}
+                  p={"4px"}
+                  borderRadius={"10px"}
+                >
+                  Upgrade
+                </Text>
+              </HStack>
+            </MenuButton>
+            <MenuList bg={cardBg} borderColor={borderColor}>
+              <MenuItem
+                icon={<Icon as={User} boxSize={4} />}
+                bg={cardBg}
+                _hover={{ bg: hoverBg }}
+                onClick={() => navigate("/home/profile")}
               >
-                View your recent diagram edits and changes
-              </Text>
-            </CardBody>
-          </Card>
-
-          <Card bg={cardBg}>
-            <CardHeader>
-              <Heading size="sm">Templates</Heading>
-            </CardHeader>
-            <CardBody pt={0}>
-              <Text
-                fontSize="sm"
-                color="gray.600"
-                _dark={{ color: "gray.400" }}
+                Profile Settings
+              </MenuItem>
+              <MenuItem
+                icon={<Icon as={Settings} boxSize={4} />}
+                bg={cardBg}
+                _hover={{ bg: hoverBg }}
               >
-                Start with pre-built diagram templates
-              </Text>
-            </CardBody>
-          </Card>
-
-          <Card bg={cardBg}>
-            <CardHeader>
-              <Heading size="sm">Shared with Me</Heading>
-            </CardHeader>
-            <CardBody pt={0}>
-              <Text
-                fontSize="sm"
-                color="gray.600"
-                _dark={{ color: "gray.400" }}
+                Preferences
+              </MenuItem>
+              <Divider />
+              <MenuItem
+                icon={<Icon as={LogOut} boxSize={4} />}
+                color="red.500"
+                bg={cardBg}
+                _hover={{ bg: hoverBg }}
+                onClick={handleLogout}
               >
-                Access diagrams shared by team members
-              </Text>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
-      </Container>
+                Logout
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
+      ) : null}
+
+      {/* Footer */}
+    </VStack>
+  );
+
+  if (loading) {
+    return (
+      <Flex h="100vh" align="center" justify="center" bg={bgColor}>
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  return (
+    <Box minH="100vh" bg={bgColor}>
+      {/* Mobile Menu Button */}
+      <Box
+        display={{ base: "block", md: "none" }}
+        bg={bgColor}
+        position="fixed"
+        top={4}
+        left={3}
+        zIndex={10}
+        borderRadius={"full"}
+      >
+        <IconButton
+          aria-label="Open menu"
+          icon={<Icon as={MenuIcon} boxSize={5} />}
+          onClick={onOpen}
+          bg={bgColor}
+          borderRadius={"full"}
+        />
+      </Box>
+
+      {/* Sidebar - Desktop */}
+      <Box
+        display={{ base: "none", md: "block" }}
+        position="fixed"
+        left={0}
+        top={0}
+        bottom={0}
+        w="280px"
+        bg={bgColor}
+      >
+        <SidebarContent />
+      </Box>
+
+      {/* Sidebar - Mobile Drawer */}
+      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
+        <DrawerOverlay />
+        <DrawerContent bg={bgColor} maxW="280px">
+          <SidebarContent />
+        </DrawerContent>
+      </Drawer>
+
+      {/* Main Content */}
+      <Box
+        ml={{ base: 0, md: "280px" }}
+        minH="100vh"
+        display="flex"
+        flexDirection="column"
+      >
+        <HeaderWithSearch></HeaderWithSearch>
+        <Flex h="92vh" w={"full"}>
+          {/* Page Content */}
+          <Box
+            flex="1"
+            px={{ base: 4, md: 8 }}
+            py={6}
+            minH="0"
+            borderTopLeftRadius="30px"
+            bg={cardBg}
+            overflowY="auto"
+          >
+            <Outlet />
+          </Box>
+          {/* Chat Panel */}
+          <FloatingChat isOpen={isChatOpen} width={chatWidth} />
+        </Flex>
+      </Box>
+      <FloatingUnitButton onClick={() => setIsChatOpen(!isChatOpen)} />
     </Box>
   );
 }

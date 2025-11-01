@@ -13,7 +13,7 @@ import {
   AlertDescription,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { ThemeToggle } from "../components/page/ThemeToggle";
 import { FcGoogle } from "react-icons/fc";
 import { DiDatabase } from "react-icons/di";
 
