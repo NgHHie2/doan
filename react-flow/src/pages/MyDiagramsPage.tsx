@@ -32,6 +32,7 @@ import {
 import { CiGrid41 } from "react-icons/ci";
 import { IoIosList } from "react-icons/io";
 import { FaCaretDown } from "react-icons/fa";
+import { BsDiagram3 } from "react-icons/bs";
 
 interface Diagram {
   id: string;
@@ -65,7 +66,7 @@ export function MyDiagramsPage() {
   };
 
   return (
-    <>
+    <Box w="full" maxW="100%" overflowX="hidden">
       <Flex justify="space-between" align="center" mb={4}>
         <Box>
           <Heading size="lg" color={textColor} fontWeight="400">
@@ -147,7 +148,7 @@ export function MyDiagramsPage() {
           <CardBody>
             <VStack spacing={4}>
               <Box bg={hoverBg} p={6} borderRadius="full">
-                <Icon as={FileText} boxSize={12} color={mutedText} />
+                <Icon as={BsDiagram3} boxSize={12} color={mutedText} />
               </Box>
               <Heading size="md" color={textColor} fontWeight="600">
                 No diagrams yet
@@ -256,6 +257,6 @@ export function MyDiagramsPage() {
           </CardBody>
         </Card>
       </SimpleGrid>
-    </>
+    </Box>
   );
 }

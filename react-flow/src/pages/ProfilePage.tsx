@@ -133,7 +133,7 @@ export function ProfilePage() {
   }
 
   return (
-    <>
+    <Box w="full" maxW="100%" overflowX="hidden">
       <Box mb={8}>
         <Heading size="xl" mb={2} color={textColor} fontWeight="600">
           Profile Settings
@@ -144,7 +144,7 @@ export function ProfilePage() {
       </Box>
 
       {/* Profile Header Card */}
-      <Card bg={cardBg} borderColor={borderColor} border="1px" mb={6}>
+      <Card bg={cardBg} borderColor={borderColor} mb={6} shadow={"none"}>
         <CardBody>
           <HStack spacing={6}>
             <Avatar
@@ -174,15 +174,7 @@ export function ProfilePage() {
       </Card>
 
       {/* Personal Information */}
-      <Card bg={cardBg} borderColor={borderColor} border="1px" mb={6}>
-        <CardHeader>
-          <HStack>
-            <Icon as={User} boxSize={5} color="blue.500" />
-            <Heading size="md" color={textColor} fontWeight="600">
-              Personal Information
-            </Heading>
-          </HStack>
-        </CardHeader>
+      <Card bg={cardBg} shadow={"none"} mb={6}>
         <CardBody>
           <VStack spacing={4} align="stretch">
             <HStack spacing={4}>
@@ -270,82 +262,12 @@ export function ProfilePage() {
                 color={textColor}
               />
             </FormControl>
-
-            <FormControl>
-              <FormLabel fontSize="sm" color={mutedText}>
-                <HStack>
-                  <Icon as={IdCard} boxSize={4} />
-                  <Text>ID Number (CCCD)</Text>
-                </HStack>
-              </FormLabel>
-              <Input
-                value={profile.cccd || ""}
-                onChange={(e) =>
-                  setProfile({ ...profile, cccd: e.target.value })
-                }
-                placeholder="Enter ID number"
-                bg={inputBg}
-                borderColor={borderColor}
-                color={textColor}
-              />
-            </FormControl>
-          </VStack>
-        </CardBody>
-      </Card>
-
-      {/* Account Information */}
-      <Card bg={cardBg} borderColor={borderColor} border="1px" mb={6}>
-        <CardHeader>
-          <HStack>
-            <Icon as={Shield} boxSize={5} color="green.500" />
-            <Heading size="md" color={textColor} fontWeight="600">
-              Account Information
-            </Heading>
-          </HStack>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={3} align="stretch">
-            <HStack justify="space-between">
-              <Text fontSize="sm" color={mutedText}>
-                Username
-              </Text>
-              <Text fontSize="sm" color={textColor} fontWeight="500">
-                @{profile.username}
-              </Text>
-            </HStack>
-            <Divider />
-            <HStack justify="space-between">
-              <Text fontSize="sm" color={mutedText}>
-                Role
-              </Text>
-              <Badge colorScheme="blue">{profile.role}</Badge>
-            </HStack>
-            <Divider />
-            {profile.provider && (
-              <>
-                <HStack justify="space-between">
-                  <Text fontSize="sm" color={mutedText}>
-                    Login Provider
-                  </Text>
-                  <Badge colorScheme="green">{profile.provider}</Badge>
-                </HStack>
-                <Divider />
-              </>
-            )}
-            <HStack justify="space-between">
-              <Text fontSize="sm" color={mutedText}>
-                Account ID
-              </Text>
-              <Text fontSize="sm" color={textColor} fontFamily="mono">
-                #{profile.id}
-              </Text>
-            </HStack>
           </VStack>
         </CardBody>
       </Card>
 
       {/* Save Button */}
-      <Flex justify="flex-end">
+      <Flex justify="flex-start" marginStart={5}>
         <Button
           colorScheme="blue"
           onClick={handleSave}
@@ -355,6 +277,6 @@ export function ProfilePage() {
           Save Changes
         </Button>
       </Flex>
-    </>
+    </Box>
   );
 }

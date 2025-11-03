@@ -33,7 +33,7 @@ import { CiGrid41 } from "react-icons/ci";
 import { IoIosList } from "react-icons/io";
 import { FaCaretDown } from "react-icons/fa";
 import { LuShare2 } from "react-icons/lu";
-import { HiUsers, HiOutlineUsers } from "react-icons/hi2";
+import { PiStar, PiStarFill } from "react-icons/pi";
 
 interface Diagram {
   id: string;
@@ -42,7 +42,7 @@ interface Diagram {
   updatedAt: string;
 }
 
-export function SharedDiagramsPage() {
+export function StarPage() {
   const navigate = useNavigate();
   const [diagrams, setDiagrams] = useState<Diagram[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -71,7 +71,7 @@ export function SharedDiagramsPage() {
       <Flex justify="space-between" align="center" mb={4}>
         <Box>
           <Heading size="lg" color={textColor} fontWeight="400">
-            Shared with me
+            Mark Star
           </Heading>
         </Box>
         <HStack spacing={0} borderRadius="md" overflow="hidden" boxShadow="md">
@@ -149,7 +149,7 @@ export function SharedDiagramsPage() {
           <CardBody>
             <VStack spacing={4}>
               <Box bg={hoverBg} p={6} borderRadius="full">
-                <Icon as={HiOutlineUsers} boxSize={12} color={mutedText} />
+                <Icon as={PiStar} boxSize={12} color={mutedText} />
               </Box>
               <Heading size="md" color={textColor} fontWeight="600">
                 No diagrams yet

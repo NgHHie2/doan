@@ -12,6 +12,7 @@ import { SharedDiagramsPage } from "./pages/SharedDiagramsPage";
 import { TrashPage } from "./pages/TrashPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import theme from "./theme";
+import { StarPage } from "./pages/StarPage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
                   <Route index element={<MyDiagramsPage />} />
                   <Route path="shared" element={<SharedDiagramsPage />} />
                   <Route path="trash" element={<TrashPage />} />
+                  <Route path="star" element={<StarPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                 </Route>
                 <Route path="/:diagramId" element={<SchemaVisualizer />} />

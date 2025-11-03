@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
   Box,
@@ -49,8 +49,11 @@ import { IoMdTrash, IoMdFolderOpen, IoMdFolder } from "react-icons/io";
 import { HiUsers, HiOutlineUsers } from "react-icons/hi2";
 import { PiTrashSimpleFill, PiTrashSimple } from "react-icons/pi";
 import { HeaderWithSearch } from "../components/page/HeaderWithSearch";
-import { FloatingUnitButton } from "../components/page/FloatingUnitButton";
 import FloatingChat from "../components/page/FloatingChat";
+import { HiOutlineDotsHorizontal } from "react-icons/hi";
+import { PiStar, PiStarFill } from "react-icons/pi";
+import { BsChatLeftDots, BsChatLeftDotsFill } from "react-icons/bs";
+import { IoHelp } from "react-icons/io5";
 
 interface UserData {
   firstName: string;
@@ -68,7 +71,7 @@ export function HomePage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const chatWidth = "360px";
+  const chatWidth = 300;
 
   const bgColor = useColorModeValue("#faf9f9ff", "#0d1117");
   const cardBg = useColorModeValue("white", "#161b22");
@@ -127,12 +130,14 @@ export function HomePage() {
     label,
     path,
     onClick,
+    business = false,
   }: {
     icon: any;
     activeIcon?: any;
     label: string;
     path?: string;
     onClick?: () => void;
+    business?: boolean;
   }) => {
     const active = path && isActive(path);
 
@@ -144,15 +149,15 @@ export function HomePage() {
         leftIcon={
           <Icon
             as={active && activeIcon ? activeIcon : icon}
-            boxSize={6}
-            mr="4px"
+            boxSize={business ? 4 : 6} // nhỏ hơn nếu business
+            mr={business ? "6px" : "4px"}
           />
         }
         bg={active ? activeNavBg : "transparent"}
         color={textColor}
         fontWeight="400"
-        fontSize="15px"
-        h="45px"
+        fontSize={business ? "13px" : "15px"} // font nhỏ hơn
+        h={business ? "35px" : "45px"} // height nhỏ hơn
         _hover={{ bg: activeNavBg }}
         onClick={() => {
           if (onClick) onClick();
@@ -165,12 +170,15 @@ export function HomePage() {
     );
   };
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [menuWidth, setMenuWidth] = useState<string>("auto");
+
   const SidebarContent = () => (
     <VStack h="full" spacing={0} align="stretch">
       {/* Logo & Title */}
       <Box p={2} pt={4} pb={6}>
         <HStack spacing={1}>
-          <Icon as={DiDatabase} p={0} boxSize={12} color={textColor} />
+          <Icon as={DiDatabase} p={0} boxSize={14} color={textColor} />
           <Box>
             <Heading size="md" color={textColor} fontWeight="600">
               Database Diagram
@@ -197,7 +205,7 @@ export function HomePage() {
       </Box>
 
       {/* Navigation */}
-      <VStack flex={1} spacing={1} px={4} align="stretch" overflowY="auto">
+      <VStack spacing={1} px={4} align="stretch" overflowY="auto">
         <NavItem
           icon={IoMdFolderOpen}
           activeIcon={IoMdFolder}
@@ -211,10 +219,35 @@ export function HomePage() {
           path="/home/shared"
         />
         <NavItem
+          icon={PiStar}
+          activeIcon={PiStarFill}
+          label="Mark Star"
+          path="/home/star"
+        />
+        <NavItem
           icon={PiTrashSimple}
           activeIcon={PiTrashSimpleFill}
           label="Trash"
           path="/home/trash"
+        />
+      </VStack>
+
+      <Box flex={1} />
+
+      <VStack spacing={1} my={1} mx={3}>
+        <NavItem
+          icon={BsChatLeftDots}
+          activeIcon={BsChatLeftDotsFill}
+          label="Send Feedback"
+          path="/home"
+          business={true}
+        />
+        <NavItem
+          icon={IoHelp}
+          activeIcon={IoHelp}
+          label="Get Help"
+          path="/home"
+          business={true}
         />
       </VStack>
 
@@ -224,41 +257,78 @@ export function HomePage() {
           <Spinner size="sm" />
         </Box>
       ) : user ? (
-        <Box p={3} borderBottom="1px" borderColor={borderColor}>
-          <Menu>
+        <Box
+          p={3}
+          borderTop="1px"
+          borderColor={borderColor}
+          _hover={{ bg: hoverBg }}
+        >
+          <Menu
+            onOpen={() => {
+              if (buttonRef.current) {
+                setMenuWidth(`${buttonRef.current.offsetWidth}px`);
+              }
+            }}
+          >
             <MenuButton
               as={Button}
               w="full"
               h="auto"
               p={2}
               variant="ghost"
-              _hover={{ bg: hoverBg }}
+              ref={buttonRef}
             >
               <HStack spacing={3}>
                 <Avatar
                   size="sm"
                   name={`${user.firstName} ${user.lastName}`}
                   src={user.picture}
+                  flexShrink={0}
+                  borderWidth={"2px"}
+                  borderColor={borderColor}
+                  colorScheme="blue"
                 />
-                <VStack align="start" spacing={0} flex={1}>
-                  <Text fontSize="sm" fontWeight="600" color={textColor}>
+                <VStack
+                  align="start"
+                  spacing={0}
+                  flex={1}
+                  minW={0}
+                  overflow="hidden"
+                >
+                  <Text
+                    fontSize="sm"
+                    fontWeight="600"
+                    color={textColor}
+                    noOfLines={1}
+                    textAlign="left"
+                    width="100%"
+                  >
                     {user.firstName} {user.lastName}
                   </Text>
-                  <Text fontSize="xs" color={mutedText}>
+                  <Text
+                    fontSize="xs"
+                    color={mutedText}
+                    noOfLines={1}
+                    textAlign="left"
+                    width="100%"
+                  >
                     @{user.username}
                   </Text>
                 </VStack>
-                <Text
-                  fontSize={"sm"}
-                  border={"1px"}
-                  p={"4px"}
-                  borderRadius={"10px"}
-                >
-                  Upgrade
-                </Text>
+                <IconButton
+                  aria-label="More options"
+                  icon={<HiOutlineDotsHorizontal />}
+                  size="sm"
+                  variant="ghost"
+                />
               </HStack>
             </MenuButton>
-            <MenuList bg={cardBg} borderColor={borderColor}>
+            <MenuList
+              bg={cardBg}
+              borderColor={borderColor}
+              minW="unset"
+              w={menuWidth}
+            >
               <MenuItem
                 icon={<Icon as={User} boxSize={4} />}
                 bg={cardBg}
@@ -303,28 +373,9 @@ export function HomePage() {
 
   return (
     <Box minH="100vh" bg={bgColor}>
-      {/* Mobile Menu Button */}
-      <Box
-        display={{ base: "block", md: "none" }}
-        bg={bgColor}
-        position="fixed"
-        top={4}
-        left={3}
-        zIndex={10}
-        borderRadius={"full"}
-      >
-        <IconButton
-          aria-label="Open menu"
-          icon={<Icon as={MenuIcon} boxSize={5} />}
-          onClick={onOpen}
-          bg={bgColor}
-          borderRadius={"full"}
-        />
-      </Box>
-
       {/* Sidebar - Desktop */}
       <Box
-        display={{ base: "none", md: "block" }}
+        display={{ base: "none", lg: "block" }}
         position="fixed"
         left={0}
         top={0}
@@ -345,30 +396,55 @@ export function HomePage() {
 
       {/* Main Content */}
       <Box
-        ml={{ base: 0, md: "280px" }}
+        ml={{ base: 0, lg: "280px" }}
         minH="100vh"
         display="flex"
         flexDirection="column"
       >
-        <HeaderWithSearch></HeaderWithSearch>
-        <Flex h="92vh" w={"full"}>
-          {/* Page Content */}
+        <Box display="flex" flexDirection="row" alignItems="center">
+          {/* Mobile Menu Button */}
           <Box
-            flex="1"
-            px={{ base: 4, md: 8 }}
-            py={6}
-            minH="0"
-            borderTopLeftRadius="30px"
-            bg={cardBg}
-            overflowY="auto"
+            display={{ base: "block", lg: "none" }}
+            bg={bgColor}
+            zIndex={10}
+            borderRadius={"full"}
+            mx={2}
           >
-            <Outlet />
+            <IconButton
+              aria-label="Open menu"
+              icon={<Icon as={MenuIcon} boxSize={5} />}
+              onClick={onOpen}
+              bg={bgColor}
+              borderRadius={"full"}
+            />
           </Box>
-          {/* Chat Panel */}
-          <FloatingChat isOpen={isChatOpen} width={chatWidth} />
-        </Flex>
+          <HeaderWithSearch
+            onChatToggle={() => setIsChatOpen(!isChatOpen)}
+            isChatOpen={isChatOpen}
+          />
+        </Box>
+
+        {/* Content Area - chat will overlay on top */}
+        <Box
+          flex="1"
+          px={{ base: 4, md: 8 }}
+          py={6}
+          minH="0"
+          borderTopRadius="30px"
+          bg={cardBg}
+          overflowY="auto"
+          mr={isChatOpen ? chatWidth + 10 + "px" : "0"}
+          transition="margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          zIndex={20}
+          border={"1px"}
+          borderColor={borderColor}
+        >
+          <Outlet />
+        </Box>
       </Box>
-      <FloatingUnitButton onClick={() => setIsChatOpen(!isChatOpen)} />
+
+      {/* Floating Chat Panel */}
+      <FloatingChat isOpen={isChatOpen} width={chatWidth} />
     </Box>
   );
 }

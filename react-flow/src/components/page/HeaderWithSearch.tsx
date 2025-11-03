@@ -25,8 +25,17 @@ import {
 import { Search } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { TbFilterBolt } from "react-icons/tb";
+import { FloatingUnitButton } from "./FloatingUnitButton";
 
-export function HeaderWithSearch() {
+interface HeaderWithSearchProps {
+  onChatToggle?: () => void;
+  isChatOpen?: boolean;
+}
+
+export function HeaderWithSearch({
+  onChatToggle,
+  isChatOpen,
+}: HeaderWithSearchProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [searchQuery, setSearchQuery] = useState("");
   const bgColor = useColorModeValue("#faf9f9ff", "#0d1117");
@@ -40,9 +49,10 @@ export function HeaderWithSearch() {
         position="sticky"
         top={0}
         zIndex={5}
-        h="70px"
-        pr={{ base: "0px", md: "10px" }}
-        pl={{ base: "60px", md: "0px" }}
+        h="60px"
+        my={2}
+        // pr={{ base: "0px", lg: "10px" }}
+        // pl={{ base: "60px", lg: "0px" }}
         display="grid"
         alignItems="center"
       >
@@ -51,24 +61,26 @@ export function HeaderWithSearch() {
           <HStack spacing={2} py={2} flex={1} h="full">
             <InputGroup h="full" maxW="800px">
               <InputLeftElement h="full" pr="2">
-                <IconButton
-                  aria-label="Search"
-                  icon={<Search />}
-                  variant="ghost"
-                  size="md"
-                  ml={"20px"}
-                  borderRadius="30px"
-                  onClick={() => console.log("Search:", searchQuery)}
-                />
-              </InputLeftElement>
-              <InputRightElement h="full" pl="2">
-                <Tooltip label="Advanced filter" hasArrow placement="top">
+                <Tooltip label="Search" hasArrow placement="bottom">
                   <IconButton
-                    aria-label="Filter"
-                    icon={<TbFilterBolt size="22" />} // icon to hơn
+                    aria-label="Search"
+                    icon={<Search size={"20"} />}
                     variant="ghost"
                     size="md"
-                    mr={"20px"}
+                    ml={"12px"}
+                    borderRadius="30px"
+                    onClick={() => console.log("Search:", searchQuery)}
+                  />
+                </Tooltip>
+              </InputLeftElement>
+              <InputRightElement h="full" pl="2">
+                <Tooltip label="Advanced filter" hasArrow placement="bottom">
+                  <IconButton
+                    aria-label="Filter"
+                    icon={<TbFilterBolt size="22" />}
+                    variant="ghost"
+                    size="md"
+                    mr={"12px"}
                     borderRadius="full"
                     onClick={onOpen}
                   />
@@ -87,8 +99,9 @@ export function HeaderWithSearch() {
             </InputGroup>
           </HStack>
 
-          {/* Right: Theme Toggle */}
-          <HStack spacing={2} h="full">
+          {/* Right: Header Unit Button + Theme Toggle */}
+          <HStack spacing={2} h="full" align="center">
+            <FloatingUnitButton onClick={onChatToggle} />
             <ThemeToggle />
           </HStack>
         </Flex>
