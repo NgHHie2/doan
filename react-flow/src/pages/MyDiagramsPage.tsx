@@ -19,41 +19,80 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  useToast,
 } from "@chakra-ui/react";
-import {
-  Plus,
-  FileText,
-  Folder,
-  Clock,
-  Grid,
-  List,
-  ChevronDown,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 import { CiGrid41 } from "react-icons/ci";
 import { IoIosList } from "react-icons/io";
 import { FaCaretDown } from "react-icons/fa";
 import { BsDiagram3 } from "react-icons/bs";
-
-interface Diagram {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { DiagramList, Diagram } from "../components/page/DiagramList";
 
 export function MyDiagramsPage() {
   const navigate = useNavigate();
-  const [diagrams, setDiagrams] = useState<Diagram[]>([]);
+  const toast = useToast();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [filterName, setFilterName] = useState<string>("All Names");
   const [filterOwner, setFilterOwner] = useState<string>("All Owners");
   const [filterLatest, setFilterLatest] = useState<string>("All Time");
 
+  // Sample data - replace with your API data
+  const [diagrams, setDiagrams] = useState<Diagram[]>([
+    {
+      id: "1",
+      name: "E-Commerce Database Schema",
+      owner: {
+        name: "John Doe",
+        avatar: undefined,
+      },
+      updatedAt: "2025-11-01T10:30:00Z",
+      updatedBy: {
+        name: "Jane Smith",
+        avatar: undefined,
+      },
+      createdAt: "2025-10-15T08:00:00Z",
+      isStarred: true,
+      image: "./luocdocsdl.png",
+    },
+    {
+      id: "2",
+      name: "User Authentication System",
+      owner: {
+        name: "Alice Johnson",
+        avatar: undefined,
+      },
+      updatedAt: "2025-11-02T14:20:00Z",
+      updatedBy: {
+        name: "Bob Wilson",
+        avatar: undefined,
+      },
+      createdAt: "2025-10-20T09:15:00Z",
+      isStarred: false,
+      image: "./Hinh1-7.png",
+    },
+    {
+      id: "3",
+      name: "Inventory Management Database",
+      owner: {
+        name: "John Doe",
+        avatar: undefined,
+      },
+      updatedAt: "2025-10-28T16:45:00Z",
+      updatedBy: {
+        name: "John Doe",
+        avatar: undefined,
+      },
+      createdAt: "2025-10-10T11:30:00Z",
+      isStarred: false,
+      image: "./Hinh1-19.png",
+    },
+  ]);
+
   const bgColor = useColorModeValue("#faf9f9ff", "#0d1117");
   const cardBg = useColorModeValue("white", "#161b22");
   const borderColor = useColorModeValue("#d0d7de", "#30363d");
   const textColor = useColorModeValue("#24292f", "#e6edf3");
-  const hoverBg = useColorModeValue("#f6f8fa", "#1c2128");
+  const hoverBg = useColorModeValue("#f6f8fa", "#323b47ff");
   const mutedText = useColorModeValue("#57606a", "#8b949e");
 
   const handleCreateDiagram = () => {
@@ -63,6 +102,87 @@ export function MyDiagramsPage() {
 
   const handleOpenDiagram = (diagramId: string) => {
     navigate(`/${diagramId}`);
+  };
+
+  const handleShare = (diagramId: string) => {
+    toast({
+      title: "Share dialog",
+      description: `Sharing diagram ${diagramId}`,
+      status: "info",
+      duration: 2000,
+      isClosable: true,
+    });
+    // Implement share logic
+  };
+
+  const handleRename = (diagramId: string) => {
+    toast({
+      title: "Rename dialog",
+      description: `Renaming diagram ${diagramId}`,
+      status: "info",
+      duration: 2000,
+      isClosable: true,
+    });
+    // Implement rename logic
+  };
+
+  const handleToggleStar = (diagramId: string) => {
+    setDiagrams((prev) =>
+      prev.map((d) =>
+        d.id === diagramId ? { ...d, isStarred: !d.isStarred } : d
+      )
+    );
+    const diagram = diagrams.find((d) => d.id === diagramId);
+    toast({
+      title: diagram?.isStarred ? "Removed from starred" : "Added to starred",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    });
+  };
+
+  const handleDuplicate = (diagramId: string) => {
+    toast({
+      title: "Duplicating diagram",
+      description: `Creating a copy of diagram ${diagramId}`,
+      status: "info",
+      duration: 2000,
+      isClosable: true,
+    });
+    // Implement duplicate logic
+  };
+
+  const handleDownload = (diagramId: string) => {
+    toast({
+      title: "Downloading diagram",
+      description: `Downloading diagram ${diagramId}`,
+      status: "info",
+      duration: 2000,
+      isClosable: true,
+    });
+    // Implement download logic
+  };
+
+  const handleHistory = (diagramId: string) => {
+    toast({
+      title: "Activity history",
+      description: `Viewing history for diagram ${diagramId}`,
+      status: "info",
+      duration: 2000,
+      isClosable: true,
+    });
+    // Implement history view logic
+  };
+
+  const handleDelete = (diagramId: string) => {
+    toast({
+      title: "Moved to trash",
+      description: `Diagram ${diagramId} moved to trash`,
+      status: "warning",
+      duration: 2000,
+      isClosable: true,
+    });
+    // Implement delete logic
   };
 
   return (
@@ -93,7 +213,7 @@ export function MyDiagramsPage() {
         </HStack>
       </Flex>
 
-      <Flex>
+      <Flex mb={4}>
         {/* Filters */}
         <HStack spacing={2}>
           {/* Name Filter */}
@@ -101,9 +221,14 @@ export function MyDiagramsPage() {
             <MenuButton as={Button} rightIcon={<FaCaretDown />} size="sm">
               {filterName}
             </MenuButton>
-            <MenuList>
+            <MenuList bg={cardBg}>
               {["All Names", "Diagram A", "Diagram B"].map((name) => (
-                <MenuItem key={name} onClick={() => setFilterName(name)}>
+                <MenuItem
+                  bg={cardBg}
+                  _hover={{ bg: hoverBg }}
+                  key={name}
+                  onClick={() => setFilterName(name)}
+                >
                   {name}
                 </MenuItem>
               ))}
@@ -115,9 +240,14 @@ export function MyDiagramsPage() {
             <MenuButton as={Button} rightIcon={<FaCaretDown />} size="sm">
               {filterOwner}
             </MenuButton>
-            <MenuList>
+            <MenuList bg={cardBg}>
               {["All Owners", "Me", "Team"].map((owner) => (
-                <MenuItem key={owner} onClick={() => setFilterOwner(owner)}>
+                <MenuItem
+                  bg={cardBg}
+                  _hover={{ bg: hoverBg }}
+                  key={owner}
+                  onClick={() => setFilterOwner(owner)}
+                >
                   {owner}
                 </MenuItem>
               ))}
@@ -129,10 +259,15 @@ export function MyDiagramsPage() {
             <MenuButton as={Button} rightIcon={<FaCaretDown />} size="sm">
               {filterLatest}
             </MenuButton>
-            <MenuList>
+            <MenuList bg={cardBg}>
               {["All Time", "Today", "Last 7 Days", "Last 30 Days"].map(
                 (time) => (
-                  <MenuItem key={time} onClick={() => setFilterLatest(time)}>
+                  <MenuItem
+                    bg={cardBg}
+                    _hover={{ bg: hoverBg }}
+                    key={time}
+                    onClick={() => setFilterLatest(time)}
+                  >
                     {time}
                   </MenuItem>
                 )
@@ -142,7 +277,7 @@ export function MyDiagramsPage() {
         </HStack>
       </Flex>
 
-      {/* Diagrams Grid */}
+      {/* Diagrams Grid or List */}
       {diagrams.length === 0 ? (
         <Card bg={"transparent"} textAlign="center" py={12} shadow={"none"}>
           <CardBody>
@@ -168,95 +303,19 @@ export function MyDiagramsPage() {
           </CardBody>
         </Card>
       ) : (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-          {diagrams.map((diagram) => (
-            <Card
-              key={diagram.id}
-              bg={cardBg}
-              borderColor={borderColor}
-              border="1px"
-              cursor="pointer"
-              onClick={() => handleOpenDiagram(diagram.id)}
-              _hover={{
-                bg: hoverBg,
-                transform: "translateY(-2px)",
-                shadow: "md",
-              }}
-              transition="all 0.2s"
-            >
-              <CardHeader pb={2}>
-                <VStack align="start" spacing={3}>
-                  <Box
-                    bg="blue.100"
-                    _dark={{ bg: "blue.900" }}
-                    p={2}
-                    borderRadius="md"
-                  >
-                    <Icon as={Folder} boxSize={5} color="blue.500" />
-                  </Box>
-                  <Heading size="sm" color={textColor} fontWeight="600">
-                    {diagram.name}
-                  </Heading>
-                  <HStack spacing={1} fontSize="xs" color={mutedText}>
-                    <Icon as={Clock} boxSize={3} />
-                    <Text>
-                      Updated:{" "}
-                      {new Date(diagram.updatedAt).toLocaleDateString()}
-                    </Text>
-                  </HStack>
-                </VStack>
-              </CardHeader>
-              <CardBody pt={0}>
-                <Text fontSize="xs" color={mutedText}>
-                  Created: {new Date(diagram.createdAt).toLocaleDateString()}
-                </Text>
-              </CardBody>
-            </Card>
-          ))}
-        </SimpleGrid>
+        <DiagramList
+          diagrams={diagrams}
+          view={view}
+          onOpen={handleOpenDiagram}
+          onShare={handleShare}
+          onRename={handleRename}
+          onToggleStar={handleToggleStar}
+          onDuplicate={handleDuplicate}
+          onDownload={handleDownload}
+          onHistory={handleHistory}
+          onDelete={handleDelete}
+        />
       )}
-
-      {/* Quick Stats */}
-      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mt={12}>
-        <Card bg={cardBg}>
-          <CardHeader pb={2}>
-            <Heading size="sm" color={textColor} fontWeight="600">
-              Recent Activity
-            </Heading>
-          </CardHeader>
-          <CardBody pt={0}>
-            <Text fontSize="sm" color={mutedText}>
-              View your recent diagram edits and changes
-            </Text>
-          </CardBody>
-        </Card>
-
-        <Card bg={cardBg}>
-          <CardHeader pb={2}>
-            <Heading size="sm" color={textColor} fontWeight="600">
-              Templates
-            </Heading>
-          </CardHeader>
-          <CardBody pt={0}>
-            <Text fontSize="sm" color={mutedText}>
-              Start with pre-built diagram templates
-            </Text>
-          </CardBody>
-        </Card>
-
-        <Card bg={cardBg}>
-          <CardHeader pb={2}>
-            <Heading size="sm" color={textColor} fontWeight="600">
-              Statistics
-            </Heading>
-          </CardHeader>
-          <CardBody pt={0}>
-            <Text fontSize="sm" color={mutedText}>
-              Track your diagram creation progress
-            </Text>
-          </CardBody>
-        </Card>
-      </SimpleGrid>
     </Box>
   );
 }
