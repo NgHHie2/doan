@@ -1,6 +1,8 @@
 package com.example.react_flow_be.controller;
 
 import com.example.react_flow_be.dto.DatabaseDiagramDto;
+import com.example.react_flow_be.dto.NewDiagramName;
+import com.example.react_flow_be.service.DatabaseDiagramService;
 import com.example.react_flow_be.service.SchemaVisualizerService;
 import com.example.react_flow_be.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class SchemaVisualizerController {
     private final ConnectionRepository connectionRepository;
     private final AttributeRepository attributeRepository;
     private final ModelRepository modelRepository;
+    private final DatabaseDiagramService databaseDiagramService;
     private final DatabaseDiagramRepository databaseDiagramRepository;
     private final FolderRepository folderRepository;
     private final UserRepository userRepository;
@@ -42,6 +45,12 @@ public class SchemaVisualizerController {
             return ResponseEntity.internalServerError()
                     .body("Failed to initialize sample data: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/{diagramId}/new-name")
+    public ResponseEntity<Boolean> newName(@PathVariable Long diagramId, @RequestBody NewDiagramName newDiagramName) {
+        Boolean success = databaseDiagramService.updateDiagramName(diagramId, newDiagramName.getNewName());
+        return ResponseEntity.ok(success);
     }
 
     @GetMapping("/health/{diagramId}")

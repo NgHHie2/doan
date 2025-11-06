@@ -14,6 +14,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { ModelNode } from "../SchemaVisualizer/ModelNode";
 import { SchemaData } from "../SchemaVisualizer/SchemaVisualizer.types";
+import { CustomControls } from "./CustomControls";
 
 const modelTypes = {
   model: ModelNode,
@@ -76,9 +77,7 @@ export const ReactFlowCanvas: React.FC<ReactFlowCanvasProps> = ({
       minZoom={0.1}
       maxZoom={4}
     >
-      <Controls />
-
-      <MiniMap />
+      {/* <MiniMap /> */}
 
       <Background color="#333" variant={BackgroundVariant.Lines} gap={40} />
     </ReactFlow>

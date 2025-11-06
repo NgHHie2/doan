@@ -41,7 +41,7 @@ export const ModelFooter: React.FC<ModelFooterProps> = ({
           <Box>{attributeCount} fields</Box>
           {primaryKeys > 0 && <Box>🔑 {primaryKeys}</Box>}
           {foreignKeys > 0 && <Box>🔗 {foreignKeys}</Box>}
-          {indexes > 0 && <Box>📊 {indexes}</Box>}
+          {/* {indexes > 0 && <Box>📊 {indexes}</Box>} */}
         </Flex>
 
         {/* Right side - Add Button */}

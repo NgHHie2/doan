@@ -29,6 +29,13 @@ public class DatabaseDiagramService {
     }
 
     @Transactional
+    public Boolean updateDiagramName(Long id, String newName) {
+        if (databaseDiagramRepository.updateNameById(id, newName) != 0)
+            return true;
+        return false;
+    }
+
+    @Transactional
     public DatabaseDiagram createSampleDatabaseDiagram(Folder folder) {
         DatabaseDiagram databaseDiagram = new DatabaseDiagram();
         databaseDiagram.setName("Blog System");

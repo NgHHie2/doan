@@ -1,6 +1,4 @@
-// src/components/AddModelButton.tsx
-import React from "react";
-import { Box, Button, Tooltip } from "@chakra-ui/react";
+import { Box, Button, IconButton, Tooltip } from "@chakra-ui/react";
 import { Plus } from "lucide-react";
 
 interface AddModelButtonProps {
@@ -13,25 +11,26 @@ export const AddModelButton: React.FC<AddModelButtonProps> = ({
   isConnected,
 }) => {
   return (
-    <Box position="absolute" top={4} left={4} zIndex={1000}>
-      <Tooltip
-        label={isConnected ? "Add new table" : "Connect to add tables"}
-        fontSize="sm"
-      >
-        <Button
-          leftIcon={<Plus size={16} />}
-          colorScheme="green"
-          size="md"
-          onClick={onAddModel}
-          isDisabled={!isConnected}
-          _disabled={{
-            opacity: 0.5,
-            cursor: "not-allowed",
-          }}
-        >
-          Add Table
-        </Button>
-      </Tooltip>
-    </Box>
+    <Tooltip
+      label={isConnected ? "Add new table" : "Connect to add tables"}
+      fontSize="sm"
+      placement="left"
+    >
+      <IconButton
+        aria-label="Add Table"
+        icon={<Plus size={16} />}
+        size="sm"
+        onClick={onAddModel}
+        isDisabled={!isConnected}
+        bg="#333"
+        color="white"
+        border="1px solid #444"
+        _hover={{ bg: "#1c1c1c" }}
+        _disabled={{
+          opacity: 0.4,
+          cursor: "not-allowed",
+        }}
+      />
+    </Tooltip>
   );
 };

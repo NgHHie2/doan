@@ -567,5 +567,12 @@ export const useSchemaVisualizer = () => {
     handleAddModel,
     handleModelNameUpdate,
     handleDeleteModel,
+
+    // Node handlers for TableListDialog
+    handleFieldNameUpdate,
+    handleFieldTypeUpdate,
+    handleToggleKeyType,
+    handleAddAttribute,
+    handleDeleteAttribute,
   };
 };
