@@ -18,8 +18,7 @@ interface FloatingChatProps {
 const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 300 }) => {
   const bg = useColorModeValue("white", "#161b22");
   const unbg = useColorModeValue("#161b22", "white");
-  const borderColor = useColorModeValue("gray.200", "#30363d");
-
+  const borderColor = useColorModeValue("#d0d7de", "#30363d");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,6 +60,10 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 300 }) => {
       zIndex={10}
       borderColor={borderColor}
       borderTopLeftRadius="30px"
+      borderTop={"2px solid"}
+      borderLeft={"2px solid"}
+      borderTopColor={borderColor}
+      borderLeftColor={borderColor}
     >
       {/* Header */}
       <Box

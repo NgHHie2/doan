@@ -407,8 +407,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     a.setAttribute("href", dataUrl);
     a.click();
   }
-  const imageWidth = 1920;
-  const imageHeight = 1080;
+  const imageWidth = 1920 * 2;
+  const imageHeight = 1080 * 2;
   const exportAsImage = async () => {
     const nodesBounds = getNodesBounds(getNodes());
     const viewport = getViewportForBounds(

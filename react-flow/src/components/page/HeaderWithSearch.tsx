@@ -58,7 +58,7 @@ export function HeaderWithSearch({
       >
         <Flex justify="space-between" align="center" h="full">
           {/* Left: Search */}
-          <HStack spacing={2} py={2} flex={1} h="full">
+          <HStack spacing={2} py={2} flex={1} h="full" mr={2}>
             <InputGroup h="full" maxW="800px">
               <InputLeftElement h="full" pr="2">
                 <Tooltip label="Search" hasArrow placement="bottom">
@@ -100,7 +100,7 @@ export function HeaderWithSearch({
           </HStack>
 
           {/* Right: Header Unit Button + Theme Toggle */}
-          <HStack spacing={2} h="full" align="center">
+          <HStack spacing={2} mr={2} h="full" align="center">
             <FloatingUnitButton onClick={onChatToggle} />
             <ThemeToggle />
           </HStack>

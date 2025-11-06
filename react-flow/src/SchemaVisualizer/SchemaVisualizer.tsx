@@ -1,5 +1,5 @@
 // src/SchemaVisualizer/SchemaVisualizer.tsx
-import React from "react";
+import React, { useState } from "react";
 import { Box, useDisclosure } from "@chakra-ui/react";
 
 import { LoadingScreen } from "../components/LoadingScreen";
@@ -8,6 +8,8 @@ import { ReactFlowCanvas } from "../components/ReactFlowCanvas";
 import { AddModelButton } from "../components/AddModelButton";
 import { TableListButton } from "../components/TableListButton";
 import { TableListDialog } from "../components/TableListDialog";
+import { SchemaVisualizerHeader } from "../components/SchemaVisualizerHeader";
+import FloatingChat from "../components/page/FloatingChat";
 
 import { useSchemaVisualizer } from "../hooks/useSchemaVisualizer";
 import { ExportDiagramButton } from "../components/ExportDiagramButton";
@@ -16,6 +18,8 @@ import { AutoAlignButton } from "../components/AutoAlignButton";
 
 export const SchemaVisualizer = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const chatWidth = 300;
 
   const {
     // Data state
@@ -42,7 +46,7 @@ export const SchemaVisualizer = () => {
     handleReset,
     handleInitialize,
 
-    // Node handlers (thêm vào đây)
+    // Node handlers
     handleFieldNameUpdate,
     handleFieldTypeUpdate,
     handleToggleKeyType,
@@ -58,17 +62,21 @@ export const SchemaVisualizer = () => {
 
   return (
     <Box height="100vh" width="100vw" bg="#1C1c1c" position="relative">
+      {/* Header với Avatar, Theme Toggle, Chat, History, Add Member */}
+      <SchemaVisualizerHeader
+        onChatToggle={() => setIsChatOpen(!isChatOpen)}
+        isChatOpen={isChatOpen}
+      />
+
+      {/* Left side buttons */}
       <Box
         position="absolute"
-        bottom="180px" // cao hơn Controls mặc định một chút
+        bottom="180px"
         left="10px"
         display="flex"
         flexDirection="column"
         gap="6px"
         bg="transparent"
-        // border="1px solid #333"
-        // boxShadow="0 0 6px rgba(0, 0, 0, 0.3)"
-        // borderRadius="8px"
         p="6px"
         zIndex={10}
       >
@@ -78,7 +86,6 @@ export const SchemaVisualizer = () => {
         <AutoAlignButton />
       </Box>
 
-      {/* <Controls /> */}
       <CustomControls />
 
       <ControlPanel
@@ -112,6 +119,9 @@ export const SchemaVisualizer = () => {
         onDeleteModel={handleDeleteModel}
         onModelNameUpdate={handleModelNameUpdate}
       />
+
+      {/* Floating Chat Panel - Tái sử dụng từ HomePage */}
+      <FloatingChat isOpen={isChatOpen} width={chatWidth} />
     </Box>
   );
 };

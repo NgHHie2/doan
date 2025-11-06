@@ -1,7 +1,7 @@
 // src/services/schemaApiService.ts
 import { SchemaData } from "../SchemaVisualizer/SchemaVisualizer.types";
 
-const API_BASE_URL = "http://localhost:8080/api/schema";
+const API_BASE_URL = "http://localhost:8085/api/schema";
 
 export const schemaApiService = {
   // Get complete schema data

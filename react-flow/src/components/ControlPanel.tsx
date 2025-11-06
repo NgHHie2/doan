@@ -61,7 +61,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     setSaving(true);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/schema/${diagramId}/new-name`,
+        `http://localhost:8085/api/schema/${diagramId}/new-name`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -156,7 +156,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           icon={saving ? <Spinner size="xs" /> : <PencilLine size={16} />}
           size="xs"
           variant="ghost"
-          colorScheme="whiteAlpha"
+          bg={"transparent"}
+          // colorScheme="whiteAlpha"
+          color={"gray.400"}
+          _hover={{ bg: "transparent", color: "white" }}
           onClick={handleStartEditing}
         />
       </HStack>
