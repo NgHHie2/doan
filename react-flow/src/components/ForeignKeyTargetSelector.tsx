@@ -126,7 +126,7 @@ export const ForeignKeyTargetSelector: React.FC<
   if (inline) {
     return (
       <VStack spacing={2} align="stretch" w="100%">
-        <Text fontWeight="bold" color="gray.200" fontSize="sm">
+        <Text fontWeight="600" color="gray.200" fontSize="sm">
           Foreign Key Target ({primaryKeyOptions.length} available)
         </Text>
 

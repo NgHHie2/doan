@@ -190,7 +190,7 @@ export function HomePage() {
         </HStack>
       </Box>
 
-      <Box p={4} pt={0}>
+      <Box p={3} pt={0}>
         <Button
           w="full"
           colorScheme="blue"
@@ -205,7 +205,7 @@ export function HomePage() {
       </Box>
 
       {/* Navigation */}
-      <VStack spacing={1} px={4} align="stretch" overflowY="auto">
+      <VStack spacing={1} px={3} align="stretch" overflowY="auto">
         <NavItem
           icon={IoMdFolderOpen}
           activeIcon={IoMdFolder}

@@ -1,4 +1,10 @@
-import { Box, IconButton, Tooltip } from "@chakra-ui/react";
+import {
+  border,
+  Box,
+  IconButton,
+  Tooltip,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import {
   Plus,
   Minus,
@@ -15,6 +21,10 @@ import { useState } from "react";
 export const CustomControls = () => {
   const { zoomIn, zoomOut, fitView, getNodes, setNodes } = useReactFlow();
   const [isInteractive, setIsInteractive] = useState(true);
+  const borderColor = useColorModeValue("#d0d7de", "#444");
+  const bgColor = useColorModeValue("white", "#333");
+  const iconColor = useColorModeValue("gray.700", "white");
+  const hoverBg = useColorModeValue("white", "#1c1c1c");
 
   const toggleInteractivity = () => {
     const newValue = !isInteractive;
@@ -32,10 +42,11 @@ export const CustomControls = () => {
   };
 
   const buttonStyle = {
-    bg: "#333",
-    color: "white",
-    border: "1px solid #444",
-    _hover: { bg: "#1c1c1c" },
+    bg: bgColor,
+    color: iconColor,
+    border: "1px solid",
+    borderColor: borderColor,
+    _hover: { bg: hoverBg },
     size: "sm" as const,
   };
 

@@ -8,6 +8,8 @@ import {
   useToast,
   Spinner,
   IconButton,
+  useColorModeValue,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Circle, PencilLine } from "lucide-react";
 import { DiDatabase } from "react-icons/di";
@@ -32,6 +34,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const [saving, setSaving] = useState(false);
   const toast = useToast();
 
+  const borderColor = useColorModeValue("#d0d7de", "#444");
+  const bgColor = useColorModeValue("white", "#333");
+  const iconColor = useColorModeValue("gray.700", "white");
+  const hoverBg = useColorModeValue("#63a3e2ff", "#888");
+  const textColor = useColorModeValue("#2d3748", "white"); // 🌟 MÀU CHỮ
+  const penColor = useColorModeValue("#2d3748", "white");
   const editableRef = useRef<HTMLSpanElement>(null);
 
   const handleStartEditing = () => {
@@ -94,22 +102,28 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       bg="transparent"
     >
       {/* Icon database */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        bg="#333"
-        border="1px solid #444"
-        borderRadius="full"
-        p={2}
-      >
-        <Icon as={DiDatabase} boxSize={6} color="#e6edf3" />
-      </Box>
+      <Tooltip label="Home" placement="bottom" hasArrow>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          bg={bgColor}
+          border="1px solid"
+          borderColor={borderColor}
+          borderRadius="full"
+          p={2}
+          onClick={() => (window.location.href = "http://localhost:5173/home")}
+          style={{ cursor: "pointer" }}
+        >
+          <Icon as={DiDatabase} boxSize={6} color={iconColor} />
+        </Box>
+      </Tooltip>
 
       {/* Schema name (editable) */}
       <HStack
-        bg={"#333"}
-        border={editing ? "1px solid #888" : "1px solid #444"} // 🌟 đậm & sáng hơn khi edit
+        bg={bgColor}
+        border={editing ? "1px solid" : "1px solid"}
+        borderColor={editing ? hoverBg : borderColor}
         borderRadius="xl"
         px={3}
         py={1}
@@ -143,7 +157,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           outline="none"
           fontSize="md"
           fontWeight={600}
-          color="white"
+          color={textColor}
           whiteSpace="nowrap"
           minW="80px"
           userSelect={"none"}
@@ -159,7 +173,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           bg={"transparent"}
           // colorScheme="whiteAlpha"
           color={"gray.400"}
-          _hover={{ bg: "transparent", color: "white" }}
+          _hover={{ bg: "transparent", color: penColor }}
           onClick={handleStartEditing}
         />
       </HStack>
@@ -176,7 +190,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           display={{ base: "none", md: "block" }}
           fontSize="sm"
           fontWeight={500}
-          color="white"
+          color={textColor}
           userSelect="none"
         >
           {isConnected ? "Connected" : "Disconnected"}

@@ -7,6 +7,7 @@ import {
   Button,
   VStack,
   HStack,
+  useColorModeValue,
 } from "@chakra-ui/react";
 
 interface ErrorScreenProps {
@@ -20,11 +21,14 @@ export const ErrorScreen: React.FC<ErrorScreenProps> = ({
   onRetry,
   onInitialize,
 }) => {
+  const bgColor = useColorModeValue("#faf9f9ff", "#0d1117");
+  const textColor = useColorModeValue("#24292f", "#e6edf3");
+
   return (
     <Box
       height="100vh"
       width="100vw"
-      bg="#1C1c1c"
+      bg={bgColor}
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -34,14 +38,14 @@ export const ErrorScreen: React.FC<ErrorScreenProps> = ({
           <AlertIcon />
           Error loading schema data: {error}
         </Alert>
-        <HStack spacing={4}>
+        {/* <HStack spacing={4}>
           <Button colorScheme="blue" onClick={onRetry}>
             Retry
           </Button>
           <Button colorScheme="green" onClick={onInitialize}>
             Initialize Sample Data
           </Button>
-        </HStack>
+        </HStack> */}
       </VStack>
     </Box>
   );
