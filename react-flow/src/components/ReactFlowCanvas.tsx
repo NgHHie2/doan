@@ -15,6 +15,7 @@ import "reactflow/dist/style.css";
 import { ModelNode } from "../SchemaVisualizer/ModelNode";
 import { SchemaData } from "../SchemaVisualizer/SchemaVisualizer.types";
 import { CustomControls } from "./CustomControls";
+import { useColorModeValue } from "@chakra-ui/react";
 
 const modelTypes = {
   model: ModelNode,
@@ -45,6 +46,7 @@ export const ReactFlowCanvas: React.FC<ReactFlowCanvasProps> = ({
   onNodeClick,
   schemaInfo,
 }) => {
+  const bgPatternColor = useColorModeValue("#cececeff", "#333");
   return (
     <ReactFlow
       nodes={nodes}
@@ -79,7 +81,11 @@ export const ReactFlowCanvas: React.FC<ReactFlowCanvasProps> = ({
     >
       {/* <MiniMap /> */}
 
-      <Background color="#333" variant={BackgroundVariant.Lines} gap={40} />
+      <Background
+        color={bgPatternColor} // 🌟 THAY ĐỔI TỪ "#333" THÀNH bgPatternColor
+        variant={BackgroundVariant.Lines}
+        gap={40}
+      />
     </ReactFlow>
   );
 };

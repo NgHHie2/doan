@@ -1,6 +1,6 @@
 // src/SchemaVisualizer/ModelNode.tsx - Heavily optimized version
 import React, { memo, useMemo, useCallback } from "react";
-import { Box } from "@chakra-ui/react";
+import { Box, useColorModeValue } from "@chakra-ui/react";
 import { NodeProps, Node as ReactFlowNode } from "reactflow";
 import { Model, Attribute } from "./SchemaVisualizer.types";
 import { ModelHeader } from "../components/ModelHeader";
@@ -38,6 +38,13 @@ interface ModelNodeData extends Model {
 }
 
 export const ModelNode: React.FC<NodeProps<ModelNodeData>> = ({ data, id }) => {
+  const nodeBg = useColorModeValue("#f1f5f9", "#2a2a2a");
+  const nodeBorder = useColorModeValue("#becadbff", "#404040");
+  const nodeHoverShadow = useColorModeValue(
+    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    "0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)"
+  );
+
   // ✅ Memoize sorted attributes with stable sorting
   const sortedAttributes = useMemo(() => {
     if (!data.attributes || !Array.isArray(data.attributes)) return [];
@@ -196,12 +203,12 @@ export const ModelNode: React.FC<NodeProps<ModelNodeData>> = ({ data, id }) => {
       width="280px"
       minWidth="280px"
       maxWidth="280px"
-      bg="#f1f5f9"
-      border="2px solid #e2e8f0"
+      bg={nodeBg} // 🌟 THAY ĐỔI
+      border="2px solid"
+      borderColor={nodeBorder} // 🌟 THAY ĐỔI
       boxShadow="0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
       _hover={{
-        boxShadow:
-          "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+        boxShadow: nodeHoverShadow, // 🌟 THAY ĐỔI
       }}
       transition="all 0.2s ease-in-out"
       overflow="visible"

@@ -1,6 +1,6 @@
 // src/SchemaVisualizer/SchemaVisualizer.tsx
 import React, { useState } from "react";
-import { Box, useDisclosure } from "@chakra-ui/react";
+import { Box, useColorModeValue, useDisclosure } from "@chakra-ui/react";
 
 import { LoadingScreen } from "../components/LoadingScreen";
 import { ControlPanel } from "../components/ControlPanel";
@@ -20,6 +20,7 @@ export const SchemaVisualizer = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const chatWidth = 300;
+  const canvasBg = useColorModeValue("#f5f5f5", "#1C1c1c");
 
   const {
     // Data state
@@ -61,7 +62,7 @@ export const SchemaVisualizer = () => {
   }
 
   return (
-    <Box height="100vh" width="100vw" bg="#1C1c1c" position="relative">
+    <Box height="100vh" width="100vw" bg={canvasBg} position="relative">
       {/* Header với Avatar, Theme Toggle, Chat, History, Add Member */}
       <SchemaVisualizerHeader
         onChatToggle={() => setIsChatOpen(!isChatOpen)}

@@ -188,6 +188,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
       border="1px solid transparent"
       fontFamily="monospace"
       fontSize="14px"
+      // fontWeight={"700"}
       style={getWidthStyles()}
       _hover={{
         bg: "rgba(255, 255, 255, 0.05)",

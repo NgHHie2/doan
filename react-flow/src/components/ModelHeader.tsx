@@ -1,6 +1,12 @@
-// Cập nhật ModelHeader.tsx
+// src/components/ModelHeader.tsx
 import React, { useState } from "react";
-import { Box, Flex, IconButton, Tooltip } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Tooltip,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { X } from "lucide-react";
 import { EditableField } from "./EditableField";
 import { Model } from "../SchemaVisualizer/SchemaVisualizer.types";
@@ -21,7 +27,11 @@ export const ModelHeader: React.FC<ModelHeaderProps> = ({
   canDelete = true,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // Thêm dòng này
+  const [isEditing, setIsEditing] = useState(false);
+
+  // 🌟 THÊM THEME COLORS
+  const headerBg = useColorModeValue("#4a90e2", "#3d5787");
+  const deleteHoverBg = useColorModeValue("red.300", "red.600");
 
   const handleNameUpdate = (newName: string) => {
     if (onModelNameUpdate) {
@@ -39,19 +49,16 @@ export const ModelHeader: React.FC<ModelHeaderProps> = ({
   return (
     <Box
       p={3}
-      // textAlign="center"
-      borderRadius="8px 8px 0 0"
-      bg="#3d5787"
+      borderRadius="6px 6px 0 0"
+      bg={headerBg} // 🌟 THAY ĐỔI
       height={`${HEADER_HEIGHT}px`}
       display="flex"
       alignItems="center"
-      // justifyContent="center"
-      // position="relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      fontWeight={"700"}
     >
       <Flex gap={2} width="100%">
-        {/* Editable Model Name */}
         <Box flex={1}>
           <EditableField
             value={model.name}
@@ -60,27 +67,26 @@ export const ModelHeader: React.FC<ModelHeaderProps> = ({
             color="white"
             minWidth="100px"
             maxWidth="200px"
-            isEditing={isEditing} // Thêm dòng này
+            isEditing={isEditing}
             onEditingChange={setIsEditing}
           />
         </Box>
       </Flex>
 
-      {/* Delete Button - Show on hover */}
-
-      <Box position="absolute" right="4px" top="4px" zIndex={10}>
+      <Box position="absolute" right="10px" top="6px" zIndex={10}>
         <Tooltip label="Delete table" fontSize="xs">
           <IconButton
             aria-label="Delete table"
-            icon={<X size={12} />}
+            icon={<X size={18} strokeWidth={3} />}
             size="xs"
             variant="ghost"
-            colorScheme="red"
+            // colorScheme="red"
+            color={"red.100"}
             onClick={handleDelete}
             minWidth="16px"
             height="16px"
             p={0}
-            _hover={{ bg: "red.400" }}
+            _hover={{ bg: deleteHoverBg }} // 🌟 THAY ĐỔI
           />
         </Tooltip>
       </Box>

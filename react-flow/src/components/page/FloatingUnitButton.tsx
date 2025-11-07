@@ -3,7 +3,7 @@ import { IconButton, Box, useColorModeValue, Tooltip } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 
 export const FloatingUnitButton = ({ onClick }: { onClick?: () => void }) => {
-  const bgColor = useColorModeValue("white", "#42474eff");
+  const bgColor = useColorModeValue("#fff", "#333");
   const iconColor = useColorModeValue("black", "white");
   const borderColor = useColorModeValue("#d0d7de", "#444");
 
@@ -23,7 +23,7 @@ export const FloatingUnitButton = ({ onClick }: { onClick?: () => void }) => {
         color={iconColor}
         borderRadius="full"
         border={"1px"}
-        // ml={3.5}
+        bg={bgColor}
         borderColor={borderColor}
         transition="all 0.3s ease-in-out"
         _hover={{

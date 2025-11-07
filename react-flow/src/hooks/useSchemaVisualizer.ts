@@ -20,6 +20,7 @@ import { generateAttributeId, generateModelId } from "../utils/uuid.utils";
 import { useWebSocketListener } from "./useWebSocketListener";
 import { getVietnamTime } from "../utils";
 import { useParams } from "react-router-dom";
+import { useColorModeValue } from "@chakra-ui/react";
 
 export const useSchemaVisualizer = () => {
   const { diagramId } = useParams<{ diagramId: string }>();
@@ -409,6 +410,9 @@ export const useSchemaVisualizer = () => {
     return connections.sort().join("|");
   }, [reactFlowNodes]);
 
+  const edgeColor = useColorModeValue("#3e76b7ff", "#4A90E2"); // Light: gray-400, Dark: gray-500
+  const edgeColorHover = useColorModeValue("#475569", "#94a3b8");
+
   const edgesData = useMemo(() => {
     if (reactFlowNodes.length === 0) return [];
 
@@ -453,7 +457,7 @@ export const useSchemaVisualizer = () => {
             type: "step",
             style: {
               strokeWidth: 2,
-              stroke: connection.strokeColor || "#4A90E2",
+              stroke: connection.strokeColor || edgeColor,
             },
             label: connection.foreignKeyName,
             labelStyle: {

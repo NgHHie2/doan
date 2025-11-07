@@ -9,7 +9,7 @@ import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 export function ThemeToggle() {
   const { colorMode, toggleColorMode } = useColorMode();
   const borderColor = useColorModeValue("#d0d7de", "#444");
-
+  const bgColor = useColorModeValue("#fff", "#333");
   return (
     <Tooltip label="Theme" hasArrow placement="bottom">
       <IconButton
@@ -25,6 +25,7 @@ export function ThemeToggle() {
         // variant="ghost"
         // mr={2}
         // ml={1.5}
+        bg={bgColor}
         size="md"
         borderRadius={"50%"}
         border={"1px"}

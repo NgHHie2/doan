@@ -1,6 +1,13 @@
 // src/components/FieldComponent.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Flex, IconButton, Tooltip, Button } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Tooltip,
+  Button,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { Handle, Position } from "reactflow";
 import { EditableField } from "./EditableField";
 import { ForeignKeyTargetSelector } from "./ForeignKeyTargetSelector";
@@ -44,6 +51,13 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [showFKSelector, setShowFKSelector] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const fieldBg = useColorModeValue("#ffffff", "#2A2A2A");
+  const fieldHoverBg = useColorModeValue("#f0f0f0", "#4A5568");
+  const fieldBorder = useColorModeValue("#e2e8f0", "#4A5568");
+  const textColor = useColorModeValue("#2d3748", "white"); // 🌟 MÀU CHỮ
+  const iconBorderColor = useColorModeValue("#aeaeaeff", "#7d7d7dff"); // 🌟 MÀU ICON BORDER
+  const iconHoverColor = useColorModeValue("#4A90E2", "#4A90E2");
 
   // ✅ Click outside handler
   useEffect(() => {
@@ -90,9 +104,9 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
   };
 
   const getFieldColor = () => {
-    if (isPK) return "#FFD700";
-    if (isFK) return "#87CEEB";
-    return "white";
+    if (isPK) return useColorModeValue("#ffb300ff", "#FFD700");
+    if (isFK) return useColorModeValue("rgba(34, 107, 232, 1)", "#87CEEB");
+    return useColorModeValue("#2d3748", "white"); // 🌟 DYNAMIC
   };
 
   const getFieldIcon = () => {
@@ -161,22 +175,28 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
 
   // ✅ Create handles
   const createHandles = () => {
+    const handleBg = useColorModeValue("#fff", "#FFFFFFFF"); // 🌟 MÀU NỀN HANDLE
+    const handleBorder = useColorModeValue("#cbd5e0", "#718096"); // 🌟 MÀU VIỀN HANDLE
+    const pkBg = useColorModeValue("#ff9100ff", "#FFD700"); // 🌟 MÀU NỀN HANDLE
+
     const baseStyle = {
       width: "8px",
       height: "8px",
       border: "1px solid",
+      borderColor: handleBorder, // 🌟 THAY ĐỔI
       borderRadius: "50%",
       opacity: 0.6,
+      backgroundColor: handleBg, // 🌟 THAY ĐỔI
     };
 
     const pkStyle = {
       ...baseStyle,
       opacity: 1,
       backgroundColor: isPK
-        ? "#FFD700" // vàng nếu là Primary Key
+        ? pkBg // vàng nếu là Primary Key
         : isFK
         ? "#1770d6ff" // xanh nếu là Foreign Key
-        : "#FFFFFFFF", // mặc định
+        : handleBg, // mặc định
     };
 
     const baseHandleId = `${model.id}-${attribute.id}`;
@@ -249,14 +269,15 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <Flex
-        bg="#2A2A2A"
+        bg={fieldBg} // 🌟 THAY ĐỔI
         justifyContent="space-between"
         alignItems="center"
         p={2}
-        color="white"
+        color={textColor}
         height={`${ROW_HEIGHT}px`}
-        borderBottom="1px solid #4A5568"
-        _hover={{ bg: "#4A5568" }}
+        borderBottom="1px solid"
+        borderColor={fieldBorder} // 🌟 THAY ĐỔI
+        _hover={{ bg: fieldHoverBg }} // 🌟 THAY ĐỔI
         position="relative"
       >
         {createHandles()}
@@ -293,12 +314,13 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
               <Box
                 width="12px"
                 height="12px"
-                border="1px dashed #666"
+                border="1px dashed"
+                borderColor={iconBorderColor}
                 borderRadius="2px"
                 cursor="pointer"
                 onClick={handleIconClick}
                 _hover={{
-                  borderColor: "#4A90E2",
+                  borderColor: iconHoverColor, // 🌟 THAY ĐỔI
                   backgroundColor: "rgba(74, 144, 226, 0.1)",
                 }}
                 transition="all 0.2s ease-in-out"
@@ -308,7 +330,7 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
         </Box>
 
         {/* Field Name */}
-        <Box width="120px" mr={2}>
+        <Box width="120px" mr={0}>
           <EditableField
             value={attribute.name}
             onSave={(newName) => onFieldNameUpdate(fieldIndex, newName)}
@@ -325,7 +347,7 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
             value={attribute.dataType}
             onSave={(newType) => onFieldTypeUpdate(fieldIndex, newType)}
             placeholder="type"
-            color="#B8B8B8"
+            color={useColorModeValue("#718096", "#B8B8B8")}
             minWidth="80px"
             maxWidth="100px"
           />
@@ -360,9 +382,9 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
           top="100%"
           left="0"
           zIndex={1000}
-          bg="gray.800"
+          bg={useColorModeValue("white", "gray.800")} // 🌟 THAY ĐỔI
           border="1px solid"
-          borderColor="gray.600"
+          borderColor={useColorModeValue("#e2e8f0", "gray.600")} // 🌟 THAY ĐỔI
           borderRadius="md"
           p={2}
           minWidth="200px"
