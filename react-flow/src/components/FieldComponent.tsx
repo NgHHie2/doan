@@ -1,4 +1,4 @@
-// src/components/FieldComponent.tsx
+// src/components/FieldComponent.tsx - FIXED DRAG INTERFERENCE
 import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
@@ -55,8 +55,8 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
   const fieldBg = useColorModeValue("#ffffff", "#2A2A2A");
   const fieldHoverBg = useColorModeValue("#f0f0f0", "#4A5568");
   const fieldBorder = useColorModeValue("#e2e8f0", "#4A5568");
-  const textColor = useColorModeValue("#2d3748", "white"); // 🌟 MÀU CHỮ
-  const iconBorderColor = useColorModeValue("#aeaeaeff", "#7d7d7dff"); // 🌟 MÀU ICON BORDER
+  const textColor = useColorModeValue("#2d3748", "white");
+  const iconBorderColor = useColorModeValue("#aeaeaeff", "#7d7d7dff");
   const iconHoverColor = useColorModeValue("#4A90E2", "#4A90E2");
 
   // ✅ Click outside handler
@@ -82,7 +82,6 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
 
   const isPK = attribute.isPrimaryKey;
   const isFK = attribute.isForeignKey;
-  // const hasConnection = !!attribute.connection;
 
   const getCurrentKeyType = (): KeyType => {
     if (attribute.isPrimaryKey) return "PRIMARY";
@@ -106,7 +105,7 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
   const getFieldColor = () => {
     if (isPK) return useColorModeValue("#ffb300ff", "#FFD700");
     if (isFK) return useColorModeValue("rgba(34, 107, 232, 1)", "#87CEEB");
-    return useColorModeValue("#2d3748", "white"); // 🌟 DYNAMIC
+    return useColorModeValue("#2d3748", "white");
   };
 
   const getFieldIcon = () => {
@@ -149,6 +148,7 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
     // Chỉ cho phép mở FK selector nếu là Foreign Key thuần túy (không phải PK)
     if (isFK && !isPK) {
       const newState = !showFKSelector;
+      console.log("🔓 Opening FK selector via right click");
       setShowFKSelector(newState);
     }
   };
@@ -175,35 +175,30 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
 
   // ✅ Create handles
   const createHandles = () => {
-    const handleBg = useColorModeValue("#fff", "#FFFFFFFF"); // 🌟 MÀU NỀN HANDLE
-    const handleBorder = useColorModeValue("#cbd5e0", "#718096"); // 🌟 MÀU VIỀN HANDLE
-    const pkBg = useColorModeValue("#ff9100ff", "#FFD700"); // 🌟 MÀU NỀN HANDLE
+    const handleBg = useColorModeValue("#fff", "#FFFFFFFF");
+    const handleBorder = useColorModeValue("#cbd5e0", "#718096");
+    const pkBg = useColorModeValue("#ff9100ff", "#FFD700");
 
     const baseStyle = {
       width: "8px",
       height: "8px",
       border: "1px solid",
-      borderColor: handleBorder, // 🌟 THAY ĐỔI
+      borderColor: handleBorder,
       borderRadius: "50%",
       opacity: 0.6,
-      backgroundColor: handleBg, // 🌟 THAY ĐỔI
+      backgroundColor: handleBg,
     };
 
     const pkStyle = {
       ...baseStyle,
       opacity: 1,
-      backgroundColor: isPK
-        ? pkBg // vàng nếu là Primary Key
-        : isFK
-        ? "#1770d6ff" // xanh nếu là Foreign Key
-        : handleBg, // mặc định
+      backgroundColor: isPK ? pkBg : isFK ? "#1770d6ff" : handleBg,
     };
 
     const baseHandleId = `${model.id}-${attribute.id}`;
 
     return (
       <>
-        {/* Left Handles */}
         <Handle
           id={`${baseHandleId}-left`}
           position={Position.Left}
@@ -230,8 +225,6 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
             zIndex: 1,
           }}
         />
-
-        {/* Right Handles */}
         <Handle
           id={`${baseHandleId}-right`}
           position={Position.Right}
@@ -269,15 +262,15 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <Flex
-        bg={fieldBg} // 🌟 THAY ĐỔI
-        justifyContent="space-between"
+        bg={fieldBg}
+        // justifyContent="space-between"
         alignItems="center"
         p={2}
         color={textColor}
         height={`${ROW_HEIGHT}px`}
         borderBottom="1px solid"
-        borderColor={fieldBorder} // 🌟 THAY ĐỔI
-        _hover={{ bg: fieldHoverBg }} // 🌟 THAY ĐỔI
+        borderColor={fieldBorder}
+        _hover={{ bg: fieldHoverBg }}
         position="relative"
       >
         {createHandles()}
@@ -287,7 +280,6 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
           {getFieldIcon() && (
             <Tooltip label={getTooltipText()} fontSize="xs">
               <Box
-                // color={getFieldColor()}
                 fontSize="12px"
                 cursor="pointer"
                 onClick={handleIconClick}
@@ -320,7 +312,7 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
                 cursor="pointer"
                 onClick={handleIconClick}
                 _hover={{
-                  borderColor: iconHoverColor, // 🌟 THAY ĐỔI
+                  borderColor: iconHoverColor,
                   backgroundColor: "rgba(74, 144, 226, 0.1)",
                 }}
                 transition="all 0.2s ease-in-out"
@@ -330,32 +322,32 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
         </Box>
 
         {/* Field Name */}
-        <Box width="120px" mr={0}>
+        <Box width="140px" mr={0}>
           <EditableField
             value={attribute.name}
             onSave={(newName) => onFieldNameUpdate(fieldIndex, newName)}
             placeholder="field_name"
             color={getFieldColor()}
-            minWidth="100px"
-            maxWidth="120px"
+            minWidth="140px"
+            maxWidth="140px"
           />
         </Box>
 
         {/* Field Type */}
-        <Box width="100px" mr={2}>
+        <Box width="70px">
           <EditableField
             value={attribute.dataType}
             onSave={(newType) => onFieldTypeUpdate(fieldIndex, newType)}
             placeholder="type"
             color={useColorModeValue("#718096", "#B8B8B8")}
-            minWidth="80px"
-            maxWidth="100px"
+            minWidth="70px"
+            maxWidth="70px"
           />
         </Box>
 
         {/* Delete Button */}
         {isHovered && (
-          <Box position="absolute" right="2px" top="2px" zIndex={10}>
+          <Box position="absolute" right="2px" top="2px" zIndex={10} mr={1.5}>
             <Tooltip label="Delete attribute" fontSize="xs">
               <IconButton
                 aria-label="Delete attribute"
@@ -374,24 +366,54 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
         )}
       </Flex>
 
-      {/* FK Selector Popup */}
+      {/* FK Selector Popup - FIXED EVENT HANDLING */}
       {showFKSelector && isFK && !isPK && (
         <Box
           ref={dropdownRef}
           position="absolute"
           top="100%"
           left="0"
-          zIndex={1000}
-          bg={useColorModeValue("white", "gray.800")} // 🌟 THAY ĐỔI
-          border="1px solid"
-          borderColor={useColorModeValue("#e2e8f0", "gray.600")} // 🌟 THAY ĐỔI
+          zIndex={99999}
+          bg={useColorModeValue("white", "gray.800")}
+          border="2px solid"
+          borderColor={useColorModeValue("#0969da", "blue.500")}
           borderRadius="md"
           p={2}
           minWidth="200px"
-          boxShadow="lg"
+          boxShadow="0 10px 40px rgba(0,0,0,0.3)"
+          onClick={(e) => {
+            console.log("📍 FK Selector Box clicked");
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseDown={(e) => {
+            console.log("📍 FK Selector Box mouseDown");
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseUp={(e) => {
+            console.log("📍 FK Selector Box mouseUp");
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onPointerDown={(e) => {
+            console.log("📍 FK Selector Box pointerDown");
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onPointerUp={(e) => {
+            console.log("📍 FK Selector Box pointerUp");
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onDragStart={(e) => {
+            console.log("📍 FK Selector Box dragStart - PREVENTED");
+            e.stopPropagation();
+            e.preventDefault();
+          }}
         >
           <ForeignKeyTargetSelector
-            key={`fk-selector-${model.id}-${attribute.id}-${Date.now()}`} // ✅ Always fresh mount
+            key={`fk-selector-${model.id}-${attribute.id}-${Date.now()}`}
             currentModelId={model.id}
             currentAttributeId={attribute.id}
             currentConnection={
@@ -407,16 +429,26 @@ export const FieldComponent: React.FC<FieldComponentProps> = ({
             inline={true}
           />
 
-          <Button
+          {/* <Button
             size="xs"
             position="absolute"
             top="2px"
             right="2px"
             variant="ghost"
-            onClick={handleFKSelectorClose}
+            onClick={(e) => {
+              console.log("❌ Close button clicked");
+              e.stopPropagation();
+              e.preventDefault();
+              handleFKSelectorClose();
+            }}
+            onMouseDown={(e) => {
+              console.log("❌ Close button mouseDown");
+              e.stopPropagation();
+              e.preventDefault();
+            }}
           >
             ✕
-          </Button>
+          </Button> */}
         </Box>
       )}
     </Box>

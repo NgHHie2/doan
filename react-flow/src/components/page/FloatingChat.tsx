@@ -60,8 +60,8 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 300 }) => {
       zIndex={10}
       borderColor={borderColor}
       borderTopLeftRadius="30px"
-      borderTop={"2px solid"}
-      borderLeft={"2px solid"}
+      borderTop={"1px solid"}
+      borderLeft={"1px solid"}
       borderTopColor={borderColor}
       borderLeftColor={borderColor}
     >

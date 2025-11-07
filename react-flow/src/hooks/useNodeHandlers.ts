@@ -193,7 +193,7 @@ export const useNodeHandlers = ({
       const newAttribute = {
         id: newAttributeId,
         name: "new_field",
-        dataType: "VARCHAR(255)",
+        dataType: "VARCHAR",
         isNullable: true,
         isPrimaryKey: false,
         isForeignKey: false,
@@ -228,7 +228,7 @@ export const useNodeHandlers = ({
         modelId,
         newAttributeId,
         attributeName: "new_field",
-        dataType: "VARCHAR(255)",
+        dataType: "VARCHAR",
       });
 
       console.log("📤 Sent add attribute request to WebSocket");

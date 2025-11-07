@@ -8,6 +8,7 @@ import {
   Connection,
   addEdge,
   NodeChange,
+  useReactFlow,
 } from "reactflow";
 import { useSchemaData } from "./useSchemaData";
 import { useWebSocketSender } from "./useWebSocketSender";
@@ -105,18 +106,35 @@ export const useSchemaVisualizer = () => {
     [setReactFlowEdges]
   );
 
+  const reactFlowInstance = useReactFlow();
+
   // Model operation handlers
   const handleAddModel = useCallback(() => {
-    if (!schemaInfo) return;
+    if (!schemaInfo || !reactFlowInstance) return;
     console.log("Adding model, current nodes:", reactFlowNodes);
+
     const newModelId = generateModelId();
-    const positionX = Math.random() * 400 + 100;
-    const positionY = Math.random() * 300 + 100;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    // 1️⃣ Lấy kích thước container React Flow
+    const viewportWidth = width;
+    const viewportHeight = height;
+
+    // 2️⃣ Tính vị trí chính giữa viewport (screen coordinates)
+    const screenCenter = {
+      x: viewportWidth / 2,
+      y: viewportHeight / 2,
+    };
+
+    // 3️⃣ Chuyển sang canvas coordinates
+    const { x: positionX, y: positionY } =
+      reactFlowInstance.project(screenCenter);
 
     console.log("🆕 Adding new model:", { newModelId, positionX, positionY });
 
     setReactFlowNodes((currentNodes: any) => {
-      // Lấy callbacks từ node hiện có để copy sang node mới
       const callbacks = {
         onFieldNameUpdate: handleFieldNameUpdate,
         onFieldTypeUpdate: handleFieldTypeUpdate,
@@ -128,14 +146,10 @@ export const useSchemaVisualizer = () => {
         onModelNameUpdate: handleModelNameUpdate,
         onDeleteModel: handleDeleteModel,
       };
-      console.log("🔧 Copying callbacks to new node:", {
-        hasCallbacks: Object.keys(callbacks).length > 0,
-        hasOnDeleteModel: !!callbacks.onDeleteModel,
-      });
 
       const newNode = {
         id: newModelId,
-        position: { x: positionX, y: positionY },
+        position: { x: positionX - 140, y: positionY - 60 },
         data: {
           id: newModelId,
           name: "Model",
@@ -147,17 +161,16 @@ export const useSchemaVisualizer = () => {
           borderWidth: 2,
           borderRadius: 8,
           attributes: [],
-          zindex: 10,
+          zindex: 100,
           ...callbacks,
         },
         type: "model",
       };
 
       console.log("New node created:", newNode);
-      return [...currentNodes, newNode];
+      return [...currentNodes, newNode]; // thêm cuối để render trên cùng
     });
 
-    // Gửi WebSocket để sync với backend và các clients khác
     if (isConnected) {
       sendAddModel({
         modelId: newModelId,
@@ -173,6 +186,7 @@ export const useSchemaVisualizer = () => {
     reactFlowNodes,
     sendAddModel,
     setReactFlowNodes,
+    reactFlowInstance,
   ]);
 
   const handleModelNameUpdate = useCallback(

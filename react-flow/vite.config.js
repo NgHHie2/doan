@@ -10,4 +10,8 @@ export default defineConfig({
   optimizeDeps: {
     include: ["sockjs-client"],
   },
+  server: {
+    host: true, // 🌟 listen trên 0.0.0.0
+    port: 5173, // mặc định
+  },
 });

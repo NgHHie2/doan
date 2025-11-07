@@ -7,7 +7,9 @@ export const schemaApiService = {
   // Get complete schema data
   async getSchemaData(diagramId: string): Promise<SchemaData> {
     try {
+      console.log(API_BASE_URL + "/" + diagramId);
       const response = await fetch(API_BASE_URL + "/" + diagramId);
+      console.log("response: ", response);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

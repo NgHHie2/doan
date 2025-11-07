@@ -1,4 +1,4 @@
-// ForeignKeyTargetSelector.tsx - CORRECT useStore usage
+// ForeignKeyTargetSelector.tsx - WITH LIGHT MODE SUPPORT
 import React, { useMemo } from "react";
 import { useStore } from "reactflow";
 import type { ReactFlowState } from "reactflow";
@@ -12,9 +12,11 @@ import {
   Button,
   Divider,
   useDisclosure,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { ChevronDown, Link } from "lucide-react";
 import { Attribute } from "../SchemaVisualizer/SchemaVisualizer.types";
+import { HiOutlineTrash } from "react-icons/hi";
 
 interface PrimaryKeyOption {
   modelId: string;
@@ -47,14 +49,27 @@ export const ForeignKeyTargetSelector: React.FC<
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  // ✅ CORRECT: Access nodes from ReactFlow store
+  // 🌟 THEME COLORS
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("#d0d7de", "gray.600");
+  const textColor = useColorModeValue("#24292f", "white");
+  const mutedText = useColorModeValue("#57606a", "gray.400");
+  // const headingColor = useColorModeValue("black", "blue.300");
+  const buttonHoverBg = useColorModeValue("#f6f8fa", "gray.600");
+  const activeButtonBg = useColorModeValue("#ddf4ff", "blue.500");
+  const dividerColor = useColorModeValue("#d0d7de", "gray.600");
+  const deleteButtonColor = useColorModeValue("#cf222e", "red.300");
+  const deleteButtonHoverBg = useColorModeValue("#ffebe9", "red.600");
+  const triggerButtonColor = useColorModeValue("#0969da", "blue.300");
+  const triggerButtonHoverBg = useColorModeValue(
+    "#ddf4ff",
+    "rgba(74, 144, 226, 0.1)"
+  );
+  const triggerButtonHoverColor = useColorModeValue("#0550ae", "blue.200");
+
   const allNodes = useStore((state: ReactFlowState) => state.nodeInternals);
 
-  // ✅ ALTERNATIVE: If nodeInternals doesn't work, try this:
-  // const allNodes = useStore((state) => Array.from(state.nodeInternals.values()));
-
   const primaryKeyOptions: PrimaryKeyOption[] = useMemo(() => {
-    // ✅ Convert Map to Array if needed
     const nodesArray = Array.isArray(allNodes)
       ? allNodes
       : Array.from(allNodes.values());
@@ -87,7 +102,7 @@ export const ForeignKeyTargetSelector: React.FC<
     });
 
     return options;
-  }, [allNodes]); // Simple dependency
+  }, [allNodes]);
 
   const getCurrentTargetDisplay = () => {
     if (!currentConnection) return "Select target...";
@@ -122,18 +137,18 @@ export const ForeignKeyTargetSelector: React.FC<
     if (!inline) onClose();
   };
 
-  // Rest of the component remains the same...
+  // Inline mode
   if (inline) {
     return (
       <VStack spacing={2} align="stretch" w="100%">
-        <Text fontWeight="600" color="gray.200" fontSize="sm">
+        <Text fontWeight="600" color={textColor} fontSize="sm">
           Foreign Key Target ({primaryKeyOptions.length} available)
         </Text>
 
-        <Divider borderColor="gray.600" />
+        <Divider borderColor={dividerColor} />
 
         {primaryKeyOptions.length === 0 ? (
-          <Text color="gray.400" fontSize="sm" textAlign="center" py={2}>
+          <Text color={mutedText} fontSize="sm" textAlign="center" py={2}>
             No primary keys available
           </Text>
         ) : (
@@ -150,14 +165,14 @@ export const ForeignKeyTargetSelector: React.FC<
                 variant="ghost"
                 justifyContent="flex-start"
                 fontSize="sm"
-                color="white"
-                _hover={{ bg: "blue.600", color: "white" }}
+                color={textColor}
+                _hover={{ bg: buttonHoverBg }}
                 onClick={() => handleTargetSelect(option)}
                 isActive={
                   currentConnection?.targetModelId === option.modelId &&
                   currentConnection?.targetAttributeId === option.attributeId
                 }
-                _active={{ bg: "blue.500", color: "white" }}
+                _active={{ bg: activeButtonBg, color: textColor }}
               >
                 🔑 {option.modelName}.{option.attributeName}
               </Button>
@@ -167,17 +182,18 @@ export const ForeignKeyTargetSelector: React.FC<
 
         {currentConnection && (
           <>
-            <Divider borderColor="gray.600" />
+            <Divider borderColor={dividerColor} />
             <Button
               size="sm"
               variant="ghost"
               justifyContent="flex-start"
               fontSize="sm"
-              color="red.300"
-              _hover={{ bg: "red.600", color: "white" }}
+              color={deleteButtonColor}
+              _hover={{ bg: deleteButtonHoverBg }}
               onClick={handleDisconnect}
+              leftIcon={<HiOutlineTrash size={16} />}
             >
-              🗑️ Remove connection
+              Remove connection
             </Button>
           </>
         )}
@@ -202,8 +218,11 @@ export const ForeignKeyTargetSelector: React.FC<
           fontSize="sm"
           minWidth="140px"
           justifyContent="space-between"
-          color={currentConnection ? "blue.300" : "gray.400"}
-          _hover={{ bg: "rgba(74, 144, 226, 0.1)", color: "blue.200" }}
+          color={currentConnection ? triggerButtonColor : mutedText}
+          _hover={{
+            bg: triggerButtonHoverBg,
+            color: triggerButtonHoverColor,
+          }}
         >
           <Text noOfLines={1} fontSize="sm">
             {getCurrentTargetDisplay()}
@@ -212,22 +231,22 @@ export const ForeignKeyTargetSelector: React.FC<
       </PopoverTrigger>
 
       <PopoverContent
-        bg="gray.800"
-        borderColor="gray.600"
-        color="white"
+        bg={bgColor}
+        borderColor={borderColor}
+        color={textColor}
         fontSize="sm"
         minWidth="220px"
       >
         <PopoverBody p={3}>
           <VStack spacing={2} align="stretch">
-            <Text fontWeight="bold" color="blue.300" fontSize="sm">
+            <Text fontWeight="bold" color={textColor} fontSize="sm">
               Select Primary Key ({primaryKeyOptions.length} available)
             </Text>
 
-            <Divider borderColor="gray.600" />
+            <Divider borderColor={dividerColor} />
 
             {primaryKeyOptions.length === 0 ? (
-              <Text color="gray.400" fontSize="sm" textAlign="center" py={2}>
+              <Text color={mutedText} fontSize="sm" textAlign="center" py={2}>
                 No primary keys available
               </Text>
             ) : (
@@ -239,14 +258,15 @@ export const ForeignKeyTargetSelector: React.FC<
                     variant="ghost"
                     justifyContent="flex-start"
                     fontSize="sm"
-                    color="white"
-                    _hover={{ bg: "gray.600" }}
+                    color={textColor}
+                    _hover={{ bg: buttonHoverBg }}
                     onClick={() => handleTargetSelect(option)}
                     isActive={
                       currentConnection?.targetModelId === option.modelId &&
                       currentConnection?.targetAttributeId ===
                         option.attributeId
                     }
+                    _active={{ bg: activeButtonBg }}
                   >
                     🔑 {option.modelName}.{option.attributeName}
                   </Button>
@@ -256,17 +276,18 @@ export const ForeignKeyTargetSelector: React.FC<
 
             {currentConnection && (
               <>
-                <Divider borderColor="gray.600" />
+                <Divider borderColor={dividerColor} />
                 <Button
                   size="sm"
                   variant="ghost"
                   justifyContent="flex-start"
                   fontSize="sm"
-                  color="red.300"
-                  _hover={{ bg: "red.600" }}
+                  color={deleteButtonColor}
+                  _hover={{ bg: deleteButtonHoverBg }}
                   onClick={handleDisconnect}
+                  leftIcon={<HiOutlineTrash size={16} />}
                 >
-                  🗑️ Remove connection
+                  Remove connection
                 </Button>
               </>
             )}

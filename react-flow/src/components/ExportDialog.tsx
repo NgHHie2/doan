@@ -1,4 +1,4 @@
-// src/components/ExportDialog.tsx
+// src/components/ExportDialog.tsx - WITH LIGHT MODE SUPPORT
 import React, { useState } from "react";
 import {
   Modal,
@@ -19,10 +19,10 @@ import {
   useToast,
   Divider,
   Badge,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { FileJson, Database, Image as ImageIcon, Download } from "lucide-react";
 import { toPng } from "html-to-image";
-// import { useReactFlow, getNodesBounds, getViewportForBounds } from "reactflow";
 import {
   Panel,
   useReactFlow,
@@ -49,6 +49,23 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const toast = useToast();
   const { getNodes } = useReactFlow();
+
+  // 🌟 THEME COLORS
+  const bgColor = useColorModeValue("white", "gray.900");
+  const textColor = useColorModeValue("#24292f", "white");
+  const mutedText = useColorModeValue("#57606a", "gray.400");
+  const borderColor = useColorModeValue("#d0d7de", "gray.700");
+  const hoverBorderColor = useColorModeValue("#0969da", "blue.400");
+  const selectedBorderColor = useColorModeValue("#0969da", "blue.500");
+  const boxBg = useColorModeValue("#f6f8fa", "gray.800");
+  const selectBg = useColorModeValue("white", "gray.800");
+  const selectBorderColor = useColorModeValue("#d0d7de", "gray.600");
+  const dividerColor = useColorModeValue("#d0d7de", "gray.700");
+
+  // Icon colors
+  const jsonIconColor = useColorModeValue("#0969da", "blue.400");
+  const sqlIconColor = useColorModeValue("#1a7f37", "green.400");
+  const imageIconColor = useColorModeValue("#8250df", "purple.400");
 
   // ============= JSON EXPORT =============
   const exportAsJSON = () => {
@@ -121,13 +138,11 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
     const nodes = getNodes();
     let sql = "";
 
-    // Header comment
     sql += `-- Database Schema Export\n`;
     sql += `-- Generated: ${new Date().toISOString()}\n`;
     sql += `-- Database Type: ${dbType.toUpperCase()}\n`;
     sql += `-- Schema: ${schemaData?.name || "Untitled"}\n\n`;
 
-    // Database-specific settings
     switch (dbType) {
       case "mysql":
         sql += `SET FOREIGN_KEY_CHECKS = 0;\n\n`;
@@ -140,7 +155,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         break;
     }
 
-    // Create tables
     nodes.forEach((node) => {
       const tableName = node.data.name;
       const attributes = node.data.attributes || [];
@@ -155,42 +169,34 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       attributes.forEach((attr: any) => {
         let columnDef = `  ${quoteIdentifier(attr.name, dbType)} `;
 
-        // Data type conversion
         columnDef += convertDataType(attr.dataType, dbType);
 
-        // Nullable
         if (!attr.isNullable) {
           columnDef += " NOT NULL";
         }
 
-        // Auto increment
         if (attr.isAutoIncrement) {
           columnDef += getAutoIncrementSyntax(dbType);
         }
 
-        // Default value
         if (attr.defaultValue) {
           columnDef += ` DEFAULT ${attr.defaultValue}`;
         }
 
-        // Unique
         if (attr.isUnique && !attr.isPrimaryKey) {
           columnDef += " UNIQUE";
         }
 
-        // Comment (MySQL/PostgreSQL)
         if (attr.comment && (dbType === "mysql" || dbType === "postgresql")) {
           columnDef += ` COMMENT '${attr.comment.replace(/'/g, "''")}'`;
         }
 
         columnDefinitions.push(columnDef);
 
-        // Collect primary keys
         if (attr.isPrimaryKey) {
           primaryKeys.push(quoteIdentifier(attr.name, dbType));
         }
 
-        // Collect foreign keys
         if (attr.connection) {
           foreignKeys.push({
             column: attr.name,
@@ -202,12 +208,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         }
       });
 
-      // Add primary key constraint
       if (primaryKeys.length > 0) {
         columnDefinitions.push(`  PRIMARY KEY (${primaryKeys.join(", ")})`);
       }
 
-      // Add foreign key constraints
       foreignKeys.forEach((fk: any) => {
         const fkDef = `  CONSTRAINT ${quoteIdentifier(
           fk.name,
@@ -225,7 +229,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       sql += columnDefinitions.join(",\n");
       sql += `\n)`;
 
-      // Engine for MySQL
       if (dbType === "mysql") {
         sql += ` ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`;
       }
@@ -233,7 +236,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       sql += `;\n\n`;
     });
 
-    // Re-enable foreign keys
     switch (dbType) {
       case "mysql":
         sql += `SET FOREIGN_KEY_CHECKS = 1;\n`;
@@ -262,7 +264,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   const convertDataType = (dataType: string, dbType: DatabaseType): string => {
     const type = dataType.toUpperCase();
 
-    // Common conversions
     const typeMap: Record<DatabaseType, Record<string, string>> = {
       mysql: {
         VARCHAR: "VARCHAR",
@@ -331,12 +332,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       },
     };
 
-    // Extract base type (e.g., VARCHAR(255) -> VARCHAR)
     const baseType = type.split("(")[0].trim();
     const mapped = typeMap[dbType][baseType];
 
     if (mapped) {
-      // Preserve length/precision if exists
       if (type.includes("(")) {
         const params = type.substring(type.indexOf("("));
         return mapped + params;
@@ -344,7 +343,6 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
       return mapped;
     }
 
-    // Return original if no mapping found
     return dataType;
   };
 
@@ -400,15 +398,16 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   };
 
   // ============= IMAGE EXPORT =============
-  function downloadImage(dataUrl) {
+  function downloadImage(dataUrl: string) {
     const a = document.createElement("a");
-
     a.setAttribute("download", "reactflow.png");
     a.setAttribute("href", dataUrl);
     a.click();
   }
+
   const imageWidth = 1920 * 2;
   const imageHeight = 1080 * 2;
+
   const exportAsImage = async () => {
     const nodesBounds = getNodesBounds(getNodes());
     const viewport = getViewportForBounds(
@@ -470,15 +469,20 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
       <ModalOverlay />
-      <ModalContent bg="gray.900" color="white">
+      <ModalContent
+        border={"1px solid"}
+        borderColor={borderColor}
+        bg={bgColor}
+        color={textColor}
+      >
         <ModalHeader>Export Diagram</ModalHeader>
         <ModalCloseButton />
 
         <ModalBody>
           <VStack spacing={4} align="stretch">
-            <Text fontSize="sm" color="gray.400">
+            <Text fontSize="sm" color={mutedText}>
               Choose export format for your diagram
             </Text>
 
@@ -491,15 +495,18 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                 <Box
                   p={4}
                   border="2px solid"
-                  borderColor={exportType === "json" ? "blue.500" : "gray.700"}
+                  borderColor={
+                    exportType === "json" ? selectedBorderColor : borderColor
+                  }
                   borderRadius="md"
                   cursor="pointer"
-                  _hover={{ borderColor: "blue.400" }}
+                  _hover={{ borderColor: hoverBorderColor }}
                   onClick={() => setExportType("json")}
+                  bg={exportType === "json" ? boxBg : "transparent"}
                 >
                   <HStack justify="space-between">
                     <HStack spacing={3}>
-                      <Box color="blue.400">{getExportIcon("json")}</Box>
+                      <Box color={jsonIconColor}>{getExportIcon("json")}</Box>
                       <VStack align="start" spacing={0}>
                         <HStack>
                           <Text fontWeight="bold">JSON Format</Text>
@@ -507,7 +514,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                             .json
                           </Badge>
                         </HStack>
-                        <Text fontSize="xs" color="gray.400">
+                        <Text fontSize="xs" color={mutedText}>
                           {getExportDescription("json")}
                         </Text>
                       </VStack>
@@ -520,18 +527,21 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                 <Box
                   p={4}
                   border="2px solid"
-                  borderColor={exportType === "sql" ? "green.500" : "gray.700"}
+                  borderColor={
+                    exportType === "sql" ? selectedBorderColor : borderColor
+                  }
                   borderRadius="md"
                   cursor="pointer"
-                  _hover={{ borderColor: "green.400" }}
+                  _hover={{ borderColor: hoverBorderColor }}
                   onClick={() => setExportType("sql")}
+                  bg={exportType === "sql" ? boxBg : "transparent"}
                 >
                   <HStack
                     justify="space-between"
                     mb={exportType === "sql" ? 3 : 0}
                   >
                     <HStack spacing={3}>
-                      <Box color="green.400">{getExportIcon("sql")}</Box>
+                      <Box color={sqlIconColor}>{getExportIcon("sql")}</Box>
                       <VStack align="start" spacing={0}>
                         <HStack>
                           <Text fontWeight="bold">SQL Script</Text>
@@ -539,7 +549,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                             .sql
                           </Badge>
                         </HStack>
-                        <Text fontSize="xs" color="gray.400">
+                        <Text fontSize="xs" color={mutedText}>
                           {getExportDescription("sql")}
                         </Text>
                       </VStack>
@@ -549,7 +559,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
 
                   {exportType === "sql" && (
                     <>
-                      <Divider my={2} borderColor="gray.700" />
+                      <Divider my={2} borderColor={dividerColor} />
                       <VStack align="start" spacing={2}>
                         <Text fontSize="sm" fontWeight="medium">
                           Select Database Type:
@@ -560,8 +570,8 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                             setDatabaseType(e.target.value as DatabaseType)
                           }
                           size="sm"
-                          bg="gray.800"
-                          borderColor="gray.600"
+                          bg={selectBg}
+                          borderColor={selectBorderColor}
                         >
                           <option value="mysql">MySQL / MariaDB</option>
                           <option value="postgresql">PostgreSQL</option>
@@ -579,16 +589,17 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                   p={4}
                   border="2px solid"
                   borderColor={
-                    exportType === "image" ? "purple.500" : "gray.700"
+                    exportType === "image" ? selectedBorderColor : borderColor
                   }
                   borderRadius="md"
                   cursor="pointer"
-                  _hover={{ borderColor: "purple.400" }}
+                  _hover={{ borderColor: hoverBorderColor }}
                   onClick={() => setExportType("image")}
+                  bg={exportType === "image" ? boxBg : "transparent"}
                 >
                   <HStack justify="space-between">
                     <HStack spacing={3}>
-                      <Box color="purple.400">{getExportIcon("image")}</Box>
+                      <Box color={imageIconColor}>{getExportIcon("image")}</Box>
                       <VStack align="start" spacing={0}>
                         <HStack>
                           <Text fontWeight="bold">PNG Image</Text>
@@ -596,7 +607,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                             .png
                           </Badge>
                         </HStack>
-                        <Text fontSize="xs" color="gray.400">
+                        <Text fontSize="xs" color={mutedText}>
                           {getExportDescription("image")}
                         </Text>
                       </VStack>

@@ -15,7 +15,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // cho tất cả endpoint
-                        .allowedOrigins("http://localhost:5173") // origin của React app
+                        .allowedOrigins("http://localhost:5173", "http://172.20.10.2:5173") // origin của React app
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

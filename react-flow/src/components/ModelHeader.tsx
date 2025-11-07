@@ -54,6 +54,7 @@ export const ModelHeader: React.FC<ModelHeaderProps> = ({
       height={`${HEADER_HEIGHT}px`}
       display="flex"
       alignItems="center"
+      justifyContent={"space-between"}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       fontWeight={"700"}
@@ -73,15 +74,15 @@ export const ModelHeader: React.FC<ModelHeaderProps> = ({
         </Box>
       </Flex>
 
-      <Box position="absolute" right="10px" top="6px" zIndex={10}>
+      <Box zIndex={10} pb={1}>
         <Tooltip label="Delete table" fontSize="xs">
           <IconButton
             aria-label="Delete table"
-            icon={<X size={18} strokeWidth={3} />}
+            icon={<X size={16} strokeWidth={3} />}
             size="xs"
             variant="ghost"
-            // colorScheme="red"
-            color={"red.100"}
+            color="white"
+            // color={"red.100"}
             onClick={handleDelete}
             minWidth="16px"
             height="16px"

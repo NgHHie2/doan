@@ -1,11 +1,18 @@
 import { AiOutlineDeploymentUnit } from "react-icons/ai";
-import { IconButton, Box, useColorModeValue, Tooltip } from "@chakra-ui/react";
+import {
+  IconButton,
+  Box,
+  useColorModeValue,
+  Tooltip,
+  useBreakpointValue,
+} from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 
 export const FloatingUnitButton = ({ onClick }: { onClick?: () => void }) => {
   const bgColor = useColorModeValue("#fff", "#333");
   const iconColor = useColorModeValue("black", "white");
   const borderColor = useColorModeValue("#d0d7de", "#444");
+  const isTooltipActive = useBreakpointValue({ base: false, md: true });
 
   const spin = keyframes`
     from { transform: rotate(0deg); }
@@ -14,7 +21,13 @@ export const FloatingUnitButton = ({ onClick }: { onClick?: () => void }) => {
   const spinAnimation = `${spin} 3s linear infinite`;
 
   return (
-    <Tooltip label="Ask Sherpa" placement="bottom" hasArrow gutter={10}>
+    <Tooltip
+      label="Ask Sherpa"
+      placement="bottom"
+      hasArrow
+      gutter={10}
+      isDisabled={!isTooltipActive}
+    >
       <IconButton
         aria-label="Deployment Unit"
         icon={<AiOutlineDeploymentUnit size={22} />}

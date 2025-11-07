@@ -321,7 +321,7 @@ public class AttributeService {
         return new AttributeDto(
                 attribute.getId(),
                 attribute.getName(),
-                attribute.getDataType() + (attribute.getLength() != null ? "(" + attribute.getLength() + ")" : ""),
+                attribute.getDataType(),
                 attribute.getLength(),
                 attribute.getPrecisionValue(),
                 attribute.getScaleValue(),

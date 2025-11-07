@@ -21,7 +21,7 @@ export const ModelFooter: React.FC<ModelFooterProps> = ({
 }) => {
   // 🌟 THÊM THEME COLORS
   const footerBg = useColorModeValue("#4a90e2", "#3d5787");
-  const addHoverBg = useColorModeValue("green.500", "green.600");
+  const addHoverBg = useColorModeValue("#377dc9ff", "#1f4180ff");
 
   const attributeCount = model.attributes?.length;
   const primaryKeys = model.attributes.filter(
@@ -32,46 +32,46 @@ export const ModelFooter: React.FC<ModelFooterProps> = ({
   ).length;
 
   return (
-    <Box>
-      <Flex
-        bg={footerBg} // 🌟 THAY ĐỔI
-        px={2}
-        py={1}
-        fontSize="10px"
-        color="rgba(255,255,255,0.9)"
-        justifyContent="space-between"
-        alignItems="center"
-        borderRadius="0 0 6px 6px"
-        position="relative"
-      >
-        <Flex alignItems="center" gap={2}>
+    <Tooltip label="Add new attribute" fontSize="xs">
+      <Box onClick={() => onAddAttribute(model.id)}>
+        <Flex
+          bg={footerBg} // 🌟 THAY ĐỔI
+          px={2}
+          py={1}
+          fontSize="10px"
+          color="rgba(255,255,255,0.9)"
+          justifyContent="center"
+          alignItems="center"
+          borderRadius="0 0 6px 6px"
+          position="relative"
+          _hover={{
+            cursor: "pointer",
+            bg: addHoverBg,
+          }}
+        >
+          {/* <Flex alignItems="center" gap={2}>
           <Box>{attributeCount} fields</Box>
           {primaryKeys > 0 && <Box>🔑 {primaryKeys}</Box>}
           {foreignKeys > 0 && <Box>🔗 {foreignKeys}</Box>}
-        </Flex>
+        </Flex> */}
 
-        <Tooltip label="Add new attribute" fontSize="xs">
           <IconButton
             aria-label="Add attribute"
-            icon={<Plus size={12} />}
+            icon={<Plus size={13} strokeWidth={3} />}
+            mr={1}
             size="xs"
             variant="ghost"
-            colorScheme="green"
-            onClick={() => onAddAttribute(model.id)}
             minWidth="16px"
             height="16px"
             p={0}
-            color="rgba(255,255,255,0.7)"
+            color="white"
+            bg={"transparent"}
             _hover={{
-              bg: addHoverBg, // 🌟 THAY ĐỔI
-              color: "white",
-            }}
-            _active={{
-              bg: "green.700",
+              bg: "transparent",
             }}
           />
-        </Tooltip>
-      </Flex>
-    </Box>
+        </Flex>
+      </Box>
+    </Tooltip>
   );
 };
