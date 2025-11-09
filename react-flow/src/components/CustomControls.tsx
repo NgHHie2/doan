@@ -16,17 +16,35 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { useReactFlow } from "reactflow";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePermission } from "../hooks/usePermission";
 
 export const CustomControls = () => {
   const { zoomIn, zoomOut, fitView, getNodes, setNodes } = useReactFlow();
-  const [isInteractive, setIsInteractive] = useState(true);
+  const { canEdit } = usePermission(); // ✅ THÊM
+  const [isInteractive, setIsInteractive] = useState(canEdit); // ✅ SỬA
   const borderColor = useColorModeValue("#d0d7de", "#444");
   const bgColor = useColorModeValue("white", "#333");
   const iconColor = useColorModeValue("gray.700", "white");
   const hoverBg = useColorModeValue("white", "#1c1c1c");
 
+  // ✅ THÊM: Tự động disable khi VIEW mode
+  useEffect(() => {
+    if (!canEdit) {
+      setIsInteractive(false);
+      const updatedNodes = getNodes().map((node) => ({
+        ...node,
+        draggable: false,
+        selectable: false,
+        connectable: false,
+      }));
+      setNodes(updatedNodes);
+    }
+  }, [canEdit, getNodes, setNodes]);
+
   const toggleInteractivity = () => {
+    if (!canEdit) return; // ✅ THÊM: Không cho toggle nếu VIEW mode
+
     const newValue = !isInteractive;
     setIsInteractive(newValue);
 
@@ -89,13 +107,22 @@ export const CustomControls = () => {
         />
       </Tooltip>
 
-      <Tooltip label="Toggle interactivity" fontSize="sm" placement="left">
+      {/* ✅ SỬA: Thêm tooltip và disable khi VIEW mode */}
+      <Tooltip
+        label={
+          canEdit ? "Toggle interactivity" : "View-only mode: editing disabled"
+        }
+        fontSize="sm"
+        placement="left"
+      >
         <IconButton
           aria-label="Toggle interactivity"
           icon={<MousePointer2 size={16} />}
           onClick={toggleInteractivity}
           {...buttonStyle}
           opacity={isInteractive ? 1 : 0.5}
+          isDisabled={!canEdit} // ✅ THÊM: Disable button khi VIEW mode
+          cursor={!canEdit ? "not-allowed" : "pointer"} // ✅ THÊM
         />
       </Tooltip>
     </Box>

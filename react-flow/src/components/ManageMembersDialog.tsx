@@ -28,6 +28,7 @@ import { FiSearch, FiTrash2, FiUserPlus } from "react-icons/fi";
 import { useParams } from "react-router-dom";
 import { collaborationApiService } from "../services/collaborationApiService";
 import { CollaborationMember, AccountDTO } from "../types/collaboration.types";
+import { usePermission } from "../hooks/usePermission";
 
 interface ManageMembersDialogProps {
   isOpen: boolean;
@@ -39,7 +40,7 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
   onClose,
 }) => {
   const { diagramId } = useParams<{ diagramId: string }>();
-
+  const { canEdit, permission } = usePermission();
   const [members, setMembers] = useState<CollaborationMember[]>([]);
   const [memberDetails, setMemberDetails] = useState<Map<string, AccountDTO>>(
     new Map()
@@ -214,90 +215,88 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
-            {/* Search Section */}
-            <Box>
-              <Text fontWeight="medium" mb={2}>
-                Add new member
-              </Text>
-              <HStack>
-                <Input
-                  placeholder="Enter email (e.g. username@gmail.com)"
-                  value={searchEmail}
-                  onChange={(e) => {
-                    setSearchEmail(e.target.value);
-                    setSearchError(null);
-                  }}
-                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                  size="sm"
-                />
-                <IconButton
-                  aria-label="Search"
-                  icon={searching ? <Spinner size="sm" /> : <FiSearch />}
-                  onClick={handleSearch}
-                  isDisabled={!searchEmail.trim() || searching}
-                  size="sm"
-                />
-              </HStack>
-
-              {/* Search Error */}
-              {searchError && (
-                <Text color="red.500" fontSize="sm" mt={2}>
-                  {searchError}
+            {/* ✅ CHỈ HIỆN Search Section khi có quyền edit */}
+            {canEdit && (
+              <Box>
+                <Text fontWeight="medium" mb={2}>
+                  Add new member
                 </Text>
-              )}
+                <HStack>
+                  <Input
+                    placeholder="Enter email (e.g. username@gmail.com)"
+                    value={searchEmail}
+                    onChange={(e) => {
+                      setSearchEmail(e.target.value);
+                      setSearchError(null);
+                    }}
+                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                    size="sm"
+                  />
+                  <IconButton
+                    aria-label="Search"
+                    icon={searching ? <Spinner size="sm" /> : <FiSearch />}
+                    onClick={handleSearch}
+                    isDisabled={!searchEmail.trim() || searching}
+                    size="sm"
+                  />
+                </HStack>
 
-              {/* Search Result */}
-              {searchResult && (
-                <Box
-                  mt={3}
-                  p={3}
-                  border="1px solid"
-                  borderColor={borderColor}
-                  borderRadius="md"
-                  maxH={"200px"}
-                  overflowY={"auto"}
-                >
-                  <HStack justify="space-between">
-                    <HStack>
-                      <Avatar
-                        size="sm"
-                        name={searchResult.name}
-                        src={searchResult.picture}
-                      />
-                      <VStack align="start" spacing={0}>
-                        <Text fontSize="sm" fontWeight="medium">
-                          {searchResult.name}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          {searchResult.username}@gmail.com
-                        </Text>
-                      </VStack>
+                {searchError && (
+                  <Text color="red.500" fontSize="sm" mt={2}>
+                    {searchError}
+                  </Text>
+                )}
+
+                {searchResult && (
+                  <Box
+                    mt={3}
+                    p={3}
+                    border="1px solid"
+                    borderColor={borderColor}
+                    borderRadius="md"
+                    maxH={"200px"}
+                    overflowY={"auto"}
+                  >
+                    <HStack justify="space-between">
+                      <HStack>
+                        <Avatar
+                          size="sm"
+                          name={searchResult.name}
+                          src={searchResult.picture}
+                        />
+                        <VStack align="start" spacing={0}>
+                          <Text fontSize="sm" fontWeight="medium">
+                            {searchResult.name}
+                          </Text>
+                          <Text fontSize="xs" color="gray.500">
+                            {searchResult.username}@gmail.com
+                          </Text>
+                        </VStack>
+                      </HStack>
+                      <HStack>
+                        <Button
+                          size="sm"
+                          leftIcon={<FiUserPlus />}
+                          variant="ghost"
+                          onClick={() => handleAddCollaborator("VIEW")}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          size="sm"
+                          leftIcon={<FiUserPlus />}
+                          onClick={() => handleAddCollaborator("FULL_ACCESS")}
+                        >
+                          Full Access
+                        </Button>
+                      </HStack>
                     </HStack>
-                    <HStack>
-                      <Button
-                        size="sm"
-                        leftIcon={<FiUserPlus />}
-                        variant="ghost"
-                        onClick={() => handleAddCollaborator("VIEW")}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        leftIcon={<FiUserPlus />}
-                        onClick={() => handleAddCollaborator("FULL_ACCESS")}
-                      >
-                        Full Access
-                      </Button>
-                    </HStack>
-                  </HStack>
-                </Box>
-              )}
-            </Box>
-
-            <Divider />
-
+                  </Box>
+                )}
+              </Box>
+            )}
+            {canEdit && <Divider />}{" "}
+            {/* ✅ CHỈ HIỆN Divider nếu có search section */}
             {/* Members List */}
             <Box>
               <Text fontWeight="medium" mb={3}>
@@ -330,7 +329,6 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
                               {memberDetails.get(owner.username)?.name ||
                                 owner.username}
                             </Text>
-
                             <Text fontSize="xs" color="gray.500">
                               {owner.username}@gmail.com
                             </Text>
@@ -343,7 +341,7 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
                     </Box>
                   )}
 
-                  {/* Participants */}
+                  {/* ✅ SỬA: Participants - hiện như Owner (chỉ badge) */}
                   {participants.map((member) => {
                     const details = memberDetails.get(member.username);
                     return (
@@ -360,7 +358,7 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
                             <Avatar
                               size="sm"
                               name={details?.name}
-                              src={details.picture}
+                              src={details?.picture}
                             />
                             <VStack align="start" spacing={0}>
                               <Text fontSize="sm" fontWeight="medium">
@@ -371,32 +369,52 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
                               </Text>
                             </VStack>
                           </HStack>
-                          <HStack>
-                            <Select
-                              size="sm"
-                              value={member.permission}
-                              onChange={(e) =>
-                                handleUpdatePermission(
-                                  member.id,
-                                  e.target.value as "VIEW" | "FULL_ACCESS"
-                                )
+
+                          {/* ✅ SỬA: Nếu VIEW mode thì chỉ hiện Badge, nếu FULL_ACCESS thì hiện controls */}
+                          {canEdit ? (
+                            <HStack>
+                              <Select
+                                size="sm"
+                                value={member.permission}
+                                onChange={(e) =>
+                                  handleUpdatePermission(
+                                    member.id,
+                                    e.target.value as "VIEW" | "FULL_ACCESS"
+                                  )
+                                }
+                                width="130px"
+                                fontSize="sm"
+                              >
+                                <option value="VIEW">View</option>
+                                <option value="FULL_ACCESS">Full Access</option>
+                              </Select>
+                              <IconButton
+                                aria-label="Remove member"
+                                icon={<FiTrash2 />}
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  handleRemoveCollaborator(member.id)
+                                }
+                              />
+                            </HStack>
+                          ) : (
+                            <Badge
+                              fontSize="xs"
+                              px={2}
+                              py={1}
+                              textTransform="none"
+                              colorScheme={
+                                member.permission === "FULL_ACCESS"
+                                  ? "blue"
+                                  : "gray"
                               }
-                              width="130px"
-                              fontSize="sm"
                             >
-                              <option value="VIEW">View</option>
-                              <option value="FULL_ACCESS">Full Access</option>
-                            </Select>
-                            <IconButton
-                              aria-label="Remove member"
-                              icon={<FiTrash2 />}
-                              size="sm"
-                              variant="ghost"
-                              onClick={() =>
-                                handleRemoveCollaborator(member.id)
-                              }
-                            />
-                          </HStack>
+                              {member.permission === "FULL_ACCESS"
+                                ? "Full Access"
+                                : "View"}
+                            </Badge>
+                          )}
                         </HStack>
                       </Box>
                     );

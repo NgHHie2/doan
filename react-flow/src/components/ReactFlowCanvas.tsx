@@ -16,6 +16,7 @@ import { ModelNode } from "../SchemaVisualizer/ModelNode";
 import { SchemaData } from "../SchemaVisualizer/SchemaVisualizer.types";
 import { CustomControls } from "./CustomControls";
 import { useColorModeValue } from "@chakra-ui/react";
+import { usePermission } from "../hooks/usePermission";
 
 const modelTypes = {
   model: ModelNode,
@@ -47,6 +48,8 @@ export const ReactFlowCanvas: React.FC<ReactFlowCanvasProps> = ({
   schemaInfo,
 }) => {
   const bgPatternColor = useColorModeValue("#cececeff", "#333");
+  const { canEdit, permission } = usePermission();
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -61,9 +64,9 @@ export const ReactFlowCanvas: React.FC<ReactFlowCanvasProps> = ({
       nodeTypes={modelTypes}
       fitView
       fitViewOptions={{ padding: 0.4 }}
-      nodesDraggable={true}
+      nodesDraggable={canEdit}
       nodesConnectable={false}
-      elementsSelectable={true}
+      elementsSelectable={canEdit}
       selectNodesOnDrag={false}
       panOnDrag={true}
       zoomOnScroll={true}
