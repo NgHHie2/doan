@@ -24,6 +24,7 @@ import { useParams } from "react-router-dom";
 import { useColorModeValue } from "@chakra-ui/react";
 
 export const useSchemaVisualizer = () => {
+  const [onlineUsernames, setOnlineUsernames] = useState<string[]>([]);
   const { diagramId } = useParams<{ diagramId: string }>();
   const {
     nodes,
@@ -552,6 +553,7 @@ export const useSchemaVisualizer = () => {
     setIsUpdatingFromWebSocket,
     stableCallbacks,
     setSchemaInfo,
+    setOnlineUsernames,
   });
 
   // ✅ Gọi useWebSocketListener ở đây
@@ -566,6 +568,7 @@ export const useSchemaVisualizer = () => {
     loading,
     error,
     schemaInfo,
+    onlineUsernames,
     isConnected,
 
     // ReactFlow state

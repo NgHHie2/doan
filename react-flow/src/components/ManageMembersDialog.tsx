@@ -336,7 +336,7 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
                             </Text>
                           </VStack>
                         </HStack>
-                        <Badge fontSize="xs" variant="subtle">
+                        <Badge fontSize="xs" px={2} py={1} textTransform="none">
                           Owner
                         </Badge>
                       </HStack>

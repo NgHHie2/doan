@@ -277,9 +277,11 @@ class WebSocketService {
   }
 
   private handleErrorMessage(messageBody: string): void {
+    console.log("hiepdeptrai: ", messageBody);
     const response = parseWebSocketMessage<string>(messageBody);
     if (response) {
       this.handlers.onError?.(response.data);
+      console.log("error: ", response.data);
     }
   }
 

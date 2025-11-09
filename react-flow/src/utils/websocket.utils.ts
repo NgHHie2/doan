@@ -102,7 +102,10 @@ export const routeMessage = (
     return;
   }
 
-  console.log(`📨 Processing ${response.type} for client`);
+  console.log(
+    `📨 Processing ${response.type} for client, content: `,
+    response.data
+  );
 
   try {
     switch (response.type) {

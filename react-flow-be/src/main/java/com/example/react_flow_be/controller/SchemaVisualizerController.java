@@ -2,11 +2,17 @@ package com.example.react_flow_be.controller;
 
 import com.example.react_flow_be.dto.DatabaseDiagramDto;
 import com.example.react_flow_be.dto.NewDiagramName;
+import com.example.react_flow_be.service.CollaborationService;
 import com.example.react_flow_be.service.DatabaseDiagramService;
 import com.example.react_flow_be.service.SchemaVisualizerService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.example.react_flow_be.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class SchemaVisualizerController {
 
     private final SchemaVisualizerService schemaVisualizerService;
+    private final CollaborationService collaborationService;
     private final ConnectionRepository connectionRepository;
     private final AttributeRepository attributeRepository;
     private final ModelRepository modelRepository;
@@ -25,7 +32,12 @@ public class SchemaVisualizerController {
     private final DatabaseDiagramRepository databaseDiagramRepository;
 
     @GetMapping("/{diagramId}")
-    public ResponseEntity<DatabaseDiagramDto> getSchemaData(@PathVariable Long diagramId) {
+    public ResponseEntity<DatabaseDiagramDto> getSchemaData(@PathVariable Long diagramId, HttpServletRequest request) {
+        String username = request.getHeader("X-Username");
+        boolean hasAccess = collaborationService.hasAccess(diagramId, username);
+        if (!hasAccess) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         log.info("Getting schema data");
         DatabaseDiagramDto response = schemaVisualizerService.getSchemaData(diagramId);
         log.info("Retrieved schema data: {} models", response.getModels().size());

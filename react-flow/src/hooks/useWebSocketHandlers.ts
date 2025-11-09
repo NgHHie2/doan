@@ -16,6 +16,7 @@ interface UseWebSocketHandlersProps {
   setIsUpdatingFromWebSocket?: React.Dispatch<React.SetStateAction<boolean>>;
   stableCallbacks?: any;
   setSchemaInfo: React.Dispatch<React.SetStateAction<SchemaData>>;
+  setOnlineUsernames: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const useWebSocketHandlers = ({
@@ -31,6 +32,7 @@ export const useWebSocketHandlers = ({
   setIsUpdatingFromWebSocket,
   stableCallbacks,
   setSchemaInfo,
+  setOnlineUsernames,
 }: UseWebSocketHandlersProps) => {
   // Create stable handlers with useCallback to prevent unnecessary re-renders
   const handleNodePositionUpdate = useCallback(
@@ -500,12 +502,10 @@ export const useWebSocketHandlers = ({
     (data: any) => {
       console.log("👥 Received user list update:", data);
 
-      // Callback để parent component handle
-      if (stableCallbacks?.onUserListUpdate) {
-        stableCallbacks.onUserListUpdate(data.activeUsernames);
-      }
+      // ⭐ CẬP NHẬT STATE GIỐNG NHƯ handleUpdateDiagramName
+      setOnlineUsernames(data.activeUsernames || []);
     },
-    [stableCallbacks]
+    [setOnlineUsernames]
   );
 
   // Create stable handlers object

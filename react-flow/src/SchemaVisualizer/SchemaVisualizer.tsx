@@ -27,6 +27,7 @@ export const SchemaVisualizer = () => {
     loading,
     error,
     schemaInfo,
+    onlineUsernames,
     isConnected,
 
     // ReactFlow state
@@ -67,6 +68,7 @@ export const SchemaVisualizer = () => {
       <SchemaVisualizerHeader
         onChatToggle={() => setIsChatOpen(!isChatOpen)}
         isChatOpen={isChatOpen}
+        onlineUsernames={onlineUsernames}
       />
 
       {/* Left side buttons */}

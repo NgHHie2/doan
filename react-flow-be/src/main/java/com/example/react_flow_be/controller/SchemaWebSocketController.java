@@ -1,7 +1,11 @@
 // src/main/java/com/example/react_flow_be/controller/SchemaWebSocketController.java
 package com.example.react_flow_be.controller;
 
+import com.example.react_flow_be.config.DiagramSessionManager;
+import com.example.react_flow_be.dto.collaboration.CollaborationDTO;
 import com.example.react_flow_be.dto.websocket.*;
+import com.example.react_flow_be.entity.Collaboration;
+import com.example.react_flow_be.service.CollaborationService;
 import com.example.react_flow_be.service.DatabaseDiagramService;
 import com.example.react_flow_be.service.SchemaVisualizerService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,8 @@ public class SchemaWebSocketController {
     private final SchemaVisualizerService schemaVisualizerService;
     private final SimpMessagingTemplate messagingTemplate;
     private final DatabaseDiagramService databaseDiagramService;
+    private final DiagramSessionManager sessionManager;
+    private final CollaborationService collaborationService;
 
     @MessageMapping("/diagram/{diagramId}/updateNodePosition")
     public void updateNodePosition(@DestinationVariable Long diagramId, ModelUpdateMessage message,
@@ -292,6 +298,13 @@ public class SchemaWebSocketController {
             SimpMessageHeaderAccessor headerAccessor,
             Supplier<R> serviceCall) {
         String sessionId = headerAccessor.getSessionId();
+        String username = sessionManager.getUsernameForSession(sessionId);
+        CollaborationDTO cDto = collaborationService.getUserCollaboration(diagramId, username);
+        if (cDto.getPermission().equals(Collaboration.Permission.VIEW)) {
+            sendErrorToUser(sessionId,
+                    "You dont have permission to edit this diagram" + messageType.toLowerCase().replace("_", " "));
+            return;
+        }
 
         try {
             if (message instanceof BaseWebSocketMessage) {
@@ -347,6 +360,7 @@ public class SchemaWebSocketController {
      * Send error message to specific user
      */
     private void sendErrorToUser(String sessionId, String errorMessage) {
+        log.info("error: sessionId - " + sessionId + " " + errorMessage);
         WebSocketResponse<String> errorResponse = WebSocketResponse.error(errorMessage, sessionId);
         messagingTemplate.convertAndSendToUser(
                 sessionId, "/queue/errors", errorResponse);

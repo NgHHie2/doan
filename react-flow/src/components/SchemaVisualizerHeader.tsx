@@ -20,11 +20,13 @@ import { ManageMembersDialog } from "./ManageMembersDialog";
 interface SchemaVisualizerHeaderProps {
   onChatToggle?: () => void;
   isChatOpen?: boolean;
+  onlineUsernames?: string[];
 }
 
 export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
   onChatToggle,
   isChatOpen = false,
+  onlineUsernames = [],
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -82,7 +84,7 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
           }}
           align="center"
         >
-          <AccountGroup />
+          <AccountGroup onlineUsernames={onlineUsernames} />
           <Tooltip label="Add member" placement={tooltipPlacement} hasArrow>
             <IconButton
               borderRadius="50%"
