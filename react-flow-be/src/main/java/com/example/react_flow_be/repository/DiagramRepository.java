@@ -10,8 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface DiagramRepository extends JpaRepository<Diagram, Long> {
-    List<Diagram> findByFolderId(Long folderId);
+    // List<Diagram> findByFolderId(Long folderId);
     List<Diagram> findByType(Diagram.DiagramType type);
+
     Optional<Diagram> findByName(String name);
-    
+
 }

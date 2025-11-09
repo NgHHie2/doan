@@ -29,8 +29,6 @@ public class SchemaVisualizerService {
     private final ModelRepository modelRepository;
     private final AttributeRepository attributeRepository;
     private final ConnectionRepository connectionRepository;
-    private final FolderRepository folderRepository;
-    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public DatabaseDiagramDto getSchemaData(Long diagramId) {
@@ -70,9 +68,8 @@ public class SchemaVisualizerService {
     public void initializeSampleData() {
 
         // Create sample data using other services
-        User sampleUser = databaseDiagramService.createSampleUser();
-        Folder sampleFolder = databaseDiagramService.createSampleFolder(sampleUser);
-        DatabaseDiagram databaseDiagram = databaseDiagramService.createSampleDatabaseDiagram(sampleFolder);
+        // User sampleUser = databaseDiagramService.createSampleUser();
+        DatabaseDiagram databaseDiagram = databaseDiagramService.createSampleDatabaseDiagram();
 
         // Create Models
         Model userModel = modelService.createModel("User", 100.0, 300.0, true, databaseDiagram);

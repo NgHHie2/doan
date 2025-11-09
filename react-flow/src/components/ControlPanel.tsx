@@ -69,9 +69,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     setSaving(true);
     try {
       const res = await fetch(
-        `http://localhost:8085/api/schema/${diagramId}/new-name`,
+        `http://localhost:8080/api/schema/${diagramId}/new-name`,
         {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ newName: newText }),
         }

@@ -174,8 +174,8 @@ export const useSchemaVisualizer = () => {
     if (isConnected) {
       sendAddModel({
         modelId: newModelId,
-        positionX,
-        positionY,
+        positionX: positionX - 140,
+        positionY: positionY - 60,
         databaseDiagramId: schemaInfo.id,
       });
       console.log("📤 Sent add model request, waiting for backend response...");

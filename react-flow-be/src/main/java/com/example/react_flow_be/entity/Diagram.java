@@ -21,30 +21,29 @@ public class Diagram {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String name;
     private String description;
-    
+
     private DiagramType type;
     private Boolean isPublic;
     private Boolean isTemplate;
-    
+
     // Canvas settings
     private String canvasData;
     private Double zoomLevel;
     private Double panX;
     private Double panY;
-    
+
     @CreationTimestamp
     private LocalDateTime createdAt;
-    
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    
-    @ManyToOne
-    @JoinColumn(name = "folder_id")
-    private Folder folder;
-    
+
+    @OneToMany(mappedBy = "diagram")
+    private List<Collaboration> collaboration;
+
     public enum DiagramType {
         ER_DIAGRAM, FLOWCHART, UML_CLASS, NETWORK, ORGANIZATIONAL, MIND_MAP, WIREFRAME, CUSTOM
     }

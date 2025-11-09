@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Repository
 public interface DatabaseDiagramRepository extends JpaRepository<DatabaseDiagram, Long> {
-    List<DatabaseDiagram> findByFolderId(Long folderId);
 
     Optional<DatabaseDiagram> findByName(String name);
 

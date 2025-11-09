@@ -23,8 +23,6 @@ public class SchemaVisualizerController {
     private final ModelRepository modelRepository;
     private final DatabaseDiagramService databaseDiagramService;
     private final DatabaseDiagramRepository databaseDiagramRepository;
-    private final FolderRepository folderRepository;
-    private final UserRepository userRepository;
 
     @GetMapping("/{diagramId}")
     public ResponseEntity<DatabaseDiagramDto> getSchemaData(@PathVariable Long diagramId) {
@@ -84,12 +82,6 @@ public class SchemaVisualizerController {
 
             databaseDiagramRepository.deleteAll();
             log.info("Cleared all database diagrams");
-
-            folderRepository.deleteAll();
-            log.info("Cleared all folders");
-
-            userRepository.deleteAll();
-            log.info("Cleared all users");
 
             return ResponseEntity.ok("All data cleared successfully");
         } catch (Exception e) {

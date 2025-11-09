@@ -18,30 +18,28 @@ public class Collaboration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private CollaborationType type;
     private Permission permission;
     private Boolean isActive;
     private LocalDateTime expiresAt;
-    
+
     @CreationTimestamp
     private LocalDateTime createdAt;
-    
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    
+
+    private Long user_id;
+
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-    
-    @ManyToOne
-    @JoinColumn(name = "folder_id")
-    private Folder folder;
-    
+    @JoinColumn(name = "diagram_id")
+    private Diagram diagram;
+
     public enum CollaborationType {
-        FOLDER_ACCESS, DIAGRAM_ACCESS
+        OWNER, PARTICIPANTS
     }
-    
+
     public enum Permission {
         VIEW, COMMENT, EDIT, FULL_ACCESS
     }

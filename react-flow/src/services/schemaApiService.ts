@@ -1,14 +1,16 @@
 // src/services/schemaApiService.ts
 import { SchemaData } from "../SchemaVisualizer/SchemaVisualizer.types";
 
-const API_BASE_URL = "http://localhost:8085/api/schema";
+const API_BASE_URL = "http://localhost:8080/api/schema";
 
 export const schemaApiService = {
   // Get complete schema data
   async getSchemaData(diagramId: string): Promise<SchemaData> {
     try {
       console.log(API_BASE_URL + "/" + diagramId);
-      const response = await fetch(API_BASE_URL + "/" + diagramId);
+      const response = await fetch(API_BASE_URL + "/" + diagramId, {
+        credentials: "include",
+      });
       console.log("response: ", response);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
