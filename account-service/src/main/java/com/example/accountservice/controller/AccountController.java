@@ -256,4 +256,15 @@ public class AccountController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /*
+     * Lấy thông tin tài khoản theo email
+     */
+    @GetMapping("/email/{email}")
+    @RequireRole({ Role.ADMIN, Role.STUDENT })
+    public ResponseEntity<Account> getAccountByEmail(@PathVariable String email) {
+        return accountService.findByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

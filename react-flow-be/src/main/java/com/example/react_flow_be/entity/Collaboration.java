@@ -30,7 +30,7 @@ public class Collaboration {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    private Long user_id;
+    private String username;
 
     @ManyToOne
     @JoinColumn(name = "diagram_id")
