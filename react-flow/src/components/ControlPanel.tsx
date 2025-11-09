@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Icon,
@@ -14,6 +14,8 @@ import {
 import { Circle, PencilLine } from "lucide-react";
 import { DiDatabase } from "react-icons/di";
 import { useParams } from "react-router-dom";
+import { websocketService } from "../services/websocketService";
+import { useWebSocketSender } from "../hooks/useWebSocketSender";
 
 interface ControlPanelProps {
   schemaName: string;
@@ -29,6 +31,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onReset,
 }) => {
   const { diagramId } = useParams();
+  const { sendUpdateDiagramName } = useWebSocketSender();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(schemaName);
   const [saving, setSaving] = useState(false);
@@ -41,6 +44,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const textColor = useColorModeValue("#2d3748", "white"); // 🌟 MÀU CHỮ
   const penColor = useColorModeValue("#2d3748", "white");
   const editableRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    setName(schemaName);
+  }, [schemaName]);
 
   const handleStartEditing = () => {
     setEditing(true);
@@ -67,18 +74,23 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const handleSave = async (newText: string) => {
     if (!newText.trim() || saving) return;
     setSaving(true);
+
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/schema/${diagramId}/new-name`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ newName: newText }),
-        }
-      );
-      if (!res.ok) throw new Error("Update failed");
-    } catch {
+      // ⭐ Gửi qua WebSocket thay vì API
+      sendUpdateDiagramName({
+        newName: newText,
+      });
+
+      setEditing(false);
+
+      toast({
+        title: "Đang cập nhật...",
+        status: "info",
+        duration: 1000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error updating diagram name:", error);
       toast({
         title: "Cập nhật thất bại",
         status: "error",

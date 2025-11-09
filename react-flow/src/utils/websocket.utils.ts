@@ -93,7 +93,9 @@ export const routeMessage = (
 ): void => {
   if (!response || !response.type) return;
 
-  const shouldFilterForCurrentClient = response.sessionId === currentSessionId;
+  const shouldFilterForCurrentClient =
+    response.sessionId === currentSessionId &&
+    response.type !== "USER_LIST_UPDATE";
   console.log("wtf: {} {}", response.sessionId, currentSessionId);
   if (shouldFilterForCurrentClient) {
     console.log(`⏸️ Filtering ${response.type} for current client`);
@@ -136,6 +138,12 @@ export const routeMessage = (
         break;
       case "DELETE_MODEL":
         handlers.onDeleteModel?.(response.data);
+        break;
+      case "UPDATE_DIAGRAM_NAME":
+        handlers.onUpdateDiagramName?.(response.data);
+        break;
+      case "USER_LIST_UPDATE":
+        handlers.onUserListUpdate?.(response.data);
         break;
       default:
         console.warn(`Unknown message type: ${response.type}`);

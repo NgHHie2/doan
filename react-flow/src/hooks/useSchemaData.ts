@@ -384,6 +384,7 @@ export const useSchemaData = () => {
     loading,
     error,
     schemaInfo,
+    setSchemaInfo,
     setNodes,
     setEdges,
     fetchSchemaData,

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.accountservice.annotation.RequireRole;
 import com.example.accountservice.dto.AccountCreateRequest;
+import com.example.accountservice.dto.AccountDTO;
 import com.example.accountservice.dto.AccountSearchDTO;
 import com.example.accountservice.dto.PasswordChangeDTO;
 import com.example.accountservice.enums.Role;
@@ -30,6 +31,7 @@ import com.example.accountservice.model.Account;
 import com.example.accountservice.service.AccountService;
 
 import jakarta.validation.Valid;
+import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -261,10 +263,16 @@ public class AccountController {
      */
     @GetMapping("/email/{email}")
     @RequireRole({ Role.ADMIN, Role.STUDENT })
-    public ResponseEntity<Account> getAccountByEmail(@PathVariable String email) {
-        return accountService.findByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AccountDTO> getAccountByEmail(@PathVariable String email) {
+        Account acc = accountService.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Not found account"));
+
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setUsername(acc.getUsername());
+        accountDTO.setName(acc.getLastName() + " " + acc.getFirstName());
+        accountDTO.setPicture(acc.getPicture());
+
+        return ResponseEntity.ok(accountDTO);
     }
 
 }

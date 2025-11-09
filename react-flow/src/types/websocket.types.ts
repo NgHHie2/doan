@@ -74,6 +74,17 @@ export interface DeleteModelUpdate extends BaseUpdate {
   modelId: string;
 }
 
+export interface UpdateDiagramNameUpdate extends BaseUpdate {
+  newName: string;
+}
+
+export interface UserListUpdate extends BaseUpdate {
+  diagramId: number;
+  activeUsernames: string[];
+  activeUsers: number;
+  timestamp: number;
+}
+
 export interface WebSocketResponse<T> {
   type: string;
   data: T;
@@ -95,6 +106,8 @@ export interface MessageHandler {
   onAddModel?: ((data: AddModelUpdate) => void) | undefined;
   onUpdateModelName?: ((data: UpdateModelNameUpdate) => void) | undefined;
   onDeleteModel?: ((data: DeleteModelUpdate) => void) | undefined;
+  onUpdateDiagramName?: (data: UpdateDiagramNameUpdate) => void;
+  onUserListUpdate?: (data: UserListUpdate) => void;
   onError?: (error: string) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;

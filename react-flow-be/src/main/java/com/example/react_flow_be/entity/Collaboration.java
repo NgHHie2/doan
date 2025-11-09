@@ -19,7 +19,10 @@ public class Collaboration {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     private CollaborationType type;
+
+    @Enumerated(EnumType.STRING)
     private Permission permission;
     private Boolean isActive;
     private LocalDateTime expiresAt;

@@ -25,6 +25,7 @@ export const createDestinations = (diagramId: number | string) => ({
   addModel: `/app/diagram/${diagramId}/addModel`,
   updateModelName: `/app/diagram/${diagramId}/updateModelName`,
   deleteModel: `/app/diagram/${diagramId}/deleteModel`,
+  updateDiagramName: `/app/diagram/${diagramId}/updateDiagramName`,
 });
 
 /**
@@ -49,6 +50,8 @@ export const MESSAGE_TYPES = {
   ADD_MODEL: "ADD_MODEL",
   UPDATE_MODEL_NAME: "UPDATE_MODEL_NAME",
   DELETE_MODEL: "DELETE_MODEL",
+  UPDATE_DIAGRAM_NAME: "UPDATE_DIAGRAM_NAME",
+  USER_LIST_UPDATE: "USER_LIST_UPDATE",
   ERROR: "ERROR",
 } as const;
 

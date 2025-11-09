@@ -7,6 +7,7 @@ import {
   Tooltip,
   useColorModeValue,
   useBreakpointValue,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { MdHistory } from "react-icons/md";
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
@@ -14,6 +15,7 @@ import { HiChevronDown, HiOutlineDotsVertical } from "react-icons/hi";
 import { AccountGroup } from "./AccountGroup";
 import { FloatingUnitButton } from "./page/FloatingUnitButton";
 import { ThemeToggle } from "./page/ThemeToggle";
+import { ManageMembersDialog } from "./ManageMembersDialog";
 
 interface SchemaVisualizerHeaderProps {
   onChatToggle?: () => void;
@@ -24,6 +26,8 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
   onChatToggle,
   isChatOpen = false,
 }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const borderColor = useColorModeValue("#d0d7de", "#444");
   const bgColor = useColorModeValue("white", "#333");
   const iconColor = useColorModeValue("gray.700", "white");
@@ -85,7 +89,7 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
               aria-label="Add member"
               icon={<AiOutlineUsergroupAdd size={20} />}
               {...buttonStyle}
-              onClick={() => console.log("Add member clicked")}
+              onClick={onOpen}
             />
           </Tooltip>
           <Tooltip
@@ -118,6 +122,7 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
           />
         </Tooltip>
       </Stack>
+      <ManageMembersDialog isOpen={isOpen} onClose={onClose} />
     </Box>
   );
 };

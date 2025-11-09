@@ -88,6 +88,8 @@ export const useWebSocketListener = ({
       onUpdateModelName: (data) =>
         handlersRef.current.onUpdateModelName?.(data),
       onDeleteModel: (data) => handlersRef.current.onDeleteModel?.(data),
+      onUpdateDiagramName: (data) =>
+        handlersRef.current.onUpdateDiagramName?.(data),
     };
 
     // Connect with stable handlers

@@ -10,6 +10,8 @@ import lombok.Data;
 public class AccountDTO {
     private Long id;
     private String username;
+    private String picture;
+    private String name;
     @Enumerated(EnumType.STRING)
     private Role role;
 }

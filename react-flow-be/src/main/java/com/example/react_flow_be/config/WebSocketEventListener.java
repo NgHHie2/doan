@@ -1,6 +1,9 @@
+// WebSocketEventListener.java
 package com.example.react_flow_be.config;
 
 import com.example.react_flow_be.config.DiagramSessionManager;
+import com.example.react_flow_be.dto.websocket.WebSocketResponse;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -12,6 +15,9 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,17 +43,18 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
 
-        // User disconnected - remove from all diagrams
         Long diagramId = sessionManager.getDiagramForSession(sessionId);
+        String username = sessionManager.getUsernameForSession(sessionId); // ⭐ Get username
+
         if (diagramId != null) {
             sessionManager.leaveDiagram(sessionId);
 
-            // Notify other users in the diagram
-            notifyUserCountChange(diagramId);
+            // Notify other users about user list change
+            notifyUserListChange(diagramId);
         }
 
-        log.info("WebSocket disconnected: sessionId={}, was viewing diagram={}",
-                sessionId, diagramId);
+        log.info("WebSocket disconnected: sessionId={}, user={}, was viewing diagram={}",
+                sessionId, username, diagramId);
     }
 
     @EventListener
@@ -55,18 +62,19 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
         String destination = headerAccessor.getDestination();
+        String username = headerAccessor.getFirstNativeHeader("X-Username"); // ⭐ Get username
 
         if (destination != null) {
-            // Check if subscribing to a diagram topic
             Matcher matcher = DIAGRAM_TOPIC_PATTERN.matcher(destination);
             if (matcher.matches()) {
                 Long diagramId = Long.parseLong(matcher.group(1));
-                sessionManager.joinDiagram(diagramId, sessionId);
 
-                // Notify all users in diagram about new user
-                notifyUserCountChange(diagramId);
+                // joinDiagram is already called in WebSocketAuthInterceptor
+                // Just notify about user list change
+                notifyUserListChange(diagramId);
 
-                log.info("Session {} subscribed to diagram {}", sessionId, diagramId);
+                log.info("Session {} (user: {}) subscribed to diagram {}",
+                        sessionId, username, diagramId);
             }
         }
     }
@@ -77,31 +85,43 @@ public class WebSocketEventListener {
         String sessionId = headerAccessor.getSessionId();
 
         Long diagramId = sessionManager.getDiagramForSession(sessionId);
+        String username = sessionManager.getUsernameForSession(sessionId);
+
         if (diagramId != null) {
             sessionManager.leaveDiagram(sessionId);
-            notifyUserCountChange(diagramId);
+            notifyUserListChange(diagramId);
 
-            log.info("Session {} unsubscribed from diagram {}", sessionId, diagramId);
+            log.info("Session {} (user: {}) unsubscribed from diagram {}",
+                    sessionId, username, diagramId);
         }
     }
 
-    /**
-     * Notify all users in a diagram about user count change
-     */
-    private void notifyUserCountChange(Long diagramId) {
-        int userCount = sessionManager.getActiveUserCount(diagramId);
+    private void notifyUserListChange(Long diagramId) {
+        Set<String> activeUsernames = sessionManager.getActiveUsernames(diagramId);
+        int userCount = activeUsernames.size();
 
-        UserCountMessage message = new UserCountMessage(
+        UserListMessage data = new UserListMessage(
                 diagramId,
+                activeUsernames,
                 userCount,
                 System.currentTimeMillis());
 
+        // ⭐ Sử dụng WebSocketResponse.success() như các message khác
+        WebSocketResponse<UserListMessage> response = WebSocketResponse.success("USER_LIST_UPDATE", data, null);
+
         messagingTemplate.convertAndSend(
                 "/topic/diagram/" + diagramId,
-                message);
+                response);
+
+        log.info("📢 Notified diagram {} about user list: {} users online",
+                diagramId, userCount);
     }
 
-    // DTO for user count updates
-    public record UserCountMessage(Long diagramId, int activeUsers, long timestamp) {
+    // ⭐ Updated DTO with username list
+    public record UserListMessage(
+            Long diagramId,
+            Set<String> activeUsernames,
+            int activeUsers,
+            long timestamp) {
     }
 }

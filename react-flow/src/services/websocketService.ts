@@ -18,6 +18,7 @@ import {
   ToggleKeyTypeUpdate,
   FieldNameUpdate,
   FieldTypeUpdate,
+  UpdateDiagramNameUpdate,
 } from "../types/websocket.types";
 
 // Constants
@@ -455,6 +456,16 @@ class WebSocketService {
     if (!this.state.diagramId) return;
     const DESTINATIONS = createDestinations(this.state.diagramId);
     this.sendMessage(DESTINATIONS.deleteModel, "DELETE_MODEL", update);
+  }
+
+  sendUpdateDiagramName(update: UpdateDiagramNameUpdate): void {
+    if (!this.state.diagramId) return;
+    const DESTINATIONS = createDestinations(this.state.diagramId);
+    this.sendMessage(
+      DESTINATIONS.updateDiagramName,
+      "UPDATE_DIAGRAM_NAME",
+      update
+    );
   }
 
   // Utility methods

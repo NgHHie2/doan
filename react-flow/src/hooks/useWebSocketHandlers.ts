@@ -1,6 +1,7 @@
 // src/hooks/useWebSocketHandlers.ts - Fixed WebSocket message handlers
 import { useRef, useEffect, useCallback } from "react";
 import { getVietnamTime } from "../utils";
+import { SchemaData } from "../SchemaVisualizer/SchemaVisualizer.types";
 
 interface UseWebSocketHandlersProps {
   // updateNodePosition: any;
@@ -14,6 +15,7 @@ interface UseWebSocketHandlersProps {
   // deleteModel: any;
   setIsUpdatingFromWebSocket?: React.Dispatch<React.SetStateAction<boolean>>;
   stableCallbacks?: any;
+  setSchemaInfo: React.Dispatch<React.SetStateAction<SchemaData>>;
 }
 
 export const useWebSocketHandlers = ({
@@ -28,6 +30,7 @@ export const useWebSocketHandlers = ({
   setReactFlowNodes,
   setIsUpdatingFromWebSocket,
   stableCallbacks,
+  setSchemaInfo,
 }: UseWebSocketHandlersProps) => {
   // Create stable handlers with useCallback to prevent unnecessary re-renders
   const handleNodePositionUpdate = useCallback(
@@ -481,6 +484,30 @@ export const useWebSocketHandlers = ({
     [setReactFlowNodes]
   );
 
+  const handleUpdateDiagramName = useCallback(
+    (data: any) => {
+      console.log("📝 Received diagram name update:", data);
+
+      setSchemaInfo((prev) => ({
+        ...prev,
+        name: data.newName,
+      }));
+    },
+    [setSchemaInfo]
+  );
+
+  const handleUserListUpdate = useCallback(
+    (data: any) => {
+      console.log("👥 Received user list update:", data);
+
+      // Callback để parent component handle
+      if (stableCallbacks?.onUserListUpdate) {
+        stableCallbacks.onUserListUpdate(data.activeUsernames);
+      }
+    },
+    [stableCallbacks]
+  );
+
   // Create stable handlers object
   const websocketHandlers = useRef({
     onNodePositionUpdate: handleNodePositionUpdate,
@@ -494,6 +521,8 @@ export const useWebSocketHandlers = ({
     onAddModel: handleAddModel,
     onUpdateModelName: handleUpdateModelName,
     onDeleteModel: handleDeleteModel,
+    onUpdateDiagramName: handleUpdateDiagramName,
+    onUserListUpdate: handleUserListUpdate,
   });
 
   // FIX 3: Update handlers only when dependencies actually change
@@ -510,6 +539,8 @@ export const useWebSocketHandlers = ({
       onAddModel: handleAddModel,
       onUpdateModelName: handleUpdateModelName,
       onDeleteModel: handleDeleteModel,
+      onUpdateDiagramName: handleUpdateDiagramName,
+      onUserListUpdate: handleUserListUpdate,
     };
   }, [
     handleNodePositionUpdate,
@@ -523,6 +554,8 @@ export const useWebSocketHandlers = ({
     handleAddModel,
     handleUpdateModelName,
     handleDeleteModel,
+    handleUpdateDiagramName,
+    handleUserListUpdate,
   ]);
 
   return {
@@ -537,5 +570,7 @@ export const useWebSocketHandlers = ({
     onAddModel: handleAddModel,
     onUpdateModelName: handleUpdateModelName,
     onDeleteModel: handleDeleteModel,
+    onUpdateDiagramName: handleUpdateDiagramName,
+    onUserListUpdate: handleUserListUpdate,
   };
 };

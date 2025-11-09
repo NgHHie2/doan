@@ -2,6 +2,7 @@
 package com.example.react_flow_be.controller;
 
 import com.example.react_flow_be.dto.websocket.*;
+import com.example.react_flow_be.service.DatabaseDiagramService;
 import com.example.react_flow_be.service.SchemaVisualizerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class SchemaWebSocketController {
 
     private final SchemaVisualizerService schemaVisualizerService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final DatabaseDiagramService databaseDiagramService;
 
     @MessageMapping("/diagram/{diagramId}/updateNodePosition")
     public void updateNodePosition(@DestinationVariable Long diagramId, ModelUpdateMessage message,
@@ -265,6 +267,18 @@ public class SchemaWebSocketController {
                     }
                     return null;
                 });
+    }
+
+    @MessageMapping("/diagram/{diagramId}/updateDiagramName")
+    public void updateDiagramName(@DestinationVariable Long diagramId, UpdateDiagramNameMessage message,
+            SimpMessageHeaderAccessor headerAccessor) {
+        message.setDiagramId(diagramId);
+        handleWebSocketMessage(
+                "UPDATE_DIAGRAM_NAME",
+                diagramId,
+                message,
+                headerAccessor,
+                () -> databaseDiagramService.updateDiagramName(diagramId, message.getNewName()));
     }
 
     /**

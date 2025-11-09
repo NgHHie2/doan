@@ -14,6 +14,7 @@ import {
   AddModelUpdate,
   UpdateModelNameUpdate,
   DeleteModelUpdate,
+  UpdateDiagramNameUpdate,
 } from "../types/websocket.types";
 
 /**
@@ -117,6 +118,17 @@ export const useWebSocketSender = () => {
     websocketService.sendDeleteModel(update);
   }, []);
 
+  const sendUpdateDiagramName = useCallback(
+    (update: UpdateDiagramNameUpdate) => {
+      if (!websocketService.isConnected()) {
+        console.warn("⚠️ Cannot send update diagram name: not connected");
+        return;
+      }
+      websocketService.sendUpdateDiagramName(update);
+    },
+    []
+  );
+
   return {
     isConnected,
     sendNodePositionUpdate,
@@ -130,5 +142,6 @@ export const useWebSocketSender = () => {
     sendAddModel,
     sendUpdateModelName,
     sendDeleteModel,
+    sendUpdateDiagramName,
   };
 };

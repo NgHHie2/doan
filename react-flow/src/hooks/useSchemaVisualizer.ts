@@ -34,6 +34,7 @@ export const useSchemaVisualizer = () => {
     fetchSchemaData,
     initializeData,
     updateNodePosition,
+    setSchemaInfo,
     updateFieldName,
     updateFieldType,
     addAttribute,
@@ -550,6 +551,7 @@ export const useSchemaVisualizer = () => {
     setReactFlowNodes,
     setIsUpdatingFromWebSocket,
     stableCallbacks,
+    setSchemaInfo,
   });
 
   // ✅ Gọi useWebSocketListener ở đây
