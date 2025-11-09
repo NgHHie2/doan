@@ -2,6 +2,7 @@
 package com.example.react_flow_be.service;
 
 import com.example.react_flow_be.dto.*;
+import com.example.react_flow_be.dto.collaboration.CollaborationDTO;
 import com.example.react_flow_be.entity.*;
 import com.example.react_flow_be.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class SchemaVisualizerService {
 
     private final DatabaseDiagramService databaseDiagramService;
+    private final CollaborationService collaborationService;
     private final ModelService modelService;
     private final AttributeService attributeService;
     private final ConnectionService connectionService;
@@ -31,7 +33,7 @@ public class SchemaVisualizerService {
     private final ConnectionRepository connectionRepository;
 
     @Transactional(readOnly = true)
-    public DatabaseDiagramDto getSchemaData(Long diagramId) {
+    public DatabaseDiagramDto getSchemaData(Long diagramId, String username) {
         // List<DatabaseDiagram> databaseDiagrams =
         // databaseDiagramService.getAllDatabaseDiagrams();
 
@@ -41,9 +43,11 @@ public class SchemaVisualizerService {
         List<ModelDto> modelDtos = databaseDiagram.getModels().stream()
                 .map(modelService::convertToModelDto)
                 .collect(Collectors.toList());
+        CollaborationDTO collaboration = collaborationService.getUserCollaboration(diagramId, username);
 
         return new DatabaseDiagramDto(
                 databaseDiagram.getId(),
+                collaboration.getPermission(),
                 databaseDiagram.getName(),
                 databaseDiagram.getDescription(),
                 databaseDiagram.getDatabaseType().name(),

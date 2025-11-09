@@ -58,6 +58,7 @@ export interface Model {
 
 export interface SchemaData {
   id: number;
+  permission: "VIEW" | "FULL_ACCESS" | null;
   name: string;
   description: string;
   databaseType: string;

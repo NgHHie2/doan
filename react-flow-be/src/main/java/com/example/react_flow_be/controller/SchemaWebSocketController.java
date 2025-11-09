@@ -302,7 +302,7 @@ public class SchemaWebSocketController {
         CollaborationDTO cDto = collaborationService.getUserCollaboration(diagramId, username);
         if (cDto.getPermission().equals(Collaboration.Permission.VIEW)) {
             sendErrorToUser(sessionId,
-                    "You dont have permission to edit this diagram" + messageType.toLowerCase().replace("_", " "));
+                    "You dont have permission to edit this diagram " + messageType.toLowerCase().replace("_", " "));
             return;
         }
 
@@ -362,7 +362,6 @@ public class SchemaWebSocketController {
     private void sendErrorToUser(String sessionId, String errorMessage) {
         log.info("error: sessionId - " + sessionId + " " + errorMessage);
         WebSocketResponse<String> errorResponse = WebSocketResponse.error(errorMessage, sessionId);
-        messagingTemplate.convertAndSendToUser(
-                sessionId, "/queue/errors", errorResponse);
+        messagingTemplate.convertAndSend("/queue/errors-" + sessionId, errorResponse);
     }
 }

@@ -39,7 +39,7 @@ public class SchemaVisualizerController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         log.info("Getting schema data");
-        DatabaseDiagramDto response = schemaVisualizerService.getSchemaData(diagramId);
+        DatabaseDiagramDto response = schemaVisualizerService.getSchemaData(diagramId, username);
         log.info("Retrieved schema data: {} models", response.getModels().size());
         return ResponseEntity.ok(response);
     }
@@ -61,19 +61,6 @@ public class SchemaVisualizerController {
     public ResponseEntity<Boolean> newName(@PathVariable Long diagramId, @RequestBody NewDiagramName newDiagramName) {
         Boolean success = databaseDiagramService.updateDiagramName(diagramId, newDiagramName.getNewName());
         return ResponseEntity.ok(success);
-    }
-
-    @GetMapping("/health/{diagramId}")
-    public ResponseEntity<String> healthCheck(@PathVariable Long diagramId) {
-        try {
-            log.info("Health check requested");
-            DatabaseDiagramDto schema = schemaVisualizerService.getSchemaData(diagramId);
-            return ResponseEntity.ok("Schema service is healthy - " + schema.getModels().size() + " models available");
-        } catch (Exception e) {
-            log.error("Health check failed: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                    .body("Schema service is unhealthy: " + e.getMessage());
-        }
     }
 
     @PostMapping("/clear")

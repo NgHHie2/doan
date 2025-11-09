@@ -254,12 +254,12 @@ class WebSocketService {
       });
 
       // ⭐ 3. Subscribe to personal error queue (for other errors)
-      this.client.subscribe(TOPICS.userErrors, (message) => {
-        this.handleErrorMessage(message.body);
-      });
-
-      console.log(
-        `✅ Successfully subscribed to all topics for diagram ${this.state.diagramId}`
+      console.log("📡 Subscribing to error queue...");
+      const errorSubscription = this.client.subscribe(
+        "/queue/errors-" + this.state.sessionId,
+        (message) => {
+          this.handleErrorMessage(message.body);
+        }
       );
     } catch (error) {
       console.error("❌ Error subscribing to updates:", error);
@@ -277,11 +277,9 @@ class WebSocketService {
   }
 
   private handleErrorMessage(messageBody: string): void {
-    console.log("hiepdeptrai: ", messageBody);
     const response = parseWebSocketMessage<string>(messageBody);
     if (response) {
       this.handlers.onError?.(response.data);
-      console.log("error: ", response.data);
     }
   }
 

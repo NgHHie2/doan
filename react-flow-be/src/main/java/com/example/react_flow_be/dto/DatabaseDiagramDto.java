@@ -5,11 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
 
+import com.example.react_flow_be.entity.Collaboration;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class DatabaseDiagramDto {
     private Long id;
+    private Collaboration.Permission permission;
     private String name;
     private String description;
     private String databaseType;

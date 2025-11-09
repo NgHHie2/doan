@@ -34,7 +34,7 @@ export const createDestinations = (diagramId: number | string) => ({
  */
 export const createTopics = (diagramId: number | string) => ({
   schemaUpdates: `/topic/diagram/${diagramId}`,
-  userErrors: `/user/queue/errors`,
+  userErrors: `/queue/errors`,
 });
 
 // Message Types
