@@ -27,7 +27,7 @@ import { usePermission } from "../hooks/usePermission";
 export const SchemaVisualizerContent = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const chatWidth = 300;
+  const chatWidth = 500;
   const canvasBg = useColorModeValue("#f5f5f5", "#1C1c1c");
 
   const {
