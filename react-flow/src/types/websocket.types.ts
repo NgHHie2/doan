@@ -58,6 +58,7 @@ export interface ForeignKeyDisconnectUpdate extends BaseUpdate {
 }
 
 export interface AddModelUpdate extends BaseUpdate {
+  // name: string;
   modelId: string;
   positionX: number;
   positionY: number;

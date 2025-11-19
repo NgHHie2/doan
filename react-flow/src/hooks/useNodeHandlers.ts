@@ -232,6 +232,7 @@ export const useNodeHandlers = ({
       });
 
       console.log("📤 Sent add attribute request to WebSocket");
+      return newAttributeId;
     },
     [setReactFlowNodes, sendAddAttribute]
   );

@@ -20,6 +20,7 @@ export const AddModelButton: React.FC<AddModelButtonProps> = ({
   const bgColor = useColorModeValue("white", "#333");
   const iconColor = useColorModeValue("gray.700", "white");
   const hoverBg = useColorModeValue("white", "#1c1c1c");
+  console.log("add: click");
   return (
     <Tooltip
       label={isConnected ? "Add new table" : "Connect to add tables"}

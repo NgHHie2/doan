@@ -1,3 +1,4 @@
+// src/components/page/FloatingChat.tsx
 import {
   Box,
   Input,
@@ -18,10 +19,33 @@ import { LiaTimesSolid } from "react-icons/lia";
 import { useStore } from "reactflow";
 import type { ReactFlowState } from "reactflow";
 import { chatbotService, ChatbotResponse } from "../../services/chatbotService";
+import { CreateActionsDisplay } from "../chat/CreateActionsDisplay";
+import { DeleteActionsDisplay } from "../chat/DeleteActionsDisplay";
+import { useChatActions } from "../../hooks/useChatActions";
 
 interface FloatingChatProps {
   isOpen: boolean;
   width?: number;
+  // Handlers từ useSchemaVisualizer
+  onAddModel?: () => string;
+  onAddAttribute?: (modelId: string) => string;
+  onFieldNameUpdate?: (attributeId: string, attributeName: string) => void;
+  onFieldTypeUpdate?: (attributeId: string, attributeType: string) => void;
+  onToggleKeyType?: (
+    modelId: string,
+    attributeId: string,
+    keyType: "NORMAL" | "PRIMARY" | "FOREIGN"
+  ) => void;
+  onForeignKeyConnect?: (
+    attributeId: string,
+    targetModelId: string,
+    targetAttributeId: string
+  ) => void;
+  onModelNameUpdate?: (
+    modelId: string,
+    oldName: string,
+    newName: string
+  ) => void;
 }
 
 interface Message {
@@ -31,7 +55,17 @@ interface Message {
   response?: ChatbotResponse;
 }
 
-const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
+const FloatingChat: FC<FloatingChatProps> = ({
+  isOpen,
+  width = 400,
+  onAddModel,
+  onAddAttribute,
+  onFieldNameUpdate,
+  onFieldTypeUpdate,
+  onToggleKeyType,
+  onForeignKeyConnect,
+  onModelNameUpdate,
+}) => {
   const bg = useColorModeValue("white", "#161b22");
   const borderColor = useColorModeValue("#d0d7de", "#30363d");
   const userMsgBg = useColorModeValue("blue.50", "blue.900");
@@ -48,13 +82,22 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
   // Lấy danh sách nodes từ ReactFlow store
   const allNodes = useStore((state: ReactFlowState) => state.nodeInternals);
 
+  // Sử dụng custom hook để xử lý actions
+  const { handleCreateModel, handleCreateAttribute, handleCreateForeignKey } =
+    useChatActions({
+      allNodes,
+      onAddModel,
+      onAddAttribute,
+      onFieldNameUpdate,
+      onFieldTypeUpdate,
+      onToggleKeyType,
+      onForeignKeyConnect,
+      onModelNameUpdate,
+    });
+
   // Convert nodes to models format for API
   const getModelsFromNodes = () => {
     const models: any[] = [];
-    console.log("chat: ", allNodes.values());
-    allNodes.forEach((node, key) => {
-      console.log("key:", key, "node:", node);
-    });
 
     allNodes.forEach((node) => {
       if (node.type === "model") {
@@ -65,7 +108,6 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
         };
 
         (node.data?.attributes || []).forEach((attr: any) => {
-          // 🎯 Tạo attribute (bao gồm cả FK)
           const cleanAttr: any = {
             name: attr.name,
             type: attr.dataType,
@@ -77,24 +119,17 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
 
           model.attributes.push(cleanAttr);
 
-          // 🎯 Nếu là foreign key → thêm vào mảng fks
           if (attr.isForeignKey && attr.connection) {
-            // Tìm target model và attribute name
             let targetModelName = "";
             let targetAttrName = "";
 
-            // Tìm target model
-            // console.log(attr.name);
-            // console.log("targetId: ", attr.connection.targetModelId);
             const targetModel = Array.from(allNodes.values()).find(
               (n) => n.id === attr.connection.targetModelId
             );
 
-            console.log("target: ", targetModel);
             if (targetModel) {
               targetModelName = targetModel.data?.name || targetModel.id;
 
-              // Tìm target attribute
               const targetAttr = (targetModel.data?.attributes || []).find(
                 (a: any) => a.id === attr.connection.targetAttributeId
               );
@@ -103,7 +138,6 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
               }
             }
 
-            // Chỉ thêm FK nếu tìm được đầy đủ thông tin
             if (targetModelName && targetAttrName) {
               model.fks.push({
                 column: attr.name,
@@ -218,10 +252,10 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
         borderColor={borderColor}
       >
         <Flex justify="space-between" align="center">
-          <Text>Sherpa AI</Text>
-          <Badge colorScheme="green" fontSize="0.7em">
+          <Text>Sherpa</Text>
+          {/* <Badge colorScheme="green" fontSize="0.7em">
             {currentModels.length} models
-          </Badge>
+          </Badge> */}
         </Flex>
       </Box>
 
@@ -237,7 +271,7 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
           bg={useColorModeValue("gray.50", "gray.900")}
           _hover={{ bg: useColorModeValue("gray.100", "gray.800") }}
         >
-          <Text fontWeight="medium">📊 Current Models (Debug)</Text>
+          <Text fontWeight="medium">Current Models (Debug)</Text>
           <IconButton
             aria-label="Toggle models"
             icon={showModels ? <FaChevronUp /> : <FaChevronDown />}
@@ -258,9 +292,9 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
       <VStack flex="1" p={4} spacing={3} overflowY="auto" align="stretch">
         {messages.length === 0 && (
           <Box textAlign="center" color="gray.500" mt={8}>
-            <Text fontSize="sm">👋 Xin chào!</Text>
+            <Text fontSize="sm">👋 Hi!</Text>
             <Text fontSize="xs" mt={2}>
-              Hãy hỏi tôi về thiết kế database
+              Bạn muốn thiết kế database gì...
             </Text>
           </Box>
         )}
@@ -269,7 +303,7 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
           <Box
             key={msg.id}
             alignSelf={msg.type === "user" ? "flex-end" : "flex-start"}
-            maxW="85%"
+            maxW="95%"
           >
             <Box
               bg={msg.type === "user" ? userMsgBg : botMsgBg}
@@ -280,74 +314,31 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
               <Text>{msg.text}</Text>
 
               {msg.response && (
-                <VStack mt={3} spacing={2} align="stretch">
+                <VStack mt={3} spacing={3} align="stretch">
                   {/* Action Badge */}
-                  <Badge
+                  {/* <Badge
                     colorScheme={
                       msg.response.action === "REFRESH" ? "green" : "blue"
                     }
                     alignSelf="flex-start"
                   >
                     {msg.response.action}
-                  </Badge>
+                  </Badge> */}
 
                   {/* CREATE Section */}
                   {msg.response.create.length > 0 && (
-                    <Box
-                      p={2}
-                      bg={useColorModeValue("green.50", "green.900")}
-                      borderRadius="md"
-                      borderLeft="3px solid"
-                      borderColor="green.500"
-                    >
-                      <Text
-                        fontSize="xs"
-                        fontWeight="bold"
-                        color="green.600"
-                        mb={1}
-                      >
-                        ✨ CREATE ({msg.response.create.length} tables)
-                      </Text>
-                      <Code
-                        fontSize="10px"
-                        p={2}
-                        borderRadius="sm"
-                        display="block"
-                        whiteSpace="pre-wrap"
-                        maxH="120px"
-                        overflowY="auto"
-                      >
-                        {JSON.stringify(msg.response.create, null, 2)}
-                      </Code>
-                    </Box>
+                    <CreateActionsDisplay
+                      createActions={msg.response.create}
+                      allNodes={allNodes}
+                      onCreateModel={handleCreateModel}
+                      onCreateAttribute={handleCreateAttribute}
+                      onCreateForeignKey={handleCreateForeignKey}
+                    />
                   )}
 
                   {/* DELETE Section */}
                   {msg.response.delete.length > 0 && (
-                    <Box
-                      p={2}
-                      bg={useColorModeValue("red.50", "red.900")}
-                      borderRadius="md"
-                      borderLeft="3px solid"
-                      borderColor="red.500"
-                    >
-                      <Text
-                        fontSize="xs"
-                        fontWeight="bold"
-                        color="red.600"
-                        mb={1}
-                      >
-                        🗑️ DELETE ({msg.response.delete.length} items)
-                      </Text>
-                      <Code
-                        fontSize="10px"
-                        p={2}
-                        borderRadius="sm"
-                        display="block"
-                      >
-                        {JSON.stringify(msg.response.delete, null, 2)}
-                      </Code>
-                    </Box>
+                    <DeleteActionsDisplay deleteActions={msg.response.delete} />
                   )}
 
                   {/* TOMTAT Section */}
@@ -365,7 +356,7 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
                         color="blue.600"
                         mb={1}
                       >
-                        📋 TÓM TẮT
+                        📋 SUMMARY
                       </Text>
                       <Text
                         fontSize="xs"
@@ -419,7 +410,7 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
         )}
         <Flex gap={2} alignItems="center">
           <Input
-            placeholder="Hỏi về database..."
+            placeholder="Ask about database..."
             size="sm"
             flex="1"
             borderRadius={"5px"}
@@ -436,8 +427,7 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
             disabled={isLoading}
           />
 
-          {/* Attach image icon */}
-          <IconButton
+          {/* <IconButton
             aria-label="Attach image"
             icon={<FaImage size={"20px"} />}
             border={"2px"}
@@ -446,16 +436,15 @@ const FloatingChat: FC<FloatingChatProps> = ({ isOpen, width = 400 }) => {
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
             isDisabled={isLoading}
-          />
-          <Input
+          /> */}
+          {/* <Input
             type="file"
             accept="image/*"
             ref={fileInputRef}
             onChange={handleFileChange}
             display="none"
-          />
+          /> */}
 
-          {/* Send icon */}
           <IconButton
             aria-label="Send message"
             icon={<FaArrowUp />}

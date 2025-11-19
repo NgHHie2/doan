@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddModelMessage extends BaseWebSocketMessage {
+    private String name;
     private String modelId;
     private Double positionX;
     private Double positionY;

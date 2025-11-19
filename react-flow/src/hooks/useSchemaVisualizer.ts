@@ -182,6 +182,7 @@ export const useSchemaVisualizer = () => {
       });
       console.log("📤 Sent add model request, waiting for backend response...");
     }
+    return newModelId;
   }, [
     schemaInfo,
     isConnected,
@@ -597,5 +598,6 @@ export const useSchemaVisualizer = () => {
     handleToggleKeyType,
     handleAddAttribute,
     handleDeleteAttribute,
+    handleForeignKeyTargetSelect,
   };
 };

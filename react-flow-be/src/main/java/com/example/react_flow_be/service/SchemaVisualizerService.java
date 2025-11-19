@@ -76,9 +76,9 @@ public class SchemaVisualizerService {
         DatabaseDiagram databaseDiagram = databaseDiagramService.createSampleDatabaseDiagram();
 
         // Create Models
-        Model userModel = modelService.createModel("User", 100.0, 300.0, true, databaseDiagram);
-        Model postModel = modelService.createModel("Post", 500.0, 100.0, true, databaseDiagram);
-        Model commentModel = modelService.createModel("Comment", 500.0, 500.0, false, databaseDiagram);
+        Model userModel = modelService.createModel("User", "User", 100.0, 300.0, true, databaseDiagram);
+        Model postModel = modelService.createModel("Post", "Post", 500.0, 100.0, true, databaseDiagram);
+        Model commentModel = modelService.createModel("Comment", "Comment", 500.0, 500.0, false, databaseDiagram);
 
         // Create Attributes for User model
         attributeService.createAttribute("1", userModel, "id", "BIGINT", false, 0, false, true);
@@ -199,13 +199,13 @@ public class SchemaVisualizerService {
 
     // Thêm vào SchemaVisualizerService.java
     @Transactional
-    public String addModel(Long databaseDiagramId, String modelId, Double positionX, Double positionY) {
+    public String addModel(String name, Long databaseDiagramId, String modelId, Double positionX, Double positionY) {
         try {
             Optional<DatabaseDiagram> diagramOpt = databaseDiagramRepository.findById(databaseDiagramId);
             if (diagramOpt.isPresent()) {
                 DatabaseDiagram diagram = diagramOpt.get();
 
-                Model newModel = modelService.createModel(modelId, positionX, positionY, false, diagram);
+                Model newModel = modelService.createModel(name, modelId, positionX, positionY, false, diagram);
 
                 log.info("Added new model: {} at position ({}, {})", modelId, positionX, positionY);
                 return newModel.getId();

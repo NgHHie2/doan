@@ -27,7 +27,7 @@ import { usePermission } from "../hooks/usePermission";
 export const SchemaVisualizerContent = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const chatWidth = 500;
+  const chatWidth = 400;
   const canvasBg = useColorModeValue("#f5f5f5", "#1C1c1c");
 
   const {
@@ -63,6 +63,7 @@ export const SchemaVisualizerContent = () => {
     handleAddAttribute,
     handleDeleteAttribute,
     handleModelNameUpdate,
+    handleForeignKeyTargetSelect,
   } = useSchemaVisualizer();
 
   const { canEdit, permission } = usePermission();
@@ -162,7 +163,17 @@ export const SchemaVisualizerContent = () => {
       />
 
       {/* Floating Chat Panel - Tái sử dụng từ HomePage */}
-      <FloatingChat isOpen={isChatOpen} width={chatWidth} />
+      <FloatingChat
+        isOpen={isChatOpen}
+        width={chatWidth}
+        onAddModel={handleAddModel}
+        onModelNameUpdate={handleModelNameUpdate}
+        onAddAttribute={handleAddAttribute}
+        onForeignKeyConnect={handleForeignKeyTargetSelect}
+        onFieldNameUpdate={handleFieldNameUpdate}
+        onFieldTypeUpdate={handleFieldTypeUpdate}
+        onToggleKeyType={handleToggleKeyType}
+      />
     </Box>
   );
 };

@@ -213,6 +213,7 @@ public class SchemaWebSocketController {
                 headerAccessor,
                 () -> {
                     String modelId = schemaVisualizerService.addModel(
+                            message.getName(),
                             message.getDatabaseDiagramId(),
                             message.getModelId(),
                             message.getPositionX(),

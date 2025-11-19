@@ -35,7 +35,8 @@ public class ModelService {
     }
 
     @Transactional
-    public Model createModel(String id, Double x, Double y, Boolean isChild, DatabaseDiagram databaseDiagram) {
+    public Model createModel(String name, String id, Double x, Double y, Boolean isChild,
+            DatabaseDiagram databaseDiagram) {
         Model model = new Model();
 
         model.setId(id);
