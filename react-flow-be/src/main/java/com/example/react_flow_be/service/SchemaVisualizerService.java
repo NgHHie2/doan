@@ -220,7 +220,7 @@ public class SchemaVisualizerService {
     @Transactional
     public boolean updateModelName(String modelId, String newModelName, LocalDateTime timestamp) {
         try {
-            Optional<Model> modelOpt = modelRepository.findById(modelId);
+            Optional<Model> modelOpt = modelRepository.findByIdForUpdate(modelId);
             if (modelOpt.isPresent() && (modelOpt.get().getNameUpdatedAt() == null
                     || modelOpt.get().getNameUpdatedAt().isBefore(timestamp))) {
                 Model model = modelOpt.get();

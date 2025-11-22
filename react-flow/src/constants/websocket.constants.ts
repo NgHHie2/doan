@@ -5,7 +5,7 @@ import { WebSocketConfig } from "../types/websocket.types";
 export const WS_CONFIG: WebSocketConfig = {
   url: "http://localhost:8080/ws",
   reconnectDelay: 1000,
-  maxReconnectAttempts: 10,
+  maxReconnectAttempts: Infinity,
   heartbeatInterval: 4000,
 } as const;
 

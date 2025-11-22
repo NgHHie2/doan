@@ -46,6 +46,8 @@ interface FloatingChatProps {
     oldName: string,
     newName: string
   ) => void;
+  onDeleteModel?: (modelId: string) => void;
+  onDeleteAttribute?: (modelId: string, attributeId: string) => void;
 }
 
 interface Message {
@@ -65,6 +67,8 @@ const FloatingChat: FC<FloatingChatProps> = ({
   onToggleKeyType,
   onForeignKeyConnect,
   onModelNameUpdate,
+  onDeleteModel,
+  onDeleteAttribute,
 }) => {
   const bg = useColorModeValue("white", "#161b22");
   const borderColor = useColorModeValue("#d0d7de", "#30363d");
@@ -83,17 +87,24 @@ const FloatingChat: FC<FloatingChatProps> = ({
   const allNodes = useStore((state: ReactFlowState) => state.nodeInternals);
 
   // Sử dụng custom hook để xử lý actions
-  const { handleCreateModel, handleCreateAttribute, handleCreateForeignKey } =
-    useChatActions({
-      allNodes,
-      onAddModel,
-      onAddAttribute,
-      onFieldNameUpdate,
-      onFieldTypeUpdate,
-      onToggleKeyType,
-      onForeignKeyConnect,
-      onModelNameUpdate,
-    });
+  const {
+    handleCreateModel,
+    handleCreateAttribute,
+    handleCreateForeignKey,
+    handleDeleteModel,
+    handleDeleteAttribute,
+  } = useChatActions({
+    allNodes,
+    onAddModel,
+    onAddAttribute,
+    onFieldNameUpdate,
+    onFieldTypeUpdate,
+    onToggleKeyType,
+    onForeignKeyConnect,
+    onModelNameUpdate,
+    onDeleteModel,
+    onDeleteAttribute,
+  });
 
   // Convert nodes to models format for API
   const getModelsFromNodes = () => {
@@ -338,7 +349,12 @@ const FloatingChat: FC<FloatingChatProps> = ({
 
                   {/* DELETE Section */}
                   {msg.response.delete.length > 0 && (
-                    <DeleteActionsDisplay deleteActions={msg.response.delete} />
+                    <DeleteActionsDisplay
+                      deleteActions={msg.response.delete}
+                      allNodes={allNodes}
+                      onDeleteModel={handleDeleteModel}
+                      onDeleteAttribute={handleDeleteAttribute}
+                    />
                   )}
 
                   {/* TOMTAT Section */}

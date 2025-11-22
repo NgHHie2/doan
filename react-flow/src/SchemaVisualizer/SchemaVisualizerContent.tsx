@@ -132,7 +132,7 @@ export const SchemaVisualizerContent = () => {
 
       <ControlPanel
         schemaName={schemaInfo.name}
-        isConnected={isConnected}
+        // isConnected={isConnected}
         loading={loading}
         onReset={handleReset}
       />
@@ -173,6 +173,8 @@ export const SchemaVisualizerContent = () => {
         onFieldNameUpdate={handleFieldNameUpdate}
         onFieldTypeUpdate={handleFieldTypeUpdate}
         onToggleKeyType={handleToggleKeyType}
+        onDeleteModel={handleDeleteModel}
+        onDeleteAttribute={handleDeleteAttribute}
       />
     </Box>
   );

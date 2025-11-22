@@ -11,25 +11,27 @@ import {
   useColorModeValue,
   Tooltip,
 } from "@chakra-ui/react";
-import { Circle, PencilLine } from "lucide-react";
+import { Circle, PencilLine, Star } from "lucide-react";
 import { DiDatabase } from "react-icons/di";
 import { useParams } from "react-router-dom";
 import { websocketService } from "../services/websocketService";
 import { useWebSocketSender } from "../hooks/useWebSocketSender";
+import { useWebSocketContext } from "../contexts/WebSocketContext";
 
 interface ControlPanelProps {
   schemaName: string;
-  isConnected: boolean;
+  // isConnected: boolean;
   loading: boolean;
   onReset: () => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
   schemaName,
-  isConnected,
+  // isConnected,
   loading,
   onReset,
 }) => {
+  const { isConnected } = useWebSocketContext();
   const { diagramId } = useParams();
   const { sendUpdateDiagramName } = useWebSocketSender();
   const [editing, setEditing] = useState(false);
@@ -43,6 +45,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const hoverBg = useColorModeValue("#63a3e2ff", "#888");
   const textColor = useColorModeValue("#2d3748", "white"); // 🌟 MÀU CHỮ
   const penColor = useColorModeValue("#2d3748", "white");
+  const starColor = useColorModeValue("yellow.400", "yellow.400");
   const editableRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -82,13 +85,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       });
 
       setEditing(false);
-
-      toast({
-        title: "Đang cập nhật...",
-        status: "info",
-        duration: 1000,
-        isClosable: true,
-      });
     } catch (error) {
       console.error("Error updating diagram name:", error);
       toast({
@@ -188,6 +184,22 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           color={"gray.400"}
           _hover={{ bg: "transparent", color: penColor }}
           onClick={handleStartEditing}
+        />
+
+        <IconButton
+          aria-label="Favorite"
+          icon={<Star size={18} />}
+          size="xs"
+          variant="ghost"
+          bg="transparent"
+          color="gray.400"
+          _hover={{
+            bg: "transparent",
+            color: starColor,
+            "& svg": {
+              fill: "currentColor", // ⭐ KHI HOVER → fill vàng
+            },
+          }}
         />
       </HStack>
 

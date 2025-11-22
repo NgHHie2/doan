@@ -29,7 +29,7 @@ public class AttributeService {
     @Transactional
     public boolean updateAttributeName(String attributeId, String attributeName, LocalDateTime timestamp) {
         try {
-            Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
+            Optional<Attribute> attributeOpt = attributeRepository.findByIdForUpdate(attributeId);
             if (attributeOpt.isPresent() && (attributeOpt.get().getNameUpdatedAt() == null
                     || attributeOpt.get().getNameUpdatedAt().isBefore(timestamp))) {
                 Attribute attribute = attributeOpt.get();
@@ -48,7 +48,7 @@ public class AttributeService {
     @Transactional
     public boolean updateAttributeType(String attributeId, String attributeType, LocalDateTime timestamp) {
         try {
-            Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
+            Optional<Attribute> attributeOpt = attributeRepository.findByIdForUpdate(attributeId);
             if (attributeOpt.isPresent() && (attributeOpt.get().getTypeUpdatedAt() == null
                     || attributeOpt.get().getTypeUpdatedAt().isBefore(timestamp))) {
                 Attribute attribute = attributeOpt.get();
@@ -68,7 +68,7 @@ public class AttributeService {
     @Transactional
     public boolean setAttributeAsPrimaryKey(String attributeId, LocalDateTime timestamp) {
         try {
-            Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
+            Optional<Attribute> attributeOpt = attributeRepository.findByIdForUpdate(attributeId);
             if (attributeOpt.isPresent() && (attributeOpt.get().getKeyTypeUpdatedAt() == null
                     || attributeOpt.get().getKeyTypeUpdatedAt().isBefore(timestamp))) {
                 Attribute attribute = attributeOpt.get();
@@ -102,7 +102,7 @@ public class AttributeService {
     @Transactional
     public boolean setAttributeAsForeignKey(String attributeId, LocalDateTime timestamp) {
         try {
-            Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
+            Optional<Attribute> attributeOpt = attributeRepository.findByIdForUpdate(attributeId);
             if (attributeOpt.isPresent() && (attributeOpt.get().getKeyTypeUpdatedAt() == null
                     || attributeOpt.get().getKeyTypeUpdatedAt().isBefore(timestamp))) {
                 Attribute attribute = attributeOpt.get();
@@ -139,7 +139,7 @@ public class AttributeService {
     @Transactional
     public boolean setAttributeAsNormal(String attributeId, LocalDateTime timestamp) {
         try {
-            Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
+            Optional<Attribute> attributeOpt = attributeRepository.findByIdForUpdate(attributeId);
             if (attributeOpt.isPresent() && (attributeOpt.get().getKeyTypeUpdatedAt() == null
                     || attributeOpt.get().getKeyTypeUpdatedAt().isBefore(timestamp))) {
                 Attribute attribute = attributeOpt.get();
@@ -224,7 +224,7 @@ public class AttributeService {
     @Transactional
     public boolean deleteAttribute(String attributeId) {
         try {
-            Optional<Attribute> attributeOpt = attributeRepository.findById(attributeId);
+            Optional<Attribute> attributeOpt = attributeRepository.findByIdForUpdate(attributeId);
             if (attributeOpt.isPresent()) {
                 Attribute attribute = attributeOpt.get();
 

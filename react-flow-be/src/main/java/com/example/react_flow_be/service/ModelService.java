@@ -20,7 +20,7 @@ public class ModelService {
     @Transactional
     public boolean updateModelPosition(String modelId, Double positionX, Double positionY, LocalDateTime timestamp) {
         // Use modelId for more accurate lookup
-        Optional<Model> modelOpt = modelRepository.findById(modelId);
+        Optional<Model> modelOpt = modelRepository.findByIdForUpdate(modelId);
         if (modelOpt.isPresent() && (modelOpt.get().getPositionUpdatedAt() == null ||
                 modelOpt.get().getPositionUpdatedAt().isBefore(timestamp))) {
             Model model = modelOpt.get();

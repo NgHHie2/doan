@@ -10,9 +10,10 @@ import {
   Tooltip,
   useColorModeValue,
   useToast,
+  Button,
 } from "@chakra-ui/react";
 import { FC, useState, useCallback } from "react";
-import { FaPlus, FaLink } from "react-icons/fa";
+import { FaPlus, FaLink, FaCheck } from "react-icons/fa";
 import { ChatbotResponse } from "../../services/chatbotService";
 import {
   findAttributeIdByName,
@@ -55,6 +56,9 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
   );
   const [processingFKs, setProcessingFKs] = useState<Set<string>>(new Set());
 
+  const [isAcceptingAll, setIsAcceptingAll] = useState(false);
+  const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
+
   // Handler tạo model
   const handleCreateModel = useCallback(
     async (modelName: string) => {
@@ -79,6 +83,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           status: "success",
           duration: 2000,
         });
+        setCompletedItems((prev) => new Set(prev).add(`model-${modelName}`));
       } catch (error) {
         console.error("Error creating model:", error);
         toast({
@@ -131,6 +136,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           status: "success",
           duration: 2000,
         });
+        setCompletedItems((prev) => new Set(prev).add(`attr-${attrKey}`));
       } catch (error) {
         console.error("Error adding attribute:", error);
         toast({
@@ -185,6 +191,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           status: "success",
           duration: 2000,
         });
+        setCompletedItems((prev) => new Set(prev).add(`fk-${fkKey}`));
       } catch (error) {
         console.error("Error creating foreign key:", error);
         toast({
@@ -203,6 +210,85 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
     },
     [onCreateForeignKey, toast]
   );
+
+  const handleAcceptAll = useCallback(async () => {
+    setIsAcceptingAll(true);
+
+    try {
+      // Phase 1: Create all new models
+      for (const model of createActions) {
+        const existingModelId = findModelIdByName(allNodes, model.name);
+        if (!existingModelId && !completedItems.has(`model-${model.name}`)) {
+          await handleCreateModel(model.name);
+          await delay(500);
+        }
+      }
+
+      // Phase 2: Add all attributes
+      for (const model of createActions) {
+        const modelId = findModelIdByName(allNodes, model.name) || model.name;
+
+        for (const attr of model.attrs || []) {
+          const attrKey = `${modelId}-${attr.name}`;
+          if (!completedItems.has(`attr-${attrKey}`)) {
+            try {
+              await handleAddAttribute(modelId, {
+                name: attr.name,
+                type: attr.type,
+                pk: attr.pk,
+              });
+              await delay(300);
+            } catch (error) {
+              console.error(`Failed to add attribute ${attr.name}:`, error);
+            }
+          }
+        }
+      }
+
+      // Phase 3: Create all foreign keys
+      for (const model of createActions) {
+        const modelId = findModelIdByName(allNodes, model.name) || model.name;
+
+        for (const fk of model.fks || []) {
+          const [targetTable, targetColumn] = fk.references.split(".");
+          const fkKey = `${modelId}-${fk.column}`;
+
+          if (!completedItems.has(`fk-${fkKey}`)) {
+            try {
+              await handleCreateForeignKey(
+                modelId,
+                fk.column,
+                targetTable,
+                targetColumn
+              );
+              await delay(300);
+            } catch (error) {
+              console.error(`Failed to create FK ${fk.column}:`, error);
+            }
+          }
+        }
+      }
+
+      toast({
+        title: "Hoàn tất",
+        description: "Đã thực hiện tất cả các thao tác",
+        status: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Error in Accept All:", error);
+    } finally {
+      setIsAcceptingAll(false);
+    }
+  }, [
+    createActions,
+    allNodes,
+    completedItems,
+    handleCreateModel,
+    handleAddAttribute,
+    handleCreateForeignKey,
+    toast,
+  ]);
 
   return (
     <VStack align="stretch" spacing={2}>
@@ -376,6 +462,16 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           </Box>
         );
       })}
+      <Button
+        size="sm"
+        colorScheme="green"
+        leftIcon={<FaCheck />}
+        onClick={handleAcceptAll}
+        isLoading={isAcceptingAll}
+        loadingText="Đang xử lý..."
+      >
+        Accept All
+      </Button>
     </VStack>
   );
 };

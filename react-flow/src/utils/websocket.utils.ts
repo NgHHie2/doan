@@ -66,7 +66,7 @@ export const calculateReconnectDelay = (
   attempt: number,
   baseDelay: number
 ): number => {
-  return Math.min(baseDelay * Math.pow(2, attempt - 1), 30000);
+  return Math.min(baseDelay * Math.pow(2, attempt - 1), 2000);
 };
 
 /**

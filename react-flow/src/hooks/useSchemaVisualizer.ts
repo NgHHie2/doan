@@ -22,6 +22,7 @@ import { useWebSocketListener } from "./useWebSocketListener";
 import { getVietnamTime } from "../utils";
 import { useParams } from "react-router-dom";
 import { useColorModeValue } from "@chakra-ui/react";
+import { websocketService } from "../services/websocketService";
 
 export const useSchemaVisualizer = () => {
   const [onlineUsernames, setOnlineUsernames] = useState<string[]>([]);
@@ -44,7 +45,6 @@ export const useSchemaVisualizer = () => {
     updateModelName,
     deleteModel,
   } = useSchemaData();
-
   const [reactFlowNodes, setReactFlowNodes, onNodesChange] = useNodesState([]);
   const [reactFlowEdges, setReactFlowEdges, onEdgesChange] = useEdgesState([]);
   const [isUpdatingFromWebSocket, setIsUpdatingFromWebSocket] = useState(false);
@@ -306,11 +306,14 @@ export const useSchemaVisualizer = () => {
 
   // Initialize data on first mount
   useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      fetchSchemaData(stableCallbacks);
+    let connectState = websocketService.isConnect();
+    console.log("dmm: ", connectState);
+    if (connectState == false) {
+      return;
     }
-  }, [fetchSchemaData, stableCallbacks]);
+
+    fetchSchemaData(stableCallbacks);
+  }, [websocketService.isConnect()]);
 
   // Node synchronization with change detection
   const nodesFingerprint = useMemo(() => {
@@ -391,21 +394,21 @@ export const useSchemaVisualizer = () => {
     console.log("list node: ", reactFlowNodes);
   }, [reactFlowNodes]);
 
-  useEffect(() => {
-    if (reactFlowNodes.length === 0) return;
+  // useEffect(() => {
+  //   if (reactFlowNodes.length === 0) return;
 
-    console.log("🔄 Connection state changed, re-injecting callbacks");
-    setReactFlowNodes((currentNodes) => {
-      return currentNodes.map((node) => ({
-        ...node,
-        data: {
-          ...node.data,
-          ...stableCallbacks,
-          lastCallbackUpdate: Date.now(),
-        },
-      }));
-    });
-  }, [isConnected]);
+  //   console.log("🔄 Connection state changed, re-injecting callbacks");
+  //   setReactFlowNodes((currentNodes) => {
+  //     return currentNodes.map((node) => ({
+  //       ...node,
+  //       data: {
+  //         ...node.data,
+  //         ...stableCallbacks,
+  //         lastCallbackUpdate: Date.now(),
+  //       },
+  //     }));
+  //   });
+  // }, [isConnected]);
 
   // Optimized edge calculation
   const edgesFingerprint = useMemo(() => {

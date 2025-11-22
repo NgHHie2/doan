@@ -116,6 +116,7 @@ class WebSocketService {
 
         this.handleConnect(frame);
       },
+      onWebSocketClose: this.handleDisconnect.bind(this),
       onDisconnect: this.handleDisconnect.bind(this),
       onStompError: this.handleStompError.bind(this),
       onWebSocketError: this.handleWebSocketError.bind(this),
@@ -469,7 +470,7 @@ class WebSocketService {
   }
 
   // Utility methods
-  isConnected(): boolean {
+  isConnect(): boolean {
     return this.state.connected;
   }
 

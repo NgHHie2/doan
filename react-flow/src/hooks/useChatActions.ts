@@ -28,6 +28,8 @@ interface UseChatActionsProps {
     oldName: string,
     newName: string
   ) => void;
+  onDeleteModel?: (modelId: string) => void;
+  onDeleteAttribute?: (modelId: string, attributeId: string) => void;
 }
 
 /**
@@ -43,6 +45,8 @@ export const useChatActions = ({
   onToggleKeyType,
   onForeignKeyConnect,
   onModelNameUpdate,
+  onDeleteModel,
+  onDeleteAttribute,
 }: UseChatActionsProps) => {
   /**
    * Tạo model mới với tên cụ thể
@@ -173,9 +177,41 @@ export const useChatActions = ({
     [onForeignKeyConnect, onToggleKeyType, allNodes]
   );
 
+  /**
+   * Xóa model
+   */
+  const handleDeleteModel = useCallback(
+    async (modelId: string): Promise<void> => {
+      if (!onDeleteModel) {
+        throw new Error("Delete model handler not provided");
+      }
+
+      onDeleteModel(modelId);
+      await delay(200);
+    },
+    [onDeleteModel]
+  );
+
+  /**
+   * Xóa attribute
+   */
+  const handleDeleteAttribute = useCallback(
+    async (modelId: string, attributeId: string): Promise<void> => {
+      if (!onDeleteAttribute) {
+        throw new Error("Delete attribute handler not provided");
+      }
+
+      onDeleteAttribute(modelId, attributeId);
+      await delay(200);
+    },
+    [onDeleteAttribute]
+  );
+
   return {
     handleCreateModel,
     handleCreateAttribute,
     handleCreateForeignKey,
+    handleDeleteModel,
+    handleDeleteAttribute,
   };
 };
