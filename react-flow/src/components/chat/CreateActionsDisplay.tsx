@@ -20,6 +20,7 @@ import {
   findModelIdByName,
   delay,
 } from "../../utils/nodeHelpers";
+import { usePermission } from "../../hooks/usePermission";
 
 interface CreateActionsDisplayProps {
   createActions: ChatbotResponse["create"];
@@ -46,6 +47,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
   onCreateAttribute,
   onCreateForeignKey,
 }) => {
+  const { canEdit } = usePermission();
   const createBg = useColorModeValue("green.50", "green.900");
   const toast = useToast();
   const [processingModels, setProcessingModels] = useState<Set<string>>(
@@ -317,7 +319,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                   {model.name}
                 </Badge>
               </HStack>
-              {isNewModel && (
+              {isNewModel && canEdit && (
                 <Tooltip label="Tạo bảng mới">
                   <IconButton
                     aria-label="Create table"
@@ -373,24 +375,26 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                             </Badge>
                           )}
                         </HStack>
-                        <Tooltip label="Thêm thuộc tính">
-                          <IconButton
-                            aria-label="Add attribute"
-                            icon={<FaPlus />}
-                            size="xs"
-                            variant="ghost"
-                            colorScheme="green"
-                            isLoading={isProcessing}
-                            isDisabled={isNewModel}
-                            onClick={() =>
-                              handleAddAttribute(modelId, {
-                                name: attr.name,
-                                type: attr.type,
-                                pk: attr.pk,
-                              })
-                            }
-                          />
-                        </Tooltip>
+                        {canEdit && (
+                          <Tooltip label="Thêm thuộc tính">
+                            <IconButton
+                              aria-label="Add attribute"
+                              icon={<FaPlus />}
+                              size="xs"
+                              variant="ghost"
+                              colorScheme="green"
+                              isLoading={isProcessing}
+                              isDisabled={isNewModel}
+                              onClick={() =>
+                                handleAddAttribute(modelId, {
+                                  name: attr.name,
+                                  type: attr.type,
+                                  pk: attr.pk,
+                                })
+                              }
+                            />
+                          </Tooltip>
+                        )}
                       </HStack>
                     );
                   })}
@@ -434,25 +438,27 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                             {targetTable}.{targetColumn}
                           </Code>
                         </HStack>
-                        <Tooltip label="Tạo liên kết khóa ngoại">
-                          <IconButton
-                            aria-label="Create foreign key"
-                            icon={<FaLink />}
-                            size="xs"
-                            variant="ghost"
-                            colorScheme="blue"
-                            isLoading={isProcessing}
-                            isDisabled={isNewModel}
-                            onClick={() =>
-                              handleCreateForeignKey(
-                                modelId,
-                                fk.column,
-                                targetTable,
-                                targetColumn
-                              )
-                            }
-                          />
-                        </Tooltip>
+                        {canEdit && (
+                          <Tooltip label="Tạo liên kết khóa ngoại">
+                            <IconButton
+                              aria-label="Create foreign key"
+                              icon={<FaLink />}
+                              size="xs"
+                              variant="ghost"
+                              colorScheme="blue"
+                              isLoading={isProcessing}
+                              isDisabled={isNewModel}
+                              onClick={() =>
+                                handleCreateForeignKey(
+                                  modelId,
+                                  fk.column,
+                                  targetTable,
+                                  targetColumn
+                                )
+                              }
+                            />
+                          </Tooltip>
+                        )}
                       </HStack>
                     );
                   })}
@@ -462,16 +468,18 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           </Box>
         );
       })}
-      <Button
-        size="sm"
-        colorScheme="green"
-        leftIcon={<FaCheck />}
-        onClick={handleAcceptAll}
-        isLoading={isAcceptingAll}
-        loadingText="Đang xử lý..."
-      >
-        Accept All
-      </Button>
+      {canEdit && (
+        <Button
+          size="sm"
+          colorScheme="green"
+          leftIcon={<FaCheck />}
+          onClick={handleAcceptAll}
+          isLoading={isAcceptingAll}
+          loadingText="Đang xử lý..."
+        >
+          Accept All
+        </Button>
+      )}
     </VStack>
   );
 };

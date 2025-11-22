@@ -6,6 +6,8 @@ interface WebSocketContextType {
   setIsConnected: (connected: boolean) => void;
   sessionId: string | null;
   setSessionId: (id: string | null) => void;
+  onlineUsernames: string[]; // ✅ Thêm
+  setOnlineUsernames: (usernames: string[]) => void; // ✅ Thêm
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -17,6 +19,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [onlineUsernames, setOnlineUsernames] = useState<string[]>([]); // ✅ Thêm
 
   return (
     <WebSocketContext.Provider
@@ -25,6 +28,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsConnected,
         sessionId,
         setSessionId,
+        onlineUsernames,
+        setOnlineUsernames,
       }}
     >
       {children}

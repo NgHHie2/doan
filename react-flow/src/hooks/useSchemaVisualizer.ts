@@ -22,10 +22,11 @@ import { useWebSocketListener } from "./useWebSocketListener";
 import { getVietnamTime } from "../utils";
 import { useParams } from "react-router-dom";
 import { useColorModeValue } from "@chakra-ui/react";
-import { websocketService } from "../services/websocketService";
+import { useWebSocketContext } from "../contexts/WebSocketContext";
 
 export const useSchemaVisualizer = () => {
-  const [onlineUsernames, setOnlineUsernames] = useState<string[]>([]);
+  const { isConnected, onlineUsernames } = useWebSocketContext();
+  // const [onlineUsernames, setOnlineUsernames] = useState<string[]>([]);
   const { diagramId } = useParams<{ diagramId: string }>();
   const {
     nodes,
@@ -54,12 +55,12 @@ export const useSchemaVisualizer = () => {
     reactFlowNodesRef.current = reactFlowNodes;
   }, [reactFlowNodes]);
 
-  const hasInitialized = useRef(false);
+  const hasFetchedData = useRef(false); // ⭐ Track đã fetch chưa
+  const isInitialMount = useRef(true); // ⭐ Track lần mount đầu tiên
   const currentNodesRef = useRef<any[]>([]);
 
   // ⭐ WebSocket sender (cho việc gửi messages) - đọc từ global state
   const {
-    isConnected,
     sendNodePositionUpdate,
     sendFieldNameUpdate,
     sendFieldTypeUpdate,
@@ -306,14 +307,34 @@ export const useSchemaVisualizer = () => {
 
   // Initialize data on first mount
   useEffect(() => {
-    let connectState = websocketService.isConnect();
-    console.log("dmm: ", connectState);
-    if (connectState == false) {
+    console.log(
+      "Connection state:",
+      isConnected,
+      "hasFetched:",
+      hasFetchedData.current
+    );
+
+    if (!isConnected) {
+      console.log("⏸️ WebSocket not connected, skipping data fetch");
       return;
     }
 
-    fetchSchemaData(stableCallbacks);
-  }, [websocketService.isConnect()]);
+    // ⭐ Chỉ fetch nếu chưa từng fetch hoặc là lần mount đầu tiên
+    if (!hasFetchedData.current || isInitialMount.current) {
+      console.log("✅ WebSocket connected, fetching schema data");
+      fetchSchemaData(stableCallbacks);
+      hasFetchedData.current = true;
+      isInitialMount.current = false;
+    } else {
+      console.log("⏭️ Data already fetched, skipping");
+    }
+  }, [isConnected]); // ⭐ CHỈ depend vào isConnected
+
+  // ✅ Reset flag khi đổi diagram
+  useEffect(() => {
+    hasFetchedData.current = false;
+    isInitialMount.current = true;
+  }, [diagramId]);
 
   // Node synchronization with change detection
   const nodesFingerprint = useMemo(() => {
@@ -557,7 +578,7 @@ export const useSchemaVisualizer = () => {
     setIsUpdatingFromWebSocket,
     stableCallbacks,
     setSchemaInfo,
-    setOnlineUsernames,
+    // setOnlineUsernames,
   });
 
   // ✅ Gọi useWebSocketListener ở đây
@@ -566,6 +587,8 @@ export const useSchemaVisualizer = () => {
     enabled: true,
     diagramId: diagramId,
   });
+
+  console.log("hiep2 email: ", onlineUsernames);
 
   return {
     // Data state

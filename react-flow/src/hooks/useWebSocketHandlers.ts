@@ -2,6 +2,7 @@
 import { useRef, useEffect, useCallback } from "react";
 import { getVietnamTime } from "../utils";
 import { SchemaData } from "../SchemaVisualizer/SchemaVisualizer.types";
+import { useWebSocketContext } from "../contexts/WebSocketContext";
 
 interface UseWebSocketHandlersProps {
   // updateNodePosition: any;
@@ -16,7 +17,6 @@ interface UseWebSocketHandlersProps {
   setIsUpdatingFromWebSocket?: React.Dispatch<React.SetStateAction<boolean>>;
   stableCallbacks?: any;
   setSchemaInfo: React.Dispatch<React.SetStateAction<SchemaData>>;
-  setOnlineUsernames: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const useWebSocketHandlers = ({
@@ -32,8 +32,8 @@ export const useWebSocketHandlers = ({
   setIsUpdatingFromWebSocket,
   stableCallbacks,
   setSchemaInfo,
-  setOnlineUsernames,
 }: UseWebSocketHandlersProps) => {
+  const { setOnlineUsernames } = useWebSocketContext();
   // Create stable handlers with useCallback to prevent unnecessary re-renders
   const handleNodePositionUpdate = useCallback(
     (data: any) => {
@@ -502,7 +502,7 @@ export const useWebSocketHandlers = ({
     (data: any) => {
       console.log("👥 Received user list update:", data);
 
-      // ⭐ CẬP NHẬT STATE GIỐNG NHƯ handleUpdateDiagramName
+      // ✅ Update context state
       setOnlineUsernames(data.activeUsernames || []);
     },
     [setOnlineUsernames]

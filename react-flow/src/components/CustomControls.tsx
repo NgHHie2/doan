@@ -1,34 +1,23 @@
-import {
-  border,
-  Box,
-  IconButton,
-  Tooltip,
-  useColorModeValue,
-} from "@chakra-ui/react";
-import {
-  Plus,
-  Minus,
-  Maximize2,
-  MousePointer2,
-  Maximize,
-  Minimize2,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react";
+// src/components/CustomControls.tsx
+import { Box, IconButton, Tooltip, useColorModeValue } from "@chakra-ui/react";
+import { MousePointer2, Maximize, ZoomIn, ZoomOut } from "lucide-react";
 import { useReactFlow } from "reactflow";
 import { useState, useEffect } from "react";
 import { usePermission } from "../hooks/usePermission";
+import { useWebSocketContext } from "../contexts/WebSocketContext";
 
 export const CustomControls = () => {
   const { zoomIn, zoomOut, fitView, getNodes, setNodes } = useReactFlow();
-  const { canEdit } = usePermission(); // ✅ THÊM
-  const [isInteractive, setIsInteractive] = useState(canEdit); // ✅ SỬA
+  const { canEdit } = usePermission();
+  const { isConnected } = useWebSocketContext(); // ✅ THÊM để theo dõi trạng thái connection
+
+  const [isInteractive, setIsInteractive] = useState(canEdit);
   const borderColor = useColorModeValue("#d0d7de", "#444");
   const bgColor = useColorModeValue("white", "#333");
   const iconColor = useColorModeValue("gray.700", "white");
   const hoverBg = useColorModeValue("white", "#1c1c1c");
 
-  // ✅ THÊM: Tự động disable khi VIEW mode
+  // ✅ Effect 1: Tự động disable khi VIEW mode
   useEffect(() => {
     if (!canEdit) {
       setIsInteractive(false);
@@ -42,13 +31,40 @@ export const CustomControls = () => {
     }
   }, [canEdit, getNodes, setNodes]);
 
+  // ✅ Effect 2: Tự động disable/enable khi WebSocket disconnect/reconnect
+  useEffect(() => {
+    if (!isConnected && canEdit) {
+      // Khi disconnect: tự động disable
+      console.log("❌ WebSocket disconnected - disabling interactivity");
+      setIsInteractive(false);
+      const updatedNodes = getNodes().map((node) => ({
+        ...node,
+        draggable: false,
+        selectable: false,
+        connectable: false,
+      }));
+      setNodes(updatedNodes);
+    } else if (isConnected && canEdit) {
+      // Khi reconnect: tự động enable lại (nếu user có quyền edit)
+      console.log("✅ WebSocket reconnected - enabling interactivity");
+      setIsInteractive(true);
+      const updatedNodes = getNodes().map((node) => ({
+        ...node,
+        draggable: true,
+        selectable: true,
+        connectable: true,
+      }));
+      setNodes(updatedNodes);
+    }
+  }, [isConnected, canEdit, getNodes, setNodes]);
+
   const toggleInteractivity = () => {
-    if (!canEdit) return; // ✅ THÊM: Không cho toggle nếu VIEW mode
+    if (!canEdit || !isConnected) return; // ✅ Không cho toggle nếu VIEW mode hoặc disconnected
 
     const newValue = !isInteractive;
     setIsInteractive(newValue);
 
-    // Disable drag/select/connect on all nodes
+    // Enable/disable drag/select/connect on all nodes
     const updatedNodes = getNodes().map((node) => ({
       ...node,
       draggable: newValue,
@@ -107,10 +123,14 @@ export const CustomControls = () => {
         />
       </Tooltip>
 
-      {/* ✅ SỬA: Thêm tooltip và disable khi VIEW mode */}
+      {/* ✅ Toggle Interactivity Button */}
       <Tooltip
         label={
-          canEdit ? "Toggle interactivity" : "View-only mode: editing disabled"
+          !canEdit
+            ? "View-only mode: editing disabled"
+            : !isConnected
+            ? "WebSocket disconnected: editing disabled"
+            : "Toggle interactivity"
         }
         fontSize="sm"
         placement="left"
@@ -121,8 +141,8 @@ export const CustomControls = () => {
           onClick={toggleInteractivity}
           {...buttonStyle}
           opacity={isInteractive ? 1 : 0.5}
-          isDisabled={!canEdit} // ✅ THÊM: Disable button khi VIEW mode
-          cursor={!canEdit ? "not-allowed" : "pointer"} // ✅ THÊM
+          isDisabled={!canEdit || !isConnected} // ✅ Disable khi VIEW mode HOẶC disconnected
+          cursor={!canEdit || !isConnected ? "not-allowed" : "pointer"}
         />
       </Tooltip>
     </Box>

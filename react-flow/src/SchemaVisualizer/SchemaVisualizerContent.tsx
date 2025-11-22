@@ -23,11 +23,13 @@ import { ExportDiagramButton } from "../components/ExportDiagramButton";
 import { CustomControls } from "../components/CustomControls";
 import { AutoAlignButton } from "../components/AutoAlignButton";
 import { usePermission } from "../hooks/usePermission";
+import { useWebSocketContext } from "../contexts/WebSocketContext";
 
 export const SchemaVisualizerContent = () => {
+  const { isConnected } = useWebSocketContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const chatWidth = 400;
+  const chatWidth = 340;
   const canvasBg = useColorModeValue("#f5f5f5", "#1C1c1c");
 
   const {
@@ -36,7 +38,6 @@ export const SchemaVisualizerContent = () => {
     error,
     schemaInfo,
     onlineUsernames,
-    isConnected,
 
     // ReactFlow state
     reactFlowNodes,
@@ -91,6 +92,25 @@ export const SchemaVisualizerContent = () => {
             </Badge>
             <Text fontSize="sm">
               You have view-only permission to this diagram
+            </Text>
+          </VStack>
+        </Box>
+      )}
+      {permission === "FULL_ACCESS" && !isConnected && (
+        <Box
+          position="absolute"
+          bottom={0}
+          left="50%"
+          transform="translate(-50%, 0)"
+          zIndex={9999}
+          pointerEvents="none"
+        >
+          <VStack bg="transparent" px={6} py={4} borderRadius="lg" spacing={2}>
+            <Badge colorScheme="orange" fontSize="md" px={3} py={1}>
+              DISCONNECTED
+            </Badge>
+            <Text fontSize="sm">
+              Please wait until reconnection is successful
             </Text>
           </VStack>
         </Box>

@@ -23,6 +23,7 @@ import {
   MenuList,
   MenuItem,
   Spinner,
+  Image,
 } from "@chakra-ui/react";
 import { ThemeToggle } from "../components/page/ThemeToggle";
 import {
@@ -54,6 +55,7 @@ import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { PiStar, PiStarFill } from "react-icons/pi";
 import { BsChatLeftDots, BsChatLeftDotsFill } from "react-icons/bs";
 import { IoHelp } from "react-icons/io5";
+import { useUser } from "../contexts/UserContext";
 
 interface UserData {
   firstName: string;
@@ -66,8 +68,8 @@ interface UserData {
 export function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, logout } = useUser();
+  // const [loading, setLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -80,42 +82,6 @@ export function HomePage() {
   const hoverBg = useColorModeValue("#f6f8fa", "#1c2128");
   const activeNavBg = useColorModeValue("#cbe0f8ff", "#353c47ff");
   const mutedText = useColorModeValue("#57606a", "#8b949e");
-
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch("http://localhost:8080/account/me", {
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      } else {
-        navigate("/login");
-      }
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-      navigate("/login");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch("http://localhost:8080/account/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
 
   const handleCreateDiagram = () => {
     const newId = Date.now().toString();
@@ -171,7 +137,7 @@ export function HomePage() {
   };
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [menuWidth, setMenuWidth] = useState<string>("auto");
+  // const [menuWidth, setMenuWidth] = useState<string>("auto");
 
   const SidebarContent = () => (
     <VStack h="full" spacing={0} align="stretch">
@@ -218,12 +184,12 @@ export function HomePage() {
           label="Shared with Me"
           path="/home/shared"
         />
-        <NavItem
+        {/* <NavItem
           icon={PiStar}
           activeIcon={PiStarFill}
           label="Mark Star"
           path="/home/star"
-        />
+        /> */}
         <NavItem
           icon={PiTrashSimple}
           activeIcon={PiTrashSimpleFill}
@@ -263,13 +229,7 @@ export function HomePage() {
           borderColor={borderColor}
           _hover={{ bg: hoverBg }}
         >
-          <Menu
-            onOpen={() => {
-              if (buttonRef.current) {
-                setMenuWidth(`${buttonRef.current.offsetWidth}px`);
-              }
-            }}
-          >
+          <Menu placement="top-start" matchWidth>
             <MenuButton
               as={Button}
               w="full"
@@ -279,14 +239,15 @@ export function HomePage() {
               ref={buttonRef}
             >
               <HStack spacing={3}>
-                <Avatar
-                  size="sm"
-                  name={`${user.firstName} ${user.lastName}`}
+                <Image
                   src={user.picture}
-                  flexShrink={0}
-                  borderWidth={"2px"}
+                  alt={user.username}
+                  boxSize="30px"
+                  borderRadius="full"
+                  objectFit="cover"
+                  borderWidth="2px"
                   borderColor={borderColor}
-                  colorScheme="blue"
+                  borderStyle={"solid"}
                 />
                 <VStack
                   align="start"
@@ -326,8 +287,8 @@ export function HomePage() {
             <MenuList
               bg={cardBg}
               borderColor={borderColor}
-              minW="unset"
-              w={menuWidth}
+              // minW="unset"
+              // w={menuWidth}
             >
               <MenuItem
                 icon={<Icon as={User} boxSize={4} />}
@@ -350,7 +311,7 @@ export function HomePage() {
                 color="red.500"
                 bg={cardBg}
                 _hover={{ bg: hoverBg }}
-                onClick={handleLogout}
+                onClick={logout}
               >
                 Logout
               </MenuItem>

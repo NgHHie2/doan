@@ -185,22 +185,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           _hover={{ bg: "transparent", color: penColor }}
           onClick={handleStartEditing}
         />
-
-        <IconButton
-          aria-label="Favorite"
-          icon={<Star size={18} />}
-          size="xs"
-          variant="ghost"
-          bg="transparent"
-          color="gray.400"
-          _hover={{
-            bg: "transparent",
-            color: starColor,
-            "& svg": {
-              fill: "currentColor", // ⭐ KHI HOVER → fill vàng
-            },
-          }}
-        />
       </HStack>
 
       {/* Connection status */}

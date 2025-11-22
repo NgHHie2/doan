@@ -2,6 +2,7 @@
 import React from "react";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
+import { UserProvider } from "./contexts/UserContext";
 import { SchemaVisualizer } from "./SchemaVisualizer/SchemaVisualizer";
 import { ReactFlowProvider } from "reactflow";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -19,24 +20,26 @@ function App() {
     <>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
       <ChakraProvider theme={theme}>
-        <WebSocketProvider>
-          <ReactFlowProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/home" element={<HomePage />}>
-                  <Route index element={<MyDiagramsPage />} />
-                  <Route path="shared" element={<SharedDiagramsPage />} />
-                  <Route path="trash" element={<TrashPage />} />
-                  <Route path="star" element={<StarPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                </Route>
-                <Route path="/:diagramId" element={<SchemaVisualizer />} />
-                <Route path="/" element={<Navigate to="/home" replace />} />
-              </Routes>
-            </BrowserRouter>
-          </ReactFlowProvider>
-        </WebSocketProvider>
+        <BrowserRouter>
+          <UserProvider>
+            <WebSocketProvider>
+              <ReactFlowProvider>
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/home" element={<HomePage />}>
+                    <Route index element={<MyDiagramsPage />} />
+                    <Route path="shared" element={<SharedDiagramsPage />} />
+                    <Route path="trash" element={<TrashPage />} />
+                    <Route path="star" element={<StarPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                  </Route>
+                  <Route path="/:diagramId" element={<SchemaVisualizer />} />
+                  <Route path="/" element={<Navigate to="/home" replace />} />
+                </Routes>
+              </ReactFlowProvider>
+            </WebSocketProvider>
+          </UserProvider>
+        </BrowserRouter>
       </ChakraProvider>
     </>
   );

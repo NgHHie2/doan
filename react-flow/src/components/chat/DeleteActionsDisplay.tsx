@@ -15,6 +15,7 @@ import {
 import { FC, useState, useCallback } from "react";
 import { delay, findModelIdByName } from "../../utils/nodeHelpers";
 import { FaMinus, FaLink, FaCheck } from "react-icons/fa";
+import { usePermission } from "../../hooks/usePermission";
 
 // Define the delete action structure from API
 interface DeleteAction {
@@ -37,6 +38,7 @@ export const DeleteActionsDisplay: FC<DeleteActionsDisplayProps> = ({
   onDeleteModel,
   onDeleteAttribute,
 }) => {
+  const { canEdit } = usePermission();
   const deleteBg = useColorModeValue("red.50", "red.900");
   const itemBg = useColorModeValue("white", "gray.700");
   const toast = useToast();
@@ -255,7 +257,7 @@ export const DeleteActionsDisplay: FC<DeleteActionsDisplayProps> = ({
                 </Text>
                 <Badge colorScheme="red">{action.name}</Badge>
               </HStack>
-              {action.drop_table && (
+              {action.drop_table && canEdit && (
                 <Tooltip label="Xóa bảng">
                   <IconButton
                     aria-label="Delete table"
@@ -299,19 +301,21 @@ export const DeleteActionsDisplay: FC<DeleteActionsDisplayProps> = ({
                             {attrName}
                           </Code>
                         </HStack>
-                        <Tooltip label="Xóa thuộc tính">
-                          <IconButton
-                            aria-label="Delete attribute"
-                            icon={<FaMinus />}
-                            size="xs"
-                            variant="ghost"
-                            colorScheme="red"
-                            isLoading={isProcessing}
-                            onClick={() =>
-                              handleDeleteAttribute(action.name, attrName)
-                            }
-                          />
-                        </Tooltip>
+                        {canEdit && (
+                          <Tooltip label="Xóa thuộc tính">
+                            <IconButton
+                              aria-label="Delete attribute"
+                              icon={<FaMinus />}
+                              size="xs"
+                              variant="ghost"
+                              colorScheme="red"
+                              isLoading={isProcessing}
+                              onClick={() =>
+                                handleDeleteAttribute(action.name, attrName)
+                              }
+                            />
+                          </Tooltip>
+                        )}
                       </HStack>
                     );
                   })}
@@ -349,19 +353,21 @@ export const DeleteActionsDisplay: FC<DeleteActionsDisplayProps> = ({
                             {fkName}
                           </Code>
                         </HStack>
-                        <Tooltip label="Xóa khóa ngoại">
-                          <IconButton
-                            aria-label="Delete foreign key"
-                            icon={<FaMinus />}
-                            size="xs"
-                            variant="ghost"
-                            colorScheme="red"
-                            isLoading={isProcessing}
-                            onClick={() =>
-                              handleDeleteAttribute(action.name, fkName)
-                            }
-                          />
-                        </Tooltip>
+                        {canEdit && (
+                          <Tooltip label="Xóa khóa ngoại">
+                            <IconButton
+                              aria-label="Delete foreign key"
+                              icon={<FaMinus />}
+                              size="xs"
+                              variant="ghost"
+                              colorScheme="red"
+                              isLoading={isProcessing}
+                              onClick={() =>
+                                handleDeleteAttribute(action.name, fkName)
+                              }
+                            />
+                          </Tooltip>
+                        )}
                       </HStack>
                     );
                   })}
@@ -371,16 +377,18 @@ export const DeleteActionsDisplay: FC<DeleteActionsDisplayProps> = ({
           </Box>
         );
       })}
-      <Button
-        size="sm"
-        colorScheme="red"
-        leftIcon={<FaCheck />}
-        onClick={handleAcceptAll}
-        isLoading={isAcceptingAll}
-        loadingText="Đang xử lý..."
-      >
-        Accept All
-      </Button>
+      {canEdit && (
+        <Button
+          size="sm"
+          colorScheme="red"
+          leftIcon={<FaCheck />}
+          onClick={handleAcceptAll}
+          isLoading={isAcceptingAll}
+          loadingText="Đang xử lý..."
+        >
+          Accept All
+        </Button>
+      )}
     </VStack>
   );
 };

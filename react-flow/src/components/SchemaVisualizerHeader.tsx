@@ -8,6 +8,7 @@ import {
   useColorModeValue,
   useBreakpointValue,
   useDisclosure,
+  Image,
 } from "@chakra-ui/react";
 import { MdHistory } from "react-icons/md";
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
@@ -16,6 +17,7 @@ import { AccountGroup } from "./AccountGroup";
 import { FloatingUnitButton } from "./page/FloatingUnitButton";
 import { ThemeToggle } from "./page/ThemeToggle";
 import { ManageMembersDialog } from "./ManageMembersDialog";
+import { useUser } from "../contexts/UserContext";
 
 interface SchemaVisualizerHeaderProps {
   onChatToggle?: () => void;
@@ -28,6 +30,7 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
   isChatOpen = false,
   onlineUsernames = [],
 }) => {
+  const { user } = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const borderColor = useColorModeValue("#d0d7de", "#444");
@@ -110,17 +113,20 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
           <ThemeToggle />
         </Stack>
         {/* Avatar luôn trên cùng */}
-        <Tooltip label="Profile" placement={tooltipPlacement} hasArrow>
-          <Avatar
-            h="40px"
-            w="40px"
-            name="Hiep"
-            cursor="pointer"
-            _hover={{
-              transform: "scale(1.05)",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            }}
-            transition="all 0.2s ease"
+        <Tooltip
+          label={user.username + "@gmail.com"}
+          placement={tooltipPlacement}
+          hasArrow
+        >
+          <Image
+            src={user.picture}
+            alt={user.username}
+            boxSize="40px"
+            borderRadius="full"
+            objectFit="cover"
+            borderWidth="2px"
+            borderColor={borderColor}
+            borderStyle={"solid"}
           />
         </Tooltip>
       </Stack>

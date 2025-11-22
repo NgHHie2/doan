@@ -29,6 +29,7 @@ export const AccountGroup: React.FC<AccountGroupProps> = ({
     const usersWithEmail = onlineUsernames.map(
       (username) => `${username}@gmail.com`
     );
+    console.log("hiep email: ", usersWithEmail);
     setOnlineUsers(usersWithEmail);
     setLoading(false);
   }, [onlineUsernames]);

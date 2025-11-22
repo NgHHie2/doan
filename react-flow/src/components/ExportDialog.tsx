@@ -477,7 +477,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         bg={bgColor}
         color={textColor}
       >
-        <ModalHeader>Export Diagram</ModalHeader>
+        <ModalHeader pb={0}>Export Diagram</ModalHeader>
         <ModalCloseButton />
 
         <ModalBody>
@@ -522,8 +522,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                     <Radio value="json" />
                   </HStack>
                 </Box>
-
-                {/* SQL Option */}
+                {/* SQL Option
                 <Box
                   p={4}
                   border="2px solid"
@@ -582,18 +581,17 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                       </VStack>
                     </>
                   )}
-                </Box>
-
+                </Box> */}
                 {/* Image Option */}
                 <Box
                   p={4}
                   border="2px solid"
                   borderColor={
-                    exportType === "image" ? selectedBorderColor : borderColor
+                    exportType === "image" ? imageIconColor : borderColor
                   }
                   borderRadius="md"
                   cursor="pointer"
-                  _hover={{ borderColor: hoverBorderColor }}
+                  _hover={{ borderColor: imageIconColor }}
                   onClick={() => setExportType("image")}
                   bg={exportType === "image" ? boxBg : "transparent"}
                 >
@@ -612,7 +610,7 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
                         </Text>
                       </VStack>
                     </HStack>
-                    <Radio value="image" />
+                    <Radio value="image" colorScheme="purple" />
                   </HStack>
                 </Box>
               </VStack>
