@@ -23,6 +23,7 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
+  Image,
 } from "@chakra-ui/react";
 import { FiSearch, FiTrash2, FiUserPlus } from "react-icons/fi";
 import { useParams } from "react-router-dom";
@@ -259,9 +260,9 @@ export const ManageMembersDialog: React.FC<ManageMembersDialogProps> = ({
                   >
                     <HStack justify="space-between">
                       <HStack>
-                        <Avatar
-                          size="sm"
-                          name={searchResult.name}
+                        <Image
+                          boxSize="35px"
+                          // name={searchResult.name}
                           src={searchResult.picture}
                         />
                         <VStack align="start" spacing={0}>

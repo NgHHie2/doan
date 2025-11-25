@@ -19,13 +19,16 @@ public class DatabaseDiagram extends Diagram {
     private String version;
     private String charset;
     private String collation;
-    
+
+    @Column(length = 64)
+    private String lastSnapshotHash;
+
     @OneToMany(mappedBy = "databaseDiagram")
     private List<Migration> migrations;
-    
+
     @OneToMany(mappedBy = "databaseDiagram")
     private List<Model> models; // DatabaseDiagram có models trực tiếp
-    
+
     public enum DatabaseType {
         MYSQL, POSTGRESQL, ORACLE, SQL_SERVER, SQLITE, MONGODB, REDIS, CASSANDRA, CUSTOM
     }

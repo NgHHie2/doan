@@ -17,21 +17,31 @@ import { AccountGroup } from "./AccountGroup";
 import { FloatingUnitButton } from "./page/FloatingUnitButton";
 import { ThemeToggle } from "./page/ThemeToggle";
 import { ManageMembersDialog } from "./ManageMembersDialog";
+import { HistoryListDialog } from "./HistoryListDialog";
 import { useUser } from "../contexts/UserContext";
+import { useParams } from "react-router-dom";
 
 interface SchemaVisualizerHeaderProps {
   onChatToggle?: () => void;
   isChatOpen?: boolean;
   onlineUsernames?: string[];
+  isHistoryView?: boolean; // ⭐ NEW: Flag để biết có phải history view không
 }
 
 export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
   onChatToggle,
   isChatOpen = false,
   onlineUsernames = [],
+  isHistoryView = false, // ⭐ NEW
 }) => {
   const { user } = useUser();
+  const { diagramId } = useParams<{ diagramId: string }>();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isHistoryOpen,
+    onOpen: onHistoryOpen,
+    onClose: onHistoryClose,
+  } = useDisclosure();
 
   const borderColor = useColorModeValue("#d0d7de", "#444");
   const bgColor = useColorModeValue("white", "#333");
@@ -72,7 +82,7 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
             onClick={() => setMenuOpen(!menuOpen)}
             sx={{
               transition: "transform 0.2s ease",
-              transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)", // xoay lên khi mở menu
+              transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)",
             }}
           />
         </Box>
@@ -82,36 +92,44 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
           direction={{ base: "column", sm: "row" }}
           spacing={{ base: 2, sm: 1.5 }}
           display={{
-            base: menuOpen ? "flex" : "none", // mobile show khi click
-            sm: "flex", // desktop luôn show
+            base: menuOpen ? "flex" : "none",
+            sm: "flex",
           }}
           align="center"
         >
-          <AccountGroup onlineUsernames={onlineUsernames} />
-          <Tooltip label="Add member" placement={tooltipPlacement} hasArrow>
-            <IconButton
-              borderRadius="50%"
-              aria-label="Add member"
-              icon={<AiOutlineUsergroupAdd size={20} />}
-              {...buttonStyle}
-              onClick={onOpen}
-            />
-          </Tooltip>
-          <Tooltip
-            label="Activity history"
-            placement={tooltipPlacement}
-            hasArrow
-          >
-            <IconButton
-              aria-label="Activity history"
-              icon={<MdHistory size={20} />}
-              {...buttonStyle}
-              onClick={() => console.log("History clicked")}
-            />
-          </Tooltip>
-          <FloatingUnitButton onClick={onChatToggle} />
+          {/* ⭐ Chỉ hiển thị các button này nếu KHÔNG phải history view */}
+          {!isHistoryView && (
+            <>
+              <AccountGroup onlineUsernames={onlineUsernames} />
+              <Tooltip label="Add member" placement={tooltipPlacement} hasArrow>
+                <IconButton
+                  borderRadius="50%"
+                  aria-label="Add member"
+                  icon={<AiOutlineUsergroupAdd size={20} />}
+                  {...buttonStyle}
+                  onClick={onOpen}
+                />
+              </Tooltip>
+              <Tooltip
+                label="Activity history"
+                placement={tooltipPlacement}
+                hasArrow
+              >
+                <IconButton
+                  aria-label="Activity history"
+                  icon={<MdHistory size={20} />}
+                  {...buttonStyle}
+                  onClick={onHistoryOpen}
+                />
+              </Tooltip>
+              <FloatingUnitButton onClick={onChatToggle} />
+            </>
+          )}
+
+          {/* ⭐ Theme toggle luôn hiển thị */}
           <ThemeToggle />
         </Stack>
+
         {/* Avatar luôn trên cùng */}
         <Tooltip
           label={user.username + "@gmail.com"}
@@ -130,7 +148,18 @@ export const SchemaVisualizerHeader: React.FC<SchemaVisualizerHeaderProps> = ({
           />
         </Tooltip>
       </Stack>
-      <ManageMembersDialog isOpen={isOpen} onClose={onClose} />
+
+      {/* ⭐ Dialogs - chỉ hiện khi không phải history view */}
+      {!isHistoryView && (
+        <>
+          <ManageMembersDialog isOpen={isOpen} onClose={onClose} />
+          <HistoryListDialog
+            isOpen={isHistoryOpen}
+            onClose={onHistoryClose}
+            diagramId={diagramId || ""}
+          />
+        </>
+      )}
     </Box>
   );
 };

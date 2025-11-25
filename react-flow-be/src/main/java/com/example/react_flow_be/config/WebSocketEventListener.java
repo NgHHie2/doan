@@ -3,6 +3,7 @@ package com.example.react_flow_be.config;
 
 import com.example.react_flow_be.config.DiagramSessionManager;
 import com.example.react_flow_be.dto.websocket.WebSocketResponse;
+import com.example.react_flow_be.service.MigrationService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class WebSocketEventListener {
 
     private final DiagramSessionManager sessionManager;
     private final SimpMessagingTemplate messagingTemplate;
+    private final MigrationService migrationService;
 
     private static final Pattern DIAGRAM_TOPIC_PATTERN = Pattern.compile("/topic/diagram/(\\d+)");
 
@@ -44,9 +46,21 @@ public class WebSocketEventListener {
         String sessionId = headerAccessor.getSessionId();
 
         Long diagramId = sessionManager.getDiagramForSession(sessionId);
-        String username = sessionManager.getUsernameForSession(sessionId); // ⭐ Get username
+        String username = sessionManager.getUsernameForSession(sessionId);
 
-        if (diagramId != null) {
+        if (diagramId != null && username != null) {
+            // 🔥 TẠO SNAPSHOT KHI USER DISCONNECT
+            try {
+                boolean snapshotCreated = migrationService.createSnapshotOnDisconnect(diagramId, username);
+                if (snapshotCreated) {
+                    log.info("✅ Created migration snapshot for diagram {} by user {}", diagramId, username);
+                } else {
+                    log.info("ℹ️ No changes detected, skipped snapshot for diagram {}", diagramId);
+                }
+            } catch (Exception e) {
+                log.error("❌ Error creating snapshot on disconnect: {}", e.getMessage(), e);
+            }
+
             sessionManager.leaveDiagram(sessionId);
 
             // Notify other users about user list change
@@ -62,7 +76,7 @@ public class WebSocketEventListener {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = headerAccessor.getSessionId();
         String destination = headerAccessor.getDestination();
-        String username = headerAccessor.getFirstNativeHeader("X-Username"); // ⭐ Get username
+        String username = headerAccessor.getFirstNativeHeader("X-Username");
 
         if (destination != null) {
             Matcher matcher = DIAGRAM_TOPIC_PATTERN.matcher(destination);
@@ -106,7 +120,6 @@ public class WebSocketEventListener {
                 userCount,
                 System.currentTimeMillis());
 
-        // ⭐ Sử dụng WebSocketResponse.success() như các message khác
         WebSocketResponse<UserListMessage> response = WebSocketResponse.success("USER_LIST_UPDATE", data, null);
 
         messagingTemplate.convertAndSend(
@@ -117,7 +130,6 @@ public class WebSocketEventListener {
                 diagramId, userCount);
     }
 
-    // ⭐ Updated DTO with username list
     public record UserListMessage(
             Long diagramId,
             Set<String> activeUsernames,

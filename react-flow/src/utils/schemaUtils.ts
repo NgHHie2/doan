@@ -13,11 +13,11 @@ import {
 } from "../SchemaVisualizer/SchemaVisualizer.types";
 
 export const createNodePositionUpdate = (node: Node): NodePositionUpdate => ({
-  nodeId: node.id,
+  // nodeId: node.id,
   modelId: node.data.id, // Get modelId from node data
   positionX: node.position.x,
   positionY: node.position.y,
-  diagramId: node.data.diagramId,
+  // diagramId: node.data.diagramId,
 });
 
 export const findModelByFieldId = (

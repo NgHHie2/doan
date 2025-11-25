@@ -5,31 +5,39 @@ import {
   findModelIdByName,
   delay,
 } from "../utils/nodeHelpers";
+import { useStoreApi } from "reactflow";
 
 interface UseChatActionsProps {
   allNodes: Map<string, any>;
-  // Original handlers từ useSchemaVisualizer
-  onAddModel?: () => string;
-  onAddAttribute?: (modelId: string) => string;
-  onFieldNameUpdate?: (attributeId: string, attributeName: string) => void;
-  onFieldTypeUpdate?: (attributeId: string, attributeType: string) => void;
+
+  // Handlers từ useSchemaVisualizer (async)
+  onAddModel?: () => Promise<string | null>;
+  onAddAttribute?: (modelId: string) => Promise<string | null>;
+  onFieldNameUpdate?: (
+    attributeId: string,
+    attributeName: string
+  ) => Promise<void>;
+  onFieldTypeUpdate?: (
+    attributeId: string,
+    attributeType: string
+  ) => Promise<void>;
   onToggleKeyType?: (
     modelId: string,
     attributeId: string,
     keyType: "NORMAL" | "PRIMARY" | "FOREIGN"
-  ) => void;
+  ) => Promise<void>;
   onForeignKeyConnect?: (
     attributeId: string,
     targetModelId: string,
     targetAttributeId: string
-  ) => void;
+  ) => Promise<void>;
   onModelNameUpdate?: (
     modelId: string,
     oldName: string,
     newName: string
-  ) => void;
-  onDeleteModel?: (modelId: string) => void;
-  onDeleteAttribute?: (modelId: string, attributeId: string) => void;
+  ) => Promise<void>;
+  onDeleteModel?: (modelId: string) => Promise<void>;
+  onDeleteAttribute?: (modelId: string, attributeId: string) => Promise<void>;
 }
 
 /**
@@ -48,6 +56,8 @@ export const useChatActions = ({
   onDeleteModel,
   onDeleteAttribute,
 }: UseChatActionsProps) => {
+  const storeApi = useStoreApi();
+  const getNodeInternals = () => storeApi.getState().nodeInternals;
   /**
    * Tạo model mới với tên cụ thể
    */
@@ -58,15 +68,15 @@ export const useChatActions = ({
       }
 
       // 1. Tạo model mới
-      const id = onAddModel();
+      const id = await onAddModel();
       console.log("vjp pro: ", id);
-      await delay(300);
+      await delay(100);
 
       // 4. Rename model
-      onModelNameUpdate(id, "Model", modelName);
+      await onModelNameUpdate(id, "Model", modelName);
 
       // 5. Đợi rename hoàn tất
-      await delay(300);
+      await delay(100);
     },
     [onAddModel, onModelNameUpdate, allNodes]
   );
@@ -89,27 +99,27 @@ export const useChatActions = ({
       ) {
         throw new Error("Required handlers not provided");
       }
+      console.log("bucvc: ", attributeName);
 
       // 1. Tạo attribute mới
-      const id = onAddAttribute(modelId);
-
-      // 2. Đợi attribute được tạo
-      await delay(300);
-
-      // 3. Tìm attribute vừa tạo
-      const attributeId = id;
-
-      // 4. Update name
-      onFieldNameUpdate(attributeId, attributeName);
+      const id = await onAddAttribute(modelId);
       await delay(100);
 
+      console.log("bucvc: ", id);
+
+      // 4. Update name
+      await onFieldNameUpdate(id, attributeName);
+      await delay(100);
+
+      console.log("bucvc: ", attributeName);
+
       // 5. Update type
-      onFieldTypeUpdate(attributeId, dataType);
+      await onFieldTypeUpdate(id, dataType);
       await delay(100);
 
       // 6. Set primary key nếu cần
       if (isPrimaryKey) {
-        onToggleKeyType(modelId, attributeId, "PRIMARY");
+        await onToggleKeyType(modelId, id, "PRIMARY");
         await delay(100);
       }
     },
@@ -136,9 +146,11 @@ export const useChatActions = ({
         throw new Error("Required handlers not provided");
       }
 
+      const nodes = getNodeInternals();
+
       // 1. Tìm source attribute ID
       const sourceAttributeId = findAttributeIdByName(
-        allNodes,
+        nodes,
         sourceModelId,
         sourceColumnName
       );
@@ -149,14 +161,14 @@ export const useChatActions = ({
       }
 
       // 2. Tìm target model ID
-      const targetModelId = findModelIdByName(allNodes, targetModelName);
+      const targetModelId = findModelIdByName(nodes, targetModelName);
       if (!targetModelId) {
         throw new Error(`Không tìm thấy model ${targetModelName}`);
       }
 
       // 3. Tìm target attribute ID
       const targetAttributeId = findAttributeIdByName(
-        allNodes,
+        nodes,
         targetModelId,
         targetColumnName
       );
@@ -167,12 +179,16 @@ export const useChatActions = ({
       }
 
       // 4. Set source attribute as foreign key
-      onToggleKeyType(sourceModelId, sourceAttributeId, "FOREIGN");
-      await delay(200);
+      await onToggleKeyType(sourceModelId, sourceAttributeId, "FOREIGN");
+      await delay(100);
 
       // 5. Create connection
-      onForeignKeyConnect(sourceAttributeId, targetModelId, targetAttributeId);
-      await delay(200);
+      await onForeignKeyConnect(
+        sourceAttributeId,
+        targetModelId,
+        targetAttributeId
+      );
+      await delay(100);
     },
     [onForeignKeyConnect, onToggleKeyType, allNodes]
   );
@@ -186,8 +202,8 @@ export const useChatActions = ({
         throw new Error("Delete model handler not provided");
       }
 
-      onDeleteModel(modelId);
-      await delay(200);
+      await onDeleteModel(modelId);
+      await delay(100);
     },
     [onDeleteModel]
   );
@@ -201,8 +217,8 @@ export const useChatActions = ({
         throw new Error("Delete attribute handler not provided");
       }
 
-      onDeleteAttribute(modelId, attributeId);
-      await delay(200);
+      await onDeleteAttribute(modelId, attributeId);
+      await delay(100);
     },
     [onDeleteAttribute]
   );

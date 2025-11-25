@@ -52,7 +52,7 @@ export interface ChatbotResponse {
 }
 
 class ChatbotService {
-  private readonly API_URL = "https://00d99f7eeb33.ngrok-free.app/generate";
+  private readonly API_URL = "http://localhost:8000/generate";
 
   /**
    * Parse string response từ API thành object ChatbotResponse
@@ -116,10 +116,10 @@ class ChatbotService {
   }
 
   private extractCreateArray(str: string): string | null {
-    const start = str.indexOf("create:[");
+    const start = str.indexOf("create: [");
     if (start === -1) return null;
 
-    let i = start + "create:[".length;
+    let i = start + "create: [".length;
     let depth = 1;
 
     while (i < str.length) {
@@ -128,7 +128,7 @@ class ChatbotService {
 
       if (depth === 0) {
         // vị trí kết thúc mảng
-        return str.slice(start + "create:[".length, i);
+        return str.slice(start + "create: [".length, i);
       }
 
       i++;
@@ -138,10 +138,10 @@ class ChatbotService {
   }
 
   private extractDeleteArray(str: string): string | null {
-    const start = str.indexOf("delete:[");
+    const start = str.indexOf("delete: [");
     if (start === -1) return null;
 
-    let i = start + "delete:[".length;
+    let i = start + "delete: [".length;
     let depth = 1;
 
     while (i < str.length) {
@@ -150,7 +150,7 @@ class ChatbotService {
 
       if (depth === 0) {
         // vị trí kết thúc mảng
-        return str.slice(start + "delete:[".length, i);
+        return str.slice(start + "delete: [".length, i);
       }
 
       i++;

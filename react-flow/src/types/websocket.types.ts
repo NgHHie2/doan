@@ -6,11 +6,10 @@ export interface BaseUpdate {
 }
 
 export interface NodePositionUpdate extends BaseUpdate {
-  nodeId: string;
+  // nodeId: string;
   modelId: string;
   positionX: number;
   positionY: number;
-  diagramId: number;
 }
 
 export interface FieldUpdate extends BaseUpdate {

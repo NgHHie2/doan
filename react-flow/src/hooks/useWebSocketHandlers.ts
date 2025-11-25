@@ -50,7 +50,7 @@ export const useWebSocketHandlers = ({
       // CRITICAL: Also update ReactFlow nodes directly
       setReactFlowNodes((currentNodes: any) => {
         return currentNodes.map((node: any) => {
-          if (node.id !== data.nodeId) return node;
+          if (node.id !== data.modelId) return node;
 
           const oldTime = new Date(node.data?.positionUpdatedAt || 0);
           const newTime = new Date(data.clientTimestamp + "Z");

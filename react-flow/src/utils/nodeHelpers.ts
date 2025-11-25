@@ -13,7 +13,10 @@ export const findAttributeIdByName = (
   attrName: string
 ): string | null => {
   const node = allNodes.get(modelId);
-  if (!node || node.type !== "model") return null;
+  if (!node) {
+    console.log("Không tìm thấy model ", node.id);
+    return null;
+  }
 
   const attr = node.data?.attributes?.find((a: any) => a.name === attrName);
   return attr?.id || null;
@@ -26,9 +29,11 @@ export const findModelIdByName = (
   allNodes: Map<string, any>,
   modelName: string
 ): string | null => {
-  for (const [nodeId, node] of allNodes.entries()) {
-    if (node.type === "model" && node.data?.name === modelName) {
-      return nodeId;
+  console.log("namee: " + modelName);
+  console.log("nodess: ", allNodes);
+  for (const [modelId, node] of allNodes.entries()) {
+    if (node.data?.name == modelName) {
+      return node.id;
     }
   }
   return null;

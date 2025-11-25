@@ -112,7 +112,7 @@ export const useSchemaVisualizer = () => {
   const reactFlowInstance = useReactFlow();
 
   // Model operation handlers
-  const handleAddModel = useCallback(() => {
+  const handleAddModel = useCallback(async () => {
     if (!schemaInfo || !reactFlowInstance) return;
     console.log("Adding model, current nodes:", reactFlowNodes);
 
@@ -175,7 +175,7 @@ export const useSchemaVisualizer = () => {
     });
 
     if (isConnected) {
-      sendAddModel({
+      await sendAddModel({
         modelId: newModelId,
         positionX: positionX - 140,
         positionY: positionY - 60,
@@ -194,7 +194,7 @@ export const useSchemaVisualizer = () => {
   ]);
 
   const handleModelNameUpdate = useCallback(
-    (modelId: string, oldName: string, newName: string) => {
+    async (modelId: string, oldName: string, newName: string) => {
       console.log("🏷️ handleModelNameUpdate called:", { modelId, newName });
 
       if (oldName === newName || !newName.trim()) {
@@ -234,7 +234,7 @@ export const useSchemaVisualizer = () => {
       // Gửi WebSocket để sync với other clients
       if (isConnected) {
         console.log("📤 Sending model name update via WebSocket");
-        sendUpdateModelName({
+        await sendUpdateModelName({
           modelId: modelId,
           oldModelName: oldName,
           newModelName: trimmedNewName,
@@ -247,7 +247,7 @@ export const useSchemaVisualizer = () => {
   );
 
   const handleDeleteModel = useCallback(
-    (modelId: string) => {
+    async (modelId: string) => {
       const node = reactFlowNodesRef.current.find((n: any) => n.id === modelId);
 
       if (!node) {
@@ -262,7 +262,7 @@ export const useSchemaVisualizer = () => {
 
       // Gửi WebSocket
       if (isConnected) {
-        sendDeleteModel({
+        await sendDeleteModel({
           modelId: modelId,
         });
       }
@@ -588,7 +588,7 @@ export const useSchemaVisualizer = () => {
     diagramId: diagramId,
   });
 
-  console.log("hiep2 email: ", onlineUsernames);
+  // console.log("hiep2 email: ", onlineUsernames);
 
   return {
     // Data state
@@ -600,6 +600,7 @@ export const useSchemaVisualizer = () => {
 
     // ReactFlow state
     reactFlowNodes,
+    setReactFlowNodes,
     reactFlowEdges,
     onNodesChange: enhancedOnNodesChange,
     onEdgesChange,

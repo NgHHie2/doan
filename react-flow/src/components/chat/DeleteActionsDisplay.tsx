@@ -16,6 +16,7 @@ import { FC, useState, useCallback } from "react";
 import { delay, findModelIdByName } from "../../utils/nodeHelpers";
 import { FaMinus, FaLink, FaCheck } from "react-icons/fa";
 import { usePermission } from "../../hooks/usePermission";
+import { ReactFlowState, useStore } from "reactflow";
 
 // Define the delete action structure from API
 interface DeleteAction {
@@ -27,17 +28,18 @@ interface DeleteAction {
 
 interface DeleteActionsDisplayProps {
   deleteActions: DeleteAction[];
-  allNodes: Map<string, any>;
+  // allNodes: Map<string, any>;
   onDeleteModel?: (modelId: string) => Promise<void>;
   onDeleteAttribute?: (modelId: string, attributeId: string) => Promise<void>;
 }
 
 export const DeleteActionsDisplay: FC<DeleteActionsDisplayProps> = ({
   deleteActions,
-  allNodes,
+  // allNodes,
   onDeleteModel,
   onDeleteAttribute,
 }) => {
+  const allNodes = useStore((state: ReactFlowState) => state.nodeInternals);
   const { canEdit } = usePermission();
   const deleteBg = useColorModeValue("red.50", "red.900");
   const itemBg = useColorModeValue("white", "gray.700");

@@ -1,4 +1,4 @@
-// src/SchemaVisualizer/SchemaVisualizer.tsx
+// src/SchemaVisualizer/SchemaVisualizerContent.tsx
 import React, { useState } from "react";
 import {
   Badge,
@@ -24,8 +24,10 @@ import { CustomControls } from "../components/CustomControls";
 import { AutoAlignButton } from "../components/AutoAlignButton";
 import { usePermission } from "../hooks/usePermission";
 import { useWebSocketContext } from "../contexts/WebSocketContext";
+import { useWebSocketSender } from "../hooks/useWebSocketSender";
 
 export const SchemaVisualizerContent = () => {
+  const { sendNodePositionUpdate } = useWebSocketSender();
   const { isConnected } = useWebSocketContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -41,6 +43,7 @@ export const SchemaVisualizerContent = () => {
 
     // ReactFlow state
     reactFlowNodes,
+    setReactFlowNodes,
     reactFlowEdges,
     onNodesChange,
     onEdgesChange,
@@ -115,11 +118,13 @@ export const SchemaVisualizerContent = () => {
           </VStack>
         </Box>
       )}
+
       {/* Header với Avatar, Theme Toggle, Chat, History, Add Member */}
       <SchemaVisualizerHeader
         onChatToggle={() => setIsChatOpen(!isChatOpen)}
         isChatOpen={isChatOpen}
         onlineUsernames={onlineUsernames}
+        isHistoryView={false}
       />
 
       {/* Left side buttons */}
@@ -141,7 +146,10 @@ export const SchemaVisualizerContent = () => {
               onAddModel={handleAddModel}
             />
             <TableListButton onClick={onOpen} />
-            <AutoAlignButton />
+            <AutoAlignButton
+              setReactFlowNodes={setReactFlowNodes}
+              sendNodePositionUpdate={sendNodePositionUpdate}
+            />
           </>
         )}
 
@@ -152,7 +160,6 @@ export const SchemaVisualizerContent = () => {
 
       <ControlPanel
         schemaName={schemaInfo.name}
-        // isConnected={isConnected}
         loading={loading}
         onReset={handleReset}
       />
@@ -182,7 +189,7 @@ export const SchemaVisualizerContent = () => {
         onModelNameUpdate={handleModelNameUpdate}
       />
 
-      {/* Floating Chat Panel - Tái sử dụng từ HomePage */}
+      {/* Floating Chat Panel */}
       <FloatingChat
         isOpen={isChatOpen}
         width={chatWidth}

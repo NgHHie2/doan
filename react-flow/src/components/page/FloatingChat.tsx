@@ -26,28 +26,35 @@ import { useChatActions } from "../../hooks/useChatActions";
 interface FloatingChatProps {
   isOpen: boolean;
   width?: number;
-  // Handlers từ useSchemaVisualizer
-  onAddModel?: () => string;
-  onAddAttribute?: (modelId: string) => string;
-  onFieldNameUpdate?: (attributeId: string, attributeName: string) => void;
-  onFieldTypeUpdate?: (attributeId: string, attributeType: string) => void;
+
+  // Handlers từ useSchemaVisualizer (async)
+  onAddModel?: () => Promise<string | null>;
+  onAddAttribute?: (modelId: string) => Promise<string | null>;
+  onFieldNameUpdate?: (
+    attributeId: string,
+    attributeName: string
+  ) => Promise<void>;
+  onFieldTypeUpdate?: (
+    attributeId: string,
+    attributeType: string
+  ) => Promise<void>;
   onToggleKeyType?: (
     modelId: string,
     attributeId: string,
     keyType: "NORMAL" | "PRIMARY" | "FOREIGN"
-  ) => void;
+  ) => Promise<void>;
   onForeignKeyConnect?: (
     attributeId: string,
     targetModelId: string,
     targetAttributeId: string
-  ) => void;
+  ) => Promise<void>;
   onModelNameUpdate?: (
     modelId: string,
     oldName: string,
     newName: string
-  ) => void;
-  onDeleteModel?: (modelId: string) => void;
-  onDeleteAttribute?: (modelId: string, attributeId: string) => void;
+  ) => Promise<void>;
+  onDeleteModel?: (modelId: string) => Promise<void>;
+  onDeleteAttribute?: (modelId: string, attributeId: string) => Promise<void>;
 }
 
 interface Message {
@@ -85,7 +92,7 @@ const FloatingChat: FC<FloatingChatProps> = ({
 
   // Lấy danh sách nodes từ ReactFlow store
   const allNodes = useStore((state: ReactFlowState) => state.nodeInternals);
-
+  // console.log("aizz siba: ", allNodes);
   // Sử dụng custom hook để xử lý actions
   const {
     handleCreateModel,
@@ -199,7 +206,11 @@ const FloatingChat: FC<FloatingChatProps> = ({
       const response = await chatbotService.sendMessage({
         diagram: { models },
         question: inputValue,
-        history: "None",
+        history:
+          messages.length > 0
+            ? messages[messages.length - 1].response.tomtat
+            : "",
+
         max_new_tokens: 2056,
         do_sample: false,
       });
@@ -207,7 +218,7 @@ const FloatingChat: FC<FloatingChatProps> = ({
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
-        text: response.tomtat || response.message,
+        text: "",
         response: response,
       };
 
@@ -340,7 +351,7 @@ const FloatingChat: FC<FloatingChatProps> = ({
                   {msg.response.create.length > 0 && (
                     <CreateActionsDisplay
                       createActions={msg.response.create}
-                      allNodes={allNodes}
+                      // allNodes={allNodes}
                       onCreateModel={handleCreateModel}
                       onCreateAttribute={handleCreateAttribute}
                       onCreateForeignKey={handleCreateForeignKey}
@@ -351,37 +362,14 @@ const FloatingChat: FC<FloatingChatProps> = ({
                   {msg.response.delete.length > 0 && (
                     <DeleteActionsDisplay
                       deleteActions={msg.response.delete}
-                      allNodes={allNodes}
+                      // allNodes={allNodes}
                       onDeleteModel={handleDeleteModel}
                       onDeleteAttribute={handleDeleteAttribute}
                     />
                   )}
 
                   {/* TOMTAT Section */}
-                  {msg.response.tomtat && (
-                    <Box
-                      p={2}
-                      bg={useColorModeValue("blue.50", "blue.900")}
-                      borderRadius="md"
-                      borderLeft="3px solid"
-                      borderColor="blue.500"
-                    >
-                      <Text
-                        fontSize="xs"
-                        fontWeight="bold"
-                        color="blue.600"
-                        mb={1}
-                      >
-                        📋 SUMMARY
-                      </Text>
-                      <Text
-                        fontSize="xs"
-                        color={useColorModeValue("gray.700", "gray.300")}
-                      >
-                        {msg.response.tomtat}
-                      </Text>
-                    </Box>
-                  )}
+                  {msg.response.tomtat && <Text>{msg.response.tomtat}</Text>}
                 </VStack>
               )}
             </Box>

@@ -15,16 +15,13 @@ import {
 import { FC, useState, useCallback } from "react";
 import { FaPlus, FaLink, FaCheck } from "react-icons/fa";
 import { ChatbotResponse } from "../../services/chatbotService";
-import {
-  findAttributeIdByName,
-  findModelIdByName,
-  delay,
-} from "../../utils/nodeHelpers";
+import { delay } from "../../utils/nodeHelpers";
 import { usePermission } from "../../hooks/usePermission";
+import { ReactFlowState, useStore, useStoreApi } from "reactflow";
 
 interface CreateActionsDisplayProps {
   createActions: ChatbotResponse["create"];
-  allNodes: Map<string, any>;
+  // allNodes: Map<string, any>;
   onCreateModel?: (modelName: string) => Promise<void>;
   onCreateAttribute?: (
     modelId: string,
@@ -42,24 +39,39 @@ interface CreateActionsDisplayProps {
 
 export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
   createActions,
-  allNodes,
+  // allNodes,
   onCreateModel,
   onCreateAttribute,
   onCreateForeignKey,
 }) => {
+  const allNodes = useStore((state: ReactFlowState) => state.nodeInternals);
+  const storeApi = useStoreApi();
+  const getNodeInternals = () => storeApi.getState().nodeInternals;
+
   const { canEdit } = usePermission();
   const createBg = useColorModeValue("green.50", "green.900");
   const toast = useToast();
-  const [processingModels, setProcessingModels] = useState<Set<string>>(
-    new Set()
-  );
-  const [processingAttrs, setProcessingAttrs] = useState<Set<string>>(
-    new Set()
-  );
-  const [processingFKs, setProcessingFKs] = useState<Set<string>>(new Set());
+  // const [processingModels, setProcessingModels] = useState<Set<string>>(
+  //   new Set()
+  // );
+  // const [processingAttrs, setProcessingAttrs] = useState<Set<string>>(
+  //   new Set()
+  // );
+  // const [processingFKs, setProcessingFKs] = useState<Set<string>>(new Set());
 
-  const [isAcceptingAll, setIsAcceptingAll] = useState(false);
-  const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
+  // const [isAcceptingAll, setIsAcceptingAll] = useState(false);
+  // const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
+
+  const findModelIdByName = (modelName: string, test?: string): string => {
+    const nodes = getNodeInternals();
+    if (test) console.log("bucthenhi: ", nodes);
+    for (const [id, node] of nodes.entries()) {
+      if (test) console.log("bucthenhi: ", node.data.name);
+      if (node.data?.name == modelName) {
+        return node.id;
+      }
+    }
+  };
 
   // Handler tạo model
   const handleCreateModel = useCallback(
@@ -74,18 +86,11 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
         return;
       }
 
-      setProcessingModels((prev) => new Set(prev).add(modelName));
+      // setProcessingModels((prev) => new Set(prev).add(modelName));
 
       try {
         await onCreateModel(modelName);
-
-        toast({
-          title: "Thành công",
-          description: `Đã tạo bảng ${modelName}`,
-          status: "success",
-          duration: 2000,
-        });
-        setCompletedItems((prev) => new Set(prev).add(`model-${modelName}`));
+        // setCompletedItems((prev) => new Set(prev).add(`model-${modelName}`));
       } catch (error) {
         console.error("Error creating model:", error);
         toast({
@@ -95,11 +100,11 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           duration: 2000,
         });
       } finally {
-        setProcessingModels((prev) => {
-          const next = new Set(prev);
-          next.delete(modelName);
-          return next;
-        });
+        // setProcessingModels((prev) => {
+        //   const next = new Set(prev);
+        //   next.delete(modelName);
+        //   return next;
+        // });
       }
     },
     [onCreateModel, toast]
@@ -122,7 +127,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
       }
 
       const attrKey = `${modelId}-${attrData.name}`;
-      setProcessingAttrs((prev) => new Set(prev).add(attrKey));
+      // setProcessingAttrs((prev) => new Set(prev).add(attrKey));
 
       try {
         await onCreateAttribute(
@@ -132,13 +137,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           attrData.pk || false
         );
 
-        toast({
-          title: "Thành công",
-          description: `Đã thêm thuộc tính ${attrData.name}`,
-          status: "success",
-          duration: 2000,
-        });
-        setCompletedItems((prev) => new Set(prev).add(`attr-${attrKey}`));
+        // setCompletedItems((prev) => new Set(prev).add(`attr-${attrKey}`));
       } catch (error) {
         console.error("Error adding attribute:", error);
         toast({
@@ -148,11 +147,11 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           duration: 2000,
         });
       } finally {
-        setProcessingAttrs((prev) => {
-          const next = new Set(prev);
-          next.delete(attrKey);
-          return next;
-        });
+        // setProcessingAttrs((prev) => {
+        //   const next = new Set(prev);
+        //   next.delete(attrKey);
+        //   return next;
+        // });
       }
     },
     [onCreateAttribute, toast]
@@ -177,7 +176,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
       }
 
       const fkKey = `${sourceModelId}-${sourceColumnName}`;
-      setProcessingFKs((prev) => new Set(prev).add(fkKey));
+      // setProcessingFKs((prev) => new Set(prev).add(fkKey));
 
       try {
         await onCreateForeignKey(
@@ -187,13 +186,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           targetColumnName
         );
 
-        toast({
-          title: "Thành công",
-          description: `Đã tạo khóa ngoại ${sourceColumnName}`,
-          status: "success",
-          duration: 2000,
-        });
-        setCompletedItems((prev) => new Set(prev).add(`fk-${fkKey}`));
+        // setCompletedItems((prev) => new Set(prev).add(`fk-${fkKey}`));
       } catch (error) {
         console.error("Error creating foreign key:", error);
         toast({
@@ -203,73 +196,78 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           duration: 2000,
         });
       } finally {
-        setProcessingFKs((prev) => {
-          const next = new Set(prev);
-          next.delete(fkKey);
-          return next;
-        });
+        // setProcessingFKs((prev) => {
+        //   const next = new Set(prev);
+        //   next.delete(fkKey);
+        //   return next;
+        // });
       }
     },
     [onCreateForeignKey, toast]
   );
 
   const handleAcceptAll = useCallback(async () => {
-    setIsAcceptingAll(true);
+    // setIsAcceptingAll(true);
 
     try {
       // Phase 1: Create all new models
       for (const model of createActions) {
-        const existingModelId = findModelIdByName(allNodes, model.name);
-        if (!existingModelId && !completedItems.has(`model-${model.name}`)) {
+        const existingModelId = findModelIdByName(model.name);
+        if (!existingModelId) {
           await handleCreateModel(model.name);
-          await delay(500);
         }
       }
+      await delay(300);
+
+      // console.log("finall: ", allNodes);
 
       // Phase 2: Add all attributes
       for (const model of createActions) {
-        const modelId = findModelIdByName(allNodes, model.name) || model.name;
-
+        console.log("hiep222: ", model.name);
+        const modelId = findModelIdByName(model.name, "hiep");
+        console.log("hiephiephiep: ", modelId);
         for (const attr of model.attrs || []) {
           const attrKey = `${modelId}-${attr.name}`;
-          if (!completedItems.has(`attr-${attrKey}`)) {
-            try {
-              await handleAddAttribute(modelId, {
-                name: attr.name,
-                type: attr.type,
-                pk: attr.pk,
-              });
-              await delay(300);
-            } catch (error) {
-              console.error(`Failed to add attribute ${attr.name}:`, error);
-            }
+          // if (!completedItems.has(`attr-${attrKey}`)) {
+          try {
+            await handleAddAttribute(modelId, {
+              name: attr.name,
+              type: attr.type,
+              pk: attr.pk,
+            });
+          } catch (error) {
+            console.error(`Failed to add attribute ${attr.name}:`, error);
           }
+          // }
         }
       }
+      await delay(300);
+
+      // console.log("finall: ", allNodes);
 
       // Phase 3: Create all foreign keys
       for (const model of createActions) {
-        const modelId = findModelIdByName(allNodes, model.name) || model.name;
+        const modelId = findModelIdByName(model.name);
 
         for (const fk of model.fks || []) {
           const [targetTable, targetColumn] = fk.references.split(".");
           const fkKey = `${modelId}-${fk.column}`;
 
-          if (!completedItems.has(`fk-${fkKey}`)) {
-            try {
-              await handleCreateForeignKey(
-                modelId,
-                fk.column,
-                targetTable,
-                targetColumn
-              );
-              await delay(300);
-            } catch (error) {
-              console.error(`Failed to create FK ${fk.column}:`, error);
-            }
+          // if (!completedItems.has(`fk-${fkKey}`)) {
+          try {
+            await handleCreateForeignKey(
+              modelId,
+              fk.column,
+              targetTable,
+              targetColumn
+            );
+          } catch (error) {
+            console.error(`Failed to create FK ${fk.column}:`, error);
           }
+          // }
         }
       }
+      await delay(100);
 
       toast({
         title: "Hoàn tất",
@@ -280,12 +278,12 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
     } catch (error) {
       console.error("Error in Accept All:", error);
     } finally {
-      setIsAcceptingAll(false);
+      // setIsAcceptingAll(false);
     }
   }, [
     createActions,
     allNodes,
-    completedItems,
+    // completedItems,
     handleCreateModel,
     handleAddAttribute,
     handleCreateForeignKey,
@@ -296,7 +294,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
     <VStack align="stretch" spacing={2}>
       {createActions.map((model, idx) => {
         // Check if model already exists
-        const existingModelId = findModelIdByName(allNodes, model.name);
+        const existingModelId = findModelIdByName(model.name);
         const isNewModel = !existingModelId;
         const modelId = existingModelId || `temp-${model.name}`;
 
@@ -326,7 +324,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                     icon={<FaPlus />}
                     size="xs"
                     colorScheme="green"
-                    isLoading={processingModels.has(model.name)}
+                    // isLoading={processingModels.has(model.name)}
                     onClick={() => handleCreateModel(model.name)}
                   />
                 </Tooltip>
@@ -347,7 +345,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                 <VStack align="stretch" spacing={1}>
                   {model.attrs.map((attr, attrIdx) => {
                     const attrKey = `${modelId}-${attr.name}`;
-                    const isProcessing = processingAttrs.has(attrKey);
+                    // const isProcessing = processingAttrs.has(attrKey);
 
                     return (
                       <HStack
@@ -383,7 +381,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                               size="xs"
                               variant="ghost"
                               colorScheme="green"
-                              isLoading={isProcessing}
+                              // isLoading={isProcessing}
                               isDisabled={isNewModel}
                               onClick={() =>
                                 handleAddAttribute(modelId, {
@@ -418,7 +416,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                     const [targetTable, targetColumn] =
                       fk.references.split(".");
                     const fkKey = `${modelId}-${fk.column}`;
-                    const isProcessing = processingFKs.has(fkKey);
+                    // const isProcessing = processingFKs.has(fkKey);
 
                     return (
                       <HStack
@@ -446,7 +444,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
                               size="xs"
                               variant="ghost"
                               colorScheme="blue"
-                              isLoading={isProcessing}
+                              // isLoading={isProcessing}
                               isDisabled={isNewModel}
                               onClick={() =>
                                 handleCreateForeignKey(
@@ -474,7 +472,7 @@ export const CreateActionsDisplay: FC<CreateActionsDisplayProps> = ({
           colorScheme="green"
           leftIcon={<FaCheck />}
           onClick={handleAcceptAll}
-          isLoading={isAcceptingAll}
+          // isLoading={isAcceptingAll}
           loadingText="Đang xử lý..."
         >
           Accept All

@@ -30,6 +30,7 @@ public class AttributeService {
     public boolean updateAttributeName(String attributeId, String attributeName, LocalDateTime timestamp) {
         try {
             Optional<Attribute> attributeOpt = attributeRepository.findByIdForUpdate(attributeId);
+
             if (attributeOpt.isPresent() && (attributeOpt.get().getNameUpdatedAt() == null
                     || attributeOpt.get().getNameUpdatedAt().isBefore(timestamp))) {
                 Attribute attribute = attributeOpt.get();

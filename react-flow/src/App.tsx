@@ -4,6 +4,7 @@ import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
 import { UserProvider } from "./contexts/UserContext";
 import { SchemaVisualizer } from "./SchemaVisualizer/SchemaVisualizer";
+import { HistoryViewPage } from "./pages/HistoryViewPage";
 import { ReactFlowProvider } from "reactflow";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage";
@@ -34,6 +35,11 @@ function App() {
                     <Route path="profile" element={<ProfilePage />} />
                   </Route>
                   <Route path="/:diagramId" element={<SchemaVisualizer />} />
+                  {/* ⭐ NEW: History view route */}
+                  <Route
+                    path="/history/:migrationId"
+                    element={<HistoryViewPage />}
+                  />
                   <Route path="/" element={<Navigate to="/home" replace />} />
                 </Routes>
               </ReactFlowProvider>

@@ -35,7 +35,7 @@ export const useNodeHandlers = ({
 
   // Field update handler
   const handleFieldNameUpdate = useCallback(
-    (attributeId: string, attributeName: string) => {
+    async (attributeId: string, attributeName: string) => {
       console.log("📤 Sending field update:", {
         attributeId,
         attributeName,
@@ -70,13 +70,13 @@ export const useNodeHandlers = ({
         });
       });
       // Send WebSocket update
-      sendFieldNameUpdate({ attributeId, attributeName });
+      await sendFieldNameUpdate({ attributeId, attributeName });
     },
     [setReactFlowNodes]
   );
 
   const handleFieldTypeUpdate = useCallback(
-    (attributeId: string, attributeType: string) => {
+    async (attributeId: string, attributeType: string) => {
       console.log("📤 Sending field update:", {
         attributeId,
         attributeType,
@@ -110,14 +110,14 @@ export const useNodeHandlers = ({
         });
       });
       // Send WebSocket update
-      sendFieldTypeUpdate({ attributeId, attributeType });
+      await sendFieldTypeUpdate({ attributeId, attributeType });
     },
     [setReactFlowNodes]
   );
 
   // Toggle key type handler
   const handleToggleKeyType = useCallback(
-    (
+    async (
       modelId: string,
       attributeId: string,
       keyType: "NORMAL" | "PRIMARY" | "FOREIGN"
@@ -179,14 +179,14 @@ export const useNodeHandlers = ({
       });
 
       // ✅ Single WebSocket call
-      sendToggleKeyType({ modelId, attributeId, keyType });
+      await sendToggleKeyType({ modelId, attributeId, keyType });
     },
     [setReactFlowNodes, sendToggleKeyType]
   );
 
   // ✅ FIX: Add attribute handler với proper state update
   const handleAddAttribute = useCallback(
-    (modelId: string) => {
+    async (modelId: string) => {
       console.log("📤 Adding attribute to:", { modelId });
       const newAttributeId = generateAttributeId();
 
@@ -224,7 +224,7 @@ export const useNodeHandlers = ({
       });
 
       // ✅ Send WebSocket AFTER UI update
-      sendAddAttribute({
+      await sendAddAttribute({
         modelId,
         newAttributeId,
         attributeName: "new_field",
@@ -239,7 +239,7 @@ export const useNodeHandlers = ({
 
   // Delete attribute handler
   const handleDeleteAttribute = useCallback(
-    (modelId: string, attributeId: string) => {
+    async (modelId: string, attributeId: string) => {
       // ✅ Đổi từ number sang string
       console.log("📤 Deleting attribute:", { modelId, attributeId });
 
@@ -263,17 +263,17 @@ export const useNodeHandlers = ({
 
         // Send WebSocket after UI update
 
-        sendDeleteAttribute({ modelId, attributeId });
-
         return updatedNodes;
       });
+      await sendDeleteAttribute({ modelId, attributeId });
     },
+
     [setReactFlowNodes, sendDeleteAttribute]
   );
 
   // Foreign key connection handlers
   const handleForeignKeyTargetSelect = useCallback(
-    (
+    async (
       attributeId: string, // ✅ Đổi từ number sang string
       targetModelId: string,
       targetAttributeId: string // ✅ Đổi từ number sang string
@@ -318,14 +318,13 @@ export const useNodeHandlers = ({
           };
         });
 
-        sendForeignKeyConnect({
-          attributeId,
-          targetModelId,
-          targetAttributeId,
-          foreignKeyName,
-        });
-
         return updatedNodes;
+      });
+      await sendForeignKeyConnect({
+        attributeId,
+        targetModelId,
+        targetAttributeId,
+        foreignKeyName,
       });
     },
     [setReactFlowNodes, sendForeignKeyConnect]
