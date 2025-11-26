@@ -75,13 +75,10 @@ export const ExportDialog: React.FC<ExportDialogProps> = ({
         metadata: {
           exportedAt: new Date().toISOString(),
           version: "1.0.0",
-          type: "database-diagram",
         },
         schema: {
           name: schemaData?.name || "Untitled Diagram",
           description: schemaData?.description || "",
-          databaseType: schemaData?.databaseType || "MySQL",
-          version: schemaData?.version || "8.0",
         },
         tables: nodes.map((node) => ({
           id: node.id,

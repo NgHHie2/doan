@@ -24,6 +24,7 @@ import {
   MenuItem,
   Spinner,
   Image,
+  useToast,
 } from "@chakra-ui/react";
 import { ThemeToggle } from "../components/page/ThemeToggle";
 import {
@@ -56,6 +57,7 @@ import { PiStar, PiStarFill } from "react-icons/pi";
 import { BsChatLeftDots, BsChatLeftDotsFill } from "react-icons/bs";
 import { IoHelp } from "react-icons/io5";
 import { useUser } from "../contexts/UserContext";
+import { NewDiagramDialog } from "../components/page/NewDiagramDialog";
 
 interface UserData {
   firstName: string;
@@ -69,9 +71,14 @@ export function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading, logout } = useUser();
-  // const [loading, setLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isDialogOpen,
+    onOpen: onDialogOpen,
+    onClose: onDialogClose,
+  } = useDisclosure();
+  const toast = useToast();
 
   const chatWidth = 300;
 
@@ -83,9 +90,52 @@ export function HomePage() {
   const activeNavBg = useColorModeValue("#cbe0f8ff", "#353c47ff");
   const mutedText = useColorModeValue("#57606a", "#8b949e");
 
-  const handleCreateDiagram = () => {
-    const newId = Date.now().toString();
-    navigate(`/${newId}`);
+  const handleCreateDiagram = async (diagramName: string, jsonFile?: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("name", diagramName);
+
+      if (jsonFile) {
+        formData.append("jsonFile", jsonFile);
+      }
+
+      const response = await fetch(
+        "http://localhost:8080/api/diagrams/create",
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to create diagram");
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: jsonFile
+            ? "Diagram imported successfully"
+            : "Diagram created successfully",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate(`/${data.diagramId}`);
+      }
+    } catch (error: any) {
+      console.error("Error creating diagram:", error);
+      toast({
+        title: "Error creating diagram",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -115,15 +165,15 @@ export function HomePage() {
         leftIcon={
           <Icon
             as={active && activeIcon ? activeIcon : icon}
-            boxSize={business ? 4 : 6} // nhỏ hơn nếu business
+            boxSize={business ? 4 : 6}
             mr={business ? "6px" : "4px"}
           />
         }
         bg={active ? activeNavBg : "transparent"}
         color={textColor}
         fontWeight="400"
-        fontSize={business ? "13px" : "15px"} // font nhỏ hơn
-        h={business ? "35px" : "45px"} // height nhỏ hơn
+        fontSize={business ? "13px" : "15px"}
+        h={business ? "35px" : "45px"}
         _hover={{ bg: activeNavBg }}
         onClick={() => {
           if (onClick) onClick();
@@ -137,7 +187,6 @@ export function HomePage() {
   };
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  // const [menuWidth, setMenuWidth] = useState<string>("auto");
 
   const SidebarContent = () => (
     <VStack h="full" spacing={0} align="stretch">
@@ -161,7 +210,7 @@ export function HomePage() {
           w="full"
           colorScheme="blue"
           leftIcon={<Icon as={Plus} boxSize={6} />}
-          onClick={handleCreateDiagram}
+          onClick={onDialogOpen}
           size="lg"
           fontSize={"md"}
           boxShadow="0 5px 10px rgba(0,0,0,0.4)"
@@ -184,12 +233,6 @@ export function HomePage() {
           label="Shared with Me"
           path="/home/shared"
         />
-        {/* <NavItem
-          icon={PiStar}
-          activeIcon={PiStarFill}
-          label="Mark Star"
-          path="/home/star"
-        /> */}
         <NavItem
           icon={PiTrashSimple}
           activeIcon={PiTrashSimpleFill}
@@ -284,12 +327,7 @@ export function HomePage() {
                 />
               </HStack>
             </MenuButton>
-            <MenuList
-              bg={cardBg}
-              borderColor={borderColor}
-              // minW="unset"
-              // w={menuWidth}
-            >
+            <MenuList bg={cardBg} borderColor={borderColor}>
               <MenuItem
                 icon={<Icon as={User} boxSize={4} />}
                 bg={cardBg}
@@ -319,8 +357,6 @@ export function HomePage() {
           </Menu>
         </Box>
       ) : null}
-
-      {/* Footer */}
     </VStack>
   );
 
@@ -406,6 +442,13 @@ export function HomePage() {
 
       {/* Floating Chat Panel */}
       <FloatingChat isOpen={isChatOpen} width={chatWidth} />
+
+      {/* New Diagram Dialog */}
+      <NewDiagramDialog
+        isOpen={isDialogOpen}
+        onClose={onDialogClose}
+        onCreateDiagram={handleCreateDiagram}
+      />
     </Box>
   );
 }
