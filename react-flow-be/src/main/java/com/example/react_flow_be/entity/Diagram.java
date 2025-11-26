@@ -25,9 +25,12 @@ public class Diagram {
     private String name;
     private String description;
 
-    private DiagramType type;
+    // @Enumerated(EnumType.STRING)
+    // private DiagramType type; // Allow null, no default
+
     private Boolean isPublic;
     private Boolean isTemplate;
+    private Boolean isDeleted = false; // ← THÊM FIELD NÀY
 
     // Canvas settings
     private String canvasData;
@@ -41,10 +44,11 @@ public class Diagram {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "diagram")
+    @OneToMany(mappedBy = "diagram", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Collaboration> collaboration;
 
-    public enum DiagramType {
-        ER_DIAGRAM, FLOWCHART, UML_CLASS, NETWORK, ORGANIZATIONAL, MIND_MAP, WIREFRAME, CUSTOM
-    }
+    // public enum DiagramType {
+    // ER_DIAGRAM, FLOWCHART, UML_CLASS, NETWORK, ORGANIZATIONAL, MIND_MAP,
+    // WIREFRAME, CUSTOM
+    // }
 }

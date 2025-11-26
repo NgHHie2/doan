@@ -36,7 +36,7 @@ public class DiagramImportService {
         DatabaseDiagram diagram = new DatabaseDiagram();
         diagram.setName(diagramName);
         diagram.setDescription(schemaNode.path("description").asText(""));
-        diagram.setType(Diagram.DiagramType.ER_DIAGRAM);
+        // diagram.setType(Diagram.DiagramType.ER_DIAGRAM);
         diagram.setDatabaseType(DatabaseDiagram.DatabaseType.MYSQL);
         diagram.setVersion("8.0");
         diagram.setCharset("utf8mb4");

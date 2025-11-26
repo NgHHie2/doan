@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -9,17 +9,16 @@ import {
   HStack,
   Icon,
   Card,
-  CardHeader,
   CardBody,
   Flex,
   useColorModeValue,
-  SimpleGrid,
   IconButton,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
   useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import { Plus } from "lucide-react";
 import { CiGrid41 } from "react-icons/ci";
@@ -27,66 +26,27 @@ import { IoIosList } from "react-icons/io";
 import { FaCaretDown } from "react-icons/fa";
 import { BsDiagram3 } from "react-icons/bs";
 import { DiagramList, Diagram } from "../components/page/DiagramList";
+import { diagramApi, DiagramListFilters } from "../api/diagramApi";
 
 export function MyDiagramsPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [filterName, setFilterName] = useState<string>("All Names");
-  const [filterOwner, setFilterOwner] = useState<string>("All Owners");
+
+  // Filters
+  const [filterName, setFilterName] = useState<string>("All");
+  const [filterOwner, setFilterOwner] = useState<string>("All");
   const [filterLatest, setFilterLatest] = useState<string>("All Time");
 
-  // Sample data - replace with your API data
-  const [diagrams, setDiagrams] = useState<Diagram[]>([
-    {
-      id: "1",
-      name: "E-Commerce Database Schema",
-      owner: {
-        name: "John Doe",
-        avatar: undefined,
-      },
-      updatedAt: "2025-11-01T10:30:00Z",
-      updatedBy: {
-        name: "Jane Smith",
-        avatar: undefined,
-      },
-      createdAt: "2025-10-15T08:00:00Z",
-      isStarred: true,
-      image: "./luocdocsdl.png",
-    },
-    {
-      id: "2",
-      name: "User Authentication System",
-      owner: {
-        name: "Alice Johnson",
-        avatar: undefined,
-      },
-      updatedAt: "2025-11-02T14:20:00Z",
-      updatedBy: {
-        name: "Bob Wilson",
-        avatar: undefined,
-      },
-      createdAt: "2025-10-20T09:15:00Z",
-      isStarred: false,
-      image: "./Hinh1-7.png",
-    },
-    {
-      id: "3",
-      name: "Inventory Management Database",
-      owner: {
-        name: "John Doe",
-        avatar: undefined,
-      },
-      updatedAt: "2025-10-28T16:45:00Z",
-      updatedBy: {
-        name: "John Doe",
-        avatar: undefined,
-      },
-      createdAt: "2025-10-10T11:30:00Z",
-      isStarred: false,
-      image: "./Hinh1-19.png",
-    },
-  ]);
+  // Data & Pagination
+  const [diagrams, setDiagrams] = useState<Diagram[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastDiagramId, setLastDiagramId] = useState<number | null>(null);
+
+  // Infinite scroll
+  const observerRef = useRef<IntersectionObserver>();
+  const lastDiagramRef = useRef<HTMLDivElement>(null);
 
   const bgColor = useColorModeValue("#faf9f9ff", "#0d1117");
   const cardBg = useColorModeValue("white", "#161b22");
@@ -94,6 +54,126 @@ export function MyDiagramsPage() {
   const textColor = useColorModeValue("#24292f", "#e6edf3");
   const hoverBg = useColorModeValue("#f6f8fa", "#323b47ff");
   const mutedText = useColorModeValue("#57606a", "#8b949e");
+
+  // Alphabet for name filter
+  const alphabet = [
+    "All",
+    ...Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)),
+  ];
+
+  const loadDiagrams = useCallback(
+    async (reset = false) => {
+      if (loading) return;
+      if (!reset && !hasMore) return;
+
+      setLoading(true);
+      try {
+        const filters: DiagramListFilters = {
+          lastDiagramId: reset ? undefined : lastDiagramId || undefined,
+          pageSize: 20,
+          isDeleted: false,
+          sharedWithMe: false,
+          sortBy: "updatedAt",
+          sortDirection: "DESC",
+        };
+
+        // Apply filters
+        if (filterName !== "All") {
+          filters.nameStartsWith = filterName;
+        }
+
+        if (filterOwner === "Me") {
+          filters.ownerFilter = "me";
+        } else if (filterOwner === "Team") {
+          filters.ownerFilter = "team";
+        }
+
+        if (filterLatest === "Today") {
+          filters.dateRange = "today";
+        } else if (filterLatest === "Last 7 Days") {
+          filters.dateRange = "last7days";
+        } else if (filterLatest === "Last 30 Days") {
+          filters.dateRange = "last30days";
+        }
+
+        const response = await diagramApi.getList(filters);
+
+        const newDiagrams = response.diagrams.map((d) => ({
+          id: d.id.toString(),
+          name: d.name,
+          owner: {
+            name: d.ownerFullName,
+            avatar: d.ownerAvatar,
+          },
+          updatedAt: d.lastMigrationDate || d.updatedAt,
+          updatedBy: {
+            name: d.lastMigrationUsername || d.updatedByFullName,
+            avatar: d.updatedByAvatar,
+          },
+          createdAt: d.createdAt,
+          isStarred: d.isStarred,
+          image: "", // Will use jdenticon
+        }));
+
+        if (reset) {
+          setDiagrams(newDiagrams);
+        } else {
+          setDiagrams((prev) => [...prev, ...newDiagrams]);
+        }
+
+        setHasMore(response.hasMore);
+        setLastDiagramId(response.lastDiagramId);
+      } catch (error) {
+        console.error("Error loading diagrams:", error);
+        toast({
+          title: "Error loading diagrams",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      loading,
+      hasMore,
+      lastDiagramId,
+      filterName,
+      filterOwner,
+      filterLatest,
+      toast,
+    ]
+  );
+
+  // Load initial data
+  useEffect(() => {
+    loadDiagrams(true);
+  }, [filterName, filterOwner, filterLatest]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (loading) return;
+    if (!hasMore) return;
+
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadDiagrams();
+      }
+    });
+
+    if (lastDiagramRef.current) {
+      observerRef.current.observe(lastDiagramRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loading, hasMore, loadDiagrams]);
 
   const handleCreateDiagram = () => {
     const newId = Date.now().toString();
@@ -112,7 +192,6 @@ export function MyDiagramsPage() {
       duration: 2000,
       isClosable: true,
     });
-    // Implement share logic
   };
 
   const handleRename = (diagramId: string) => {
@@ -123,7 +202,6 @@ export function MyDiagramsPage() {
       duration: 2000,
       isClosable: true,
     });
-    // Implement rename logic
   };
 
   const handleToggleStar = (diagramId: string) => {
@@ -149,7 +227,6 @@ export function MyDiagramsPage() {
       duration: 2000,
       isClosable: true,
     });
-    // Implement duplicate logic
   };
 
   const handleDownload = (diagramId: string) => {
@@ -160,7 +237,6 @@ export function MyDiagramsPage() {
       duration: 2000,
       isClosable: true,
     });
-    // Implement download logic
   };
 
   const handleHistory = (diagramId: string) => {
@@ -171,18 +247,27 @@ export function MyDiagramsPage() {
       duration: 2000,
       isClosable: true,
     });
-    // Implement history view logic
   };
 
-  const handleDelete = (diagramId: string) => {
-    toast({
-      title: "Moved to trash",
-      description: `Diagram ${diagramId} moved to trash`,
-      status: "warning",
-      duration: 2000,
-      isClosable: true,
-    });
-    // Implement delete logic
+  const handleDelete = async (diagramId: string) => {
+    try {
+      await diagramApi.deleteDiagram(Number(diagramId));
+      setDiagrams((prev) => prev.filter((d) => d.id !== diagramId));
+      toast({
+        title: "Moved to trash",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete diagram",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
@@ -214,41 +299,52 @@ export function MyDiagramsPage() {
       </Flex>
 
       <Flex mb={4}>
-        {/* Filters */}
         <HStack spacing={2}>
-          {/* Name Filter */}
+          {/* Name Filter - Alphabet */}
           <Menu>
             <MenuButton as={Button} rightIcon={<FaCaretDown />} size="sm">
-              {filterName}
+              {filterName === "All" ? "All Name" : filterName}
             </MenuButton>
-            <MenuList bg={cardBg}>
-              {["All Names", "Diagram A", "Diagram B"].map((name) => (
+
+            <MenuList bg={cardBg} maxH="300px" overflowY="auto">
+              {alphabet.map((letter) => (
                 <MenuItem
+                  key={letter}
                   bg={cardBg}
                   _hover={{ bg: hoverBg }}
-                  key={name}
-                  onClick={() => setFilterName(name)}
+                  onClick={() => setFilterName(letter)}
                 >
-                  {name}
+                  {letter}
                 </MenuItem>
               ))}
+
+              {/* Option để reset filter */}
+              <MenuItem
+                bg={cardBg}
+                _hover={{ bg: hoverBg }}
+                onClick={() => setFilterName("All")} // giá trị vẫn là "All"
+              >
+                All Name
+              </MenuItem>
             </MenuList>
           </Menu>
 
           {/* Owner Filter */}
           <Menu>
             <MenuButton as={Button} rightIcon={<FaCaretDown />} size="sm">
-              {filterOwner}
+              {filterOwner === "All" ? "All Members" : filterOwner}
             </MenuButton>
+
             <MenuList bg={cardBg}>
-              {["All Owners", "Me", "Team"].map((owner) => (
+              {["All", "Me", "Team"].map((owner) => (
                 <MenuItem
+                  key={owner}
                   bg={cardBg}
                   _hover={{ bg: hoverBg }}
-                  key={owner}
                   onClick={() => setFilterOwner(owner)}
                 >
-                  {owner}
+                  {/* Hiển thị All Members thay vì All */}
+                  {owner === "All" ? "All Members" : owner}
                 </MenuItem>
               ))}
             </MenuList>
@@ -277,8 +373,8 @@ export function MyDiagramsPage() {
         </HStack>
       </Flex>
 
-      {/* Diagrams Grid or List */}
-      {diagrams.length === 0 ? (
+      {/* Diagrams List */}
+      {diagrams.length === 0 && !loading ? (
         <Card bg={"transparent"} textAlign="center" py={12} shadow={"none"}>
           <CardBody>
             <VStack spacing={4}>
@@ -303,18 +399,45 @@ export function MyDiagramsPage() {
           </CardBody>
         </Card>
       ) : (
-        <DiagramList
-          diagrams={diagrams}
-          view={view}
-          onOpen={handleOpenDiagram}
-          onShare={handleShare}
-          onRename={handleRename}
-          onToggleStar={handleToggleStar}
-          onDuplicate={handleDuplicate}
-          onDownload={handleDownload}
-          onHistory={handleHistory}
-          onDelete={handleDelete}
-        />
+        <>
+          <DiagramList
+            diagrams={diagrams}
+            view={view}
+            onOpen={handleOpenDiagram}
+            onShare={handleShare}
+            onRename={handleRename}
+            onToggleStar={handleToggleStar}
+            onDuplicate={handleDuplicate}
+            onDownload={handleDownload}
+            onHistory={handleHistory}
+            onDelete={handleDelete}
+          />
+
+          {/* Loading indicator */}
+          {loading && (
+            <Flex justify="center" py={4}>
+              <Spinner size="md" />
+            </Flex>
+          )}
+
+          {/* Observer target for infinite scroll */}
+          {hasMore && !loading && (
+            <Box ref={lastDiagramRef} h="20px" w="full" />
+          )}
+
+          {/* No more data */}
+          {!hasMore && diagrams.length > 0 && (
+            <Text
+              textAlign="center"
+              my={4}
+              py={4}
+              color={mutedText}
+              fontSize="xs"
+            >
+              No more diagrams to load
+            </Text>
+          )}
+        </>
       )}
     </Box>
   );

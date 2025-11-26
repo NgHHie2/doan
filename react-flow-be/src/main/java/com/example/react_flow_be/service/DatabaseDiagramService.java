@@ -39,7 +39,7 @@ public class DatabaseDiagramService {
         DatabaseDiagram databaseDiagram = new DatabaseDiagram();
         databaseDiagram.setName(diagramName);
         databaseDiagram.setDescription("");
-        databaseDiagram.setType(Diagram.DiagramType.ER_DIAGRAM);
+        // databaseDiagram.setType(Diagram.DiagramType.ER_DIAGRAM);
         databaseDiagram.setDatabaseType(DatabaseDiagram.DatabaseType.MYSQL);
         databaseDiagram.setVersion("8.0");
         databaseDiagram.setCharset("utf8mb4");
@@ -62,7 +62,7 @@ public class DatabaseDiagramService {
         DatabaseDiagram databaseDiagram = new DatabaseDiagram();
         databaseDiagram.setName("Blog System");
         databaseDiagram.setDescription("Sample blog system database schema");
-        databaseDiagram.setType(Diagram.DiagramType.ER_DIAGRAM);
+        // databaseDiagram.setType(Diagram.DiagramType.ER_DIAGRAM);
         databaseDiagram.setDatabaseType(DatabaseDiagram.DatabaseType.MYSQL);
         databaseDiagram.setVersion("8.0");
         databaseDiagram.setCharset("utf8mb4");

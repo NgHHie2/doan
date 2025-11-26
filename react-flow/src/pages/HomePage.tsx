@@ -248,14 +248,14 @@ export function HomePage() {
           icon={BsChatLeftDots}
           activeIcon={BsChatLeftDotsFill}
           label="Send Feedback"
-          path="/home"
+          // path="/home"
           business={true}
         />
         <NavItem
           icon={IoHelp}
           activeIcon={IoHelp}
           label="Get Help"
-          path="/home"
+          // path="/home"
           business={true}
         />
       </VStack>
