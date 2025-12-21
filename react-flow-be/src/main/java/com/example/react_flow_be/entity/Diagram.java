@@ -30,7 +30,9 @@ public class Diagram {
 
     private Boolean isPublic;
     private Boolean isTemplate;
-    private Boolean isDeleted = false; // ← THÊM FIELD NÀY
+    private Boolean isDeleted = false;
+
+    private LocalDateTime deletedAt;
 
     // Canvas settings
     private String canvasData;

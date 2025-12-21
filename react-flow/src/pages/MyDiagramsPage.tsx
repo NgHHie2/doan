@@ -387,14 +387,14 @@ export function MyDiagramsPage() {
               <Text color={mutedText} fontSize="14px">
                 Get started by creating your first diagram
               </Text>
-              <Button
+              {/* <Button
                 colorScheme="blue"
                 leftIcon={<Icon as={Plus} boxSize={4} />}
                 onClick={handleCreateDiagram}
                 mt={4}
               >
                 Create Your First Diagram
-              </Button>
+              </Button> */}
             </VStack>
           </CardBody>
         </Card>

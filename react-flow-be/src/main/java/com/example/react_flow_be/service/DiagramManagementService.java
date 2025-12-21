@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -39,11 +40,13 @@ public class DiagramManagementService {
             throw new IllegalStateException("Only owner can delete diagram");
         }
 
-        // Set isDeleted to true
+        // ⭐ Set isDeleted to true và ghi lại thời điểm xóa
         diagram.setIsDeleted(true);
+        diagram.setDeletedAt(LocalDateTime.now());
         diagramRepository.save(diagram);
 
-        log.info("Diagram {} moved to trash by user {}", diagramId, username);
+        log.info("Diagram {} moved to trash by user {} at {}",
+                diagramId, username, diagram.getDeletedAt());
     }
 
     /**
@@ -65,8 +68,9 @@ public class DiagramManagementService {
             throw new IllegalStateException("Only owner can restore diagram");
         }
 
-        // Set isDeleted to false
+        // ⭐ Set isDeleted to false và xóa deletedAt
         diagram.setIsDeleted(false);
+        diagram.setDeletedAt(null);
         diagramRepository.save(diagram);
 
         log.info("Diagram {} restored from trash by user {}", diagramId, username);
@@ -123,5 +127,27 @@ public class DiagramManagementService {
     public Long getTrashCount(String username) {
         // This would need a custom query to count deleted diagrams where user is owner
         return diagramRepository.countByIsDeleted(true);
+    }
+
+    /**
+     * ⭐ NEW: Get days remaining before auto-delete
+     */
+    @Transactional(readOnly = true)
+    public Long getDaysUntilAutoDelete(Long diagramId) {
+        Diagram diagram = diagramRepository.findById(diagramId)
+                .orElseThrow(() -> new EntityNotFoundException("Diagram not found"));
+
+        if (!diagram.getIsDeleted() || diagram.getDeletedAt() == null) {
+            return null; // Not in trash
+        }
+
+        LocalDateTime autoDeleteDate = diagram.getDeletedAt().plusDays(7);
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.isAfter(autoDeleteDate)) {
+            return 0L; // Already expired
+        }
+
+        return java.time.Duration.between(now, autoDeleteDate).toDays();
     }
 }

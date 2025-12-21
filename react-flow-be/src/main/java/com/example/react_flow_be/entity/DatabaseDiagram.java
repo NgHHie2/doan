@@ -23,10 +23,10 @@ public class DatabaseDiagram extends Diagram {
     @Column(length = 64)
     private String lastSnapshotHash;
 
-    @OneToMany(mappedBy = "databaseDiagram")
+    @OneToMany(mappedBy = "databaseDiagram", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Migration> migrations;
 
-    @OneToMany(mappedBy = "databaseDiagram")
+    @OneToMany(mappedBy = "databaseDiagram", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Model> models; // DatabaseDiagram có models trực tiếp
 
     public enum DatabaseType {
