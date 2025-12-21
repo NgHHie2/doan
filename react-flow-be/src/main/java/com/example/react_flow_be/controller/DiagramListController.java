@@ -1,7 +1,9 @@
 package com.example.react_flow_be.controller;
 
+import com.example.react_flow_be.annotation.RequireRole;
 import com.example.react_flow_be.dto.DiagramListRequestDto;
 import com.example.react_flow_be.dto.DiagramListResponseDto;
+import com.example.react_flow_be.enums.Role;
 import com.example.react_flow_be.service.DatabaseDiagramListService;
 import com.example.react_flow_be.service.DiagramManagementService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,6 +75,51 @@ public class DiagramListController {
 
         try {
             DiagramListResponseDto response = databaseDiagramListService.getDatabaseDiagramList(requestDto, username);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting diagram list: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/all")
+    @RequireRole({ Role.ADMIN })
+    public ResponseEntity<DiagramListResponseDto> getDiagramAll(
+            @RequestParam(required = false) Long lastDiagramId,
+            @RequestParam(required = false, defaultValue = "20") Integer pageSize,
+            @RequestParam(required = false) String nameStartsWith,
+            @RequestParam(required = false) String searchQuery,
+            @RequestParam(required = false) String ownerFilter,
+            @RequestParam(required = false, defaultValue = "alltime") String dateRange,
+            @RequestParam(required = false, defaultValue = "false") Boolean isDeleted,
+            @RequestParam(required = false, defaultValue = "false") Boolean sharedWithMe,
+            @RequestParam(required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "DESC") String sortDirection,
+            HttpServletRequest request) {
+
+        String username = request.getHeader("X-Username");
+
+        if (username == null || username.isEmpty()) {
+            log.warn("No username provided in request header");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        DiagramListRequestDto requestDto = new DiagramListRequestDto();
+        requestDto.setLastDiagramId(lastDiagramId);
+        requestDto.setPageSize(pageSize);
+        requestDto.setNameStartsWith(nameStartsWith);
+        requestDto.setSearchQuery(searchQuery);
+        requestDto.setOwnerFilter(ownerFilter);
+        requestDto.setDateRange(dateRange);
+        requestDto.setIsDeleted(isDeleted);
+        requestDto.setSharedWithMe(sharedWithMe);
+        requestDto.setSortBy(sortBy);
+        requestDto.setSortDirection(sortDirection);
+
+        log.info("GET /api/diagrams/list - user: {}, filters: {}", username, requestDto);
+
+        try {
+            DiagramListResponseDto response = databaseDiagramListService.getDatabaseDiagramAll(requestDto, username);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error getting diagram list: {}", e.getMessage(), e);

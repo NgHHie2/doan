@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, Response
-from flask_cors import CORS
 import requests
 import json
 import time
@@ -7,9 +6,6 @@ from database import Database
 from token_counter import TokenCounter
 
 app = Flask(__name__)
-
-# CORS cho tất cả localhost ports
-CORS(app, origins="*", supports_credentials=True, methods=["GET", "POST", "OPTIONS"], allow_headers="*")
 
 # URL của Kaggle API (thay bằng ngrok URL của bạn)
 KAGGLE_API_URL = "https://YOUR_NGROK_URL.ngrok-free.app"

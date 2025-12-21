@@ -56,6 +56,7 @@ import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { PiStar, PiStarFill } from "react-icons/pi";
 import { BsChatLeftDots, BsChatLeftDotsFill } from "react-icons/bs";
 import { IoHelp } from "react-icons/io5";
+import { RiBarChart2Fill, RiBarChart2Line } from "react-icons/ri";
 import { useUser } from "../contexts/UserContext";
 import { NewDiagramDialog } from "../components/page/NewDiagramDialog";
 
@@ -65,6 +66,7 @@ interface UserData {
   username: string;
   email: string;
   picture?: string;
+  role: string;
 }
 
 export function HomePage() {
@@ -239,6 +241,18 @@ export function HomePage() {
           label="Trash"
           path="/home/trash"
         />
+
+        {/* Statistics - Only for ADMIN */}
+        {user?.role === "ADMIN" && (
+          <>
+            <NavItem
+              icon={RiBarChart2Line}
+              activeIcon={RiBarChart2Fill}
+              label="Statistics"
+              path="/home/statistics"
+            />
+          </>
+        )}
       </VStack>
 
       <Box flex={1} />
@@ -248,14 +262,12 @@ export function HomePage() {
           icon={BsChatLeftDots}
           activeIcon={BsChatLeftDotsFill}
           label="Send Feedback"
-          // path="/home"
           business={true}
         />
         <NavItem
           icon={IoHelp}
           activeIcon={IoHelp}
           label="Get Help"
-          // path="/home"
           business={true}
         />
       </VStack>

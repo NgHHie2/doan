@@ -282,7 +282,7 @@ const FloatingChat: FC<FloatingChatProps> = ({
       </Box>
 
       {/* Models Debug Panel */}
-      <Box borderBottom="1px solid" borderColor={borderColor}>
+      {/* <Box borderBottom="1px solid" borderColor={borderColor}>
         <Flex
           p={2}
           align="center"
@@ -308,7 +308,7 @@ const FloatingChat: FC<FloatingChatProps> = ({
             </Code>
           </Box>
         </Collapse>
-      </Box>
+      </Box> */}
 
       {/* Chat messages */}
       <VStack flex="1" p={4} spacing={3} overflowY="auto" align="stretch">

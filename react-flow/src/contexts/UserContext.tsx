@@ -13,6 +13,7 @@ interface UserData {
   username: string;
   email: string;
   picture?: string;
+  role: string;
 }
 
 interface UserContextType {

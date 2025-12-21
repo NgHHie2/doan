@@ -83,6 +83,54 @@ public class DatabaseDiagramListService {
         return new DiagramListResponseDto(items, lastDiagramId, hasMore, totalCount);
     }
 
+    @Transactional(readOnly = true)
+    public DiagramListResponseDto getDatabaseDiagramAll(DiagramListRequestDto request, String currentUsername) {
+        log.info("Getting database diagram list for user: {} with filters: {}", currentUsername, request);
+
+        // Get all database diagrams
+        List<DatabaseDiagram> allDiagrams = databaseDiagramRepository.findAll();
+
+        // Filter by user access and apply filters
+        List<DatabaseDiagram> filteredDiagrams = allDiagrams;
+
+        // Apply pagination
+        int pageSize = request.getPageSize() != null ? request.getPageSize() : 20;
+        int startIndex = 0;
+
+        // Find start index based on lastDiagramId
+        if (request.getLastDiagramId() != null) {
+            for (int i = 0; i < filteredDiagrams.size(); i++) {
+                if (filteredDiagrams.get(i).getId().equals(request.getLastDiagramId())) {
+                    startIndex = i + 1;
+                    break;
+                }
+            }
+        }
+
+        // Get page + 1 to check if has more
+        int endIndex = Math.min(startIndex + pageSize + 1, filteredDiagrams.size());
+        List<DatabaseDiagram> pageDiagrams = filteredDiagrams.subList(startIndex, endIndex);
+
+        // Check if has more
+        boolean hasMore = pageDiagrams.size() > pageSize;
+        if (hasMore) {
+            pageDiagrams = pageDiagrams.subList(0, pageSize);
+        }
+
+        // Convert to DTO
+        List<DiagramListItemDto> items = pageDiagrams.stream()
+                .map(diagram -> convertToDto(diagram, currentUsername))
+                .collect(Collectors.toList());
+
+        // Get last id for cursor
+        Long lastDiagramId = items.isEmpty() ? null : items.get(items.size() - 1).getId();
+
+        // Total count
+        Integer totalCount = filteredDiagrams.size();
+
+        return new DiagramListResponseDto(items, lastDiagramId, hasMore, totalCount);
+    }
+
     private boolean hasUserAccess(DatabaseDiagram diagram, String username) {
         return collaborationRepository.hasAccess(diagram.getId(), username);
     }
