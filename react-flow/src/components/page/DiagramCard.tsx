@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   Box,
   Card,
@@ -6,7 +7,6 @@ import {
   Text,
   VStack,
   HStack,
-  Icon,
   IconButton,
   Menu,
   MenuButton,
@@ -16,21 +16,20 @@ import {
   Avatar,
   useColorModeValue,
   Tooltip,
-  Image,
   Portal,
+  Image,
 } from "@chakra-ui/react";
 import {
   Share2,
   Edit2,
-  Star,
   Copy,
   Download,
   History,
   Trash2,
   MoreVertical,
 } from "lucide-react";
-import { BsDiagram3 } from "react-icons/bs";
 import { PiStar, PiStarFill } from "react-icons/pi";
+import * as jdenticon from "jdenticon";
 
 interface DiagramCardProps {
   id: string;
@@ -44,7 +43,6 @@ interface DiagramCardProps {
     name: string;
     avatar?: string;
   };
-  image: string;
   createdAt: string;
   isStarred?: boolean;
   onOpen: (id: string) => void;
@@ -65,7 +63,6 @@ export function DiagramCard({
   updatedBy,
   createdAt,
   isStarred = false,
-  image,
   onOpen,
   onShare,
   onRename,
@@ -75,20 +72,74 @@ export function DiagramCard({
   onHistory,
   onDelete,
 }: DiagramCardProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const cardBg = useColorModeValue("white", "#161b22");
   const borderColor = useColorModeValue("#d0d7de", "#30363d");
   const textColor = useColorModeValue("#24292f", "#e6edf3");
   const mutedText = useColorModeValue("#57606a", "#8b949e");
   const hoverBg = useColorModeValue("#f6f8fa", "#323b47ff");
-  const iconBg = useColorModeValue("blue.50", "blue.900");
   const bgColor = useColorModeValue("#faf9f9ff", "#2b3039ff");
 
+  // Generate jdenticon when component mounts or name changes
+  useEffect(() => {
+    if (canvasRef.current) {
+      jdenticon.update(canvasRef.current, name, {
+        padding: 0.08,
+        saturation: {
+          color: 0.5,
+          grayscale: 0.0,
+        },
+        lightness: {
+          color: [0.4, 0.8],
+          grayscale: [0.3, 0.9],
+        },
+      });
+    }
+  }, [name]);
+
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent opening when clicking on menu or action buttons
     if ((e.target as HTMLElement).closest("button")) {
       return;
     }
     onOpen(id);
+  };
+
+  // Format display date - show migration date if exists, otherwise created date
+  const formatDisplayDate = () => {
+    const date = new Date(updatedAt);
+    return date.toLocaleDateString();
+  };
+
+  const getDisplayText = () => {
+    // If updatedAt is different from createdAt, it means there was a migration
+    const updated = new Date(updatedAt);
+    const created = new Date(createdAt);
+
+    if (updated.getTime() !== created.getTime()) {
+      return `Last modified ${formatDisplayDate()} by ${updatedBy.name}`;
+    } else {
+      return `Created ${new Date(createdAt).toLocaleDateString()} by ${
+        owner.name
+      }`;
+    }
+  };
+
+  const getJdenticonSvg = (value: string, size: number = 200) => {
+    const svg = jdenticon.toSvg(value, size, {
+      padding: 0.08,
+      saturation: {
+        color: 0.5,
+        grayscale: 0.0,
+      },
+      lightness: {
+        color: [0.4, 0.8],
+        grayscale: [0.3, 0.9],
+      },
+    });
+
+    // Convert SVG to base64 data URL
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
   };
 
   return (
@@ -110,16 +161,27 @@ export function DiagramCard({
     >
       <CardBody p={3}>
         <VStack align="stretch" spacing={1}>
-          {/* Icon and Menu */}
+          {/* Jdenticon Canvas */}
+          <Box
+            w="full"
+            h="200px"
+            borderRadius="md"
+            overflow="hidden"
+            bg={cardBg}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Image
+              src={getJdenticonSvg(name, 200)}
+              alt={name}
+              w="full"
+              h="200px"
+              objectFit="contain"
+              borderRadius="md"
+            />
+          </Box>
 
-          <Image
-            src={image} // link ảnh hoặc biến
-            alt={name}
-            w={"full"}
-            h={"200px"}
-            objectFit="cover" // vừa khung, cắt phần thừa
-            borderRadius="md" // bo góc nếu muốn
-          />
           <Box
             display={"flex"}
             flexFlow={"row"}
@@ -180,39 +242,7 @@ export function DiagramCard({
                     >
                       Rename
                     </MenuItem>
-                    <MenuItem
-                      icon={
-                        isStarred ? (
-                          <PiStarFill size={15} />
-                        ) : (
-                          <PiStar size={15} />
-                        )
-                      }
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleStar(id);
-                      }}
-                      bg={cardBg}
-                      _hover={{ bg: hoverBg }}
-                      fontSize={"sm"}
-                      py={1}
-                    >
-                      {isStarred ? "Remove star" : "Add star"}
-                    </MenuItem>
-                    <MenuDivider />
-                    <MenuItem
-                      icon={<Copy size={15} />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDuplicate(id);
-                      }}
-                      bg={cardBg}
-                      _hover={{ bg: hoverBg }}
-                      fontSize={"sm"}
-                      py={1}
-                    >
-                      Make a copy
-                    </MenuItem>
+
                     <MenuItem
                       icon={<Download size={15} />}
                       onClick={(e) => {
@@ -246,6 +276,7 @@ export function DiagramCard({
                         e.stopPropagation();
                         onDelete(id);
                       }}
+                      // color="red.500"
                       bg={cardBg}
                       _hover={{ bg: hoverBg }}
                       fontSize={"sm"}
@@ -259,21 +290,14 @@ export function DiagramCard({
             </HStack>
           </Box>
 
-          {/* Owner */}
-          {/* <HStack spacing={2}>
-            <Avatar size="xs" name={owner.name} src={owner.avatar} />
-            <Text fontSize="xs" color={mutedText} noOfLines={1}>
-              {owner.name}
-            </Text>
-          </HStack> */}
-
-          {/* Updated info */}
+          {/* Display info */}
           <HStack spacing={2} fontSize="xs" color={mutedText}>
-            <Avatar size="2xs" name={updatedBy.name} src={updatedBy.avatar} />
-            <Text noOfLines={1}>
-              Updated {new Date(updatedAt).toLocaleDateString()} by{" "}
-              {updatedBy.name}
-            </Text>
+            {/* <Avatar
+              size="2xs"
+              name={updatedBy.name || owner.name}
+              src={updatedBy.avatar || owner.avatar}
+            /> */}
+            <Text noOfLines={1}>{getDisplayText()}</Text>
           </HStack>
         </VStack>
       </CardBody>
