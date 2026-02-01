@@ -1,6 +1,8 @@
 // CollaborationService.java
 package com.example.react_flow_be.service;
 
+import com.example.react_flow_be.config.DiagramSessionManager;
+import com.example.react_flow_be.config.WebSocketSessionTracker;
 import com.example.react_flow_be.dto.collaboration.CollaborationDTO;
 import com.example.react_flow_be.entity.Collaboration;
 import com.example.react_flow_be.entity.Diagram;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +26,8 @@ public class CollaborationService {
 
     private final CollaborationRepository collaborationRepository;
     private final DiagramRepository diagramRepository;
+    private final DiagramSessionManager sessionManager;
+    private final WebSocketSessionTracker sessionRegistry;
 
     /**
      * Lấy danh sách tất cả collaborations của một diagram
@@ -78,21 +83,37 @@ public class CollaborationService {
      * Cập nhật quyền của collaborator
      */
     @Transactional
-    public void updatePermission(Long collaborationId, Collaboration.Permission permission) {
-        log.info("Updating permission for collaboration {} to {}", collaborationId, permission);
+    public void updatePermission(Long collaborationId, Collaboration.Permission newPermission) {
+        log.info("Updating permission for collaboration {} to {}", collaborationId, newPermission);
 
         Collaboration collaboration = collaborationRepository.findById(collaborationId)
                 .orElseThrow(() -> new EntityNotFoundException("Collaboration not found with id: " + collaborationId));
 
-        // Không cho phép thay đổi quyền của owner
         if (collaboration.getType() == Collaboration.CollaborationType.OWNER) {
             throw new IllegalArgumentException("Cannot change permission of owner");
         }
 
-        collaboration.setPermission(permission);
+        Collaboration.Permission oldPermission = collaboration.getPermission();
+        String username = collaboration.getUsername();
+        Long diagramId = collaboration.getDiagram().getId();
+
+        // KIỂM TRA NẾU GIẢM QUYỀN TỪ FULL_ACCESS VỀ VIEW
+        if (oldPermission == Collaboration.Permission.FULL_ACCESS &&
+                newPermission == Collaboration.Permission.VIEW) {
+
+            log.warn("⚠️ Downgrading permission from FULL_ACCESS to VIEW for user: {}", username);
+
+            if (sessionManager.isUserActiveInDiagram(diagramId, username)) {
+                log.info("🔌 User {} is currently connected, force disconnecting...", username);
+                forceDisconnectUser(diagramId, username);
+            }
+        }
+
+        // Cập nhật quyền
+        collaboration.setPermission(newPermission);
         collaborationRepository.save(collaboration);
 
-        log.info("Successfully updated permission for collaboration {}", collaborationId);
+        log.info("✅ Successfully updated permission for collaboration {}", collaborationId);
     }
 
     /**
@@ -105,13 +126,49 @@ public class CollaborationService {
         Collaboration collaboration = collaborationRepository.findById(collaborationId)
                 .orElseThrow(() -> new EntityNotFoundException("Collaboration not found with id: " + collaborationId));
 
-        // Không cho phép xóa owner
         if (collaboration.getType() == Collaboration.CollaborationType.OWNER) {
             throw new IllegalArgumentException("Cannot remove owner from diagram");
         }
 
+        String username = collaboration.getUsername();
+        Long diagramId = collaboration.getDiagram().getId();
+
+        // KIỂM TRA USER CÓ ĐANG KẾT NỐI KHÔNG
+        if (sessionManager.isUserActiveInDiagram(diagramId, username)) {
+            log.info("🔌 User {} is currently connected, force disconnecting...", username);
+            forceDisconnectUser(diagramId, username);
+        }
+
+        // Xóa collaboration
         collaborationRepository.delete(collaboration);
-        log.info("Successfully removed collaborator {}", collaborationId);
+        log.info("✅ Successfully removed collaborator {}", collaborationId);
+    }
+
+    private void forceDisconnectUser(Long diagramId, String username) {
+        try {
+            // Lấy tất cả sessions của user trong diagram
+            Set<String> allSessions = sessionManager.getActiveSessions(diagramId);
+
+            Set<String> userSessions = allSessions.stream()
+                    .filter(sessionId -> username.equals(sessionManager.getUsernameForSession(sessionId)))
+                    .collect(Collectors.toSet());
+
+            if (userSessions.isEmpty()) {
+                log.warn("⚠️ No active sessions found for user {}", username);
+                return;
+            }
+
+            log.info("Found {} session(s) for user {} in diagram {}",
+                    userSessions.size(), username, diagramId);
+
+            // ĐÓNG TẤT CẢ WEBSOCKET SESSIONS THẬT
+            sessionRegistry.closeSessions(userSessions);
+
+            log.info("✅ Force disconnected user {} from diagram {}", username, diagramId);
+
+        } catch (Exception e) {
+            log.error("❌ Error force disconnecting user {}: {}", username, e.getMessage(), e);
+        }
     }
 
     /**

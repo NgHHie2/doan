@@ -52,7 +52,7 @@ export interface ChatbotResponse {
 }
 
 class ChatbotService {
-  private readonly API_URL = "http://localhost:8000/generate";
+  private readonly API_URL = "http://localhost:8080/generate";
 
   /**
    * Parse string response từ API thành object ChatbotResponse
@@ -188,6 +188,7 @@ class ChatbotService {
     try {
       const response = await fetch(this.API_URL, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

@@ -168,7 +168,7 @@ class WebSocketService {
     this.handlers.onDisconnect?.();
 
     if (!this.state.isManualDisconnect) {
-      this.scheduleReconnect();
+      // this.scheduleReconnect();
     }
   }
 

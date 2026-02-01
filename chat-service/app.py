@@ -79,19 +79,19 @@ def generate():
             print(f"Input tokens: {input_tokens}")
         
         # Forward request đến Kaggle
-        # response = requests.post(
-        #     f"{KAGGLE_API_URL}/generate",
-        #     json=data,
-        #     timeout=500
-        # )
-        
-        # response_data = response.json()
-        response_data = data.copy()
-        output_text = "This is a mock chatbot response for testing purposes."
-        response_data["response"] = output_text
+        response = requests.post(
+            f"{KAGGLE_API_URL}/generate",
+            json=data,
+            timeout=500
+        )
+        print(response)
+        response_data = response.json()
+        # response_data = data.copy()
+        # output_text = "This is a mock chatbot response for testing purposes."
+        # response_data["response"] = output_text
         
         # Lấy output text từ response
-        # output_text = response_data.get("response", "") or response_data.get("output", "") or response_data.get("text", "")
+        output_text = response_data.get("response", "") or response_data.get("output", "") or response_data.get("text", "")
         print(output_text)
         # Đếm output tokens
         if token_counter and output_text:
